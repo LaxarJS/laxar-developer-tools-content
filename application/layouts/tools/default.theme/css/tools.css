@@ -1,0 +1,11 @@
+.tools-layout {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.tools-layout .app-tab-content {
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 20px;
+  margin-bottom: 20px;
+}

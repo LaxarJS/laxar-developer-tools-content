@@ -1,0 +1,27 @@
+<div class="container"
+     data-ng-init="activeTab='events'">
+   <div class="row">
+      <div class="col col-lg-12 first last" data-ax-widget-area="header"></div>
+   </div>
+
+   <div class="row">
+      <div class="col col-lg-12 first last" data-ax-widget-area="toolbar"></div>
+   </div>
+
+   <ul class="nav nav-tabs" role="tablist">
+      <li data-ng-class="{ 'ax-active': activeTab=='events' }"
+         ><a href="javascript:void(0);"
+             data-ng-click="activeTab='events'">Events</a></li>
+      <li data-ng-class="{ 'ax-active': activeTab=='logs' }"
+         ><a href="javascript:void(0);"
+             data-ng-click="activeTab='logs'">Logs</a></li>
+   </ul>
+
+   <div class="app-tab-content"
+        data-ax-widget-area="events"
+        data-ng-show="activeTab=='events'"></div>
+   <div class="app-tab-content"
+        data-ax-widget-area="logs"
+        data-ng-show="activeTab=='logs'"></div>
+
+</div>

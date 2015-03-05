@@ -1,0 +1,51 @@
+{
+   "layout": "tools",
+   "areas": {
+      "activities": [
+         {
+            "widget": "developer-tools/ax-host-connector-widget",
+            "features": {
+               "events": {
+                  "stream": "eventBusItems"
+               },
+               "log": {
+                  "stream": "logItems"
+               },
+               "grid": {
+                  "resource": "gridSettings"
+               }
+            }
+         }
+      ],
+      "toolbar": [
+         {
+            "widget": "developer-tools/ax-developer-toolbar-widget",
+            "features": {
+               "grid": {
+                  "resource": "gridSettings"
+               }
+            }
+         }
+      ],
+      "events": [
+         {
+            "widget": "developer-tools/ax-events-display-widget",
+            "features": {
+               "events": {
+                  "stream": "eventBusItems"
+               }
+            }
+         }
+      ],
+      "logs": [
+         {
+            "widget": "developer-tools/ax-log-display-widget",
+            "features": {
+               "log": {
+                  "stream": "logItems"
+               }
+            }
+         }
+      ]
+   }
+}

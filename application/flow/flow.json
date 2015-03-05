@@ -1,0 +1,11 @@
+{
+   "places": {
+      "entry": {
+         "redirectTo": "tools"
+      },
+
+      "tools": {
+         "page":  "tools"
+      }
+   }
+}

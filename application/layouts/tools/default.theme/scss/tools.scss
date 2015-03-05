@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+@import "variables_all";
+
+.tools-layout {
+   padding-top: $ax-unit-vertical-double;
+   padding-bottom: $ax-unit-vertical-double;
+
+   .app-tab-content {
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: $ax-unit-vertical-double;
+      margin-bottom: $ax-unit-vertical-double;
+   }
+}
