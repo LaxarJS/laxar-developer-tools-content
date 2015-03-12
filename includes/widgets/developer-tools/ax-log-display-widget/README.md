@@ -7,7 +7,7 @@ Shows a list of log messages received through a stream of wrapper events.
 * [Appearance](#appearance)
 * [Usage](#usage)
 * [Features](#features)
-* [Integration](#Integration)
+* [Integration](#integration)
 * [References](#references)
 
 
@@ -15,10 +15,6 @@ Shows a list of log messages received through a stream of wrapper events.
 
 The events display widget has comprehensive styling even when using the default theme.
 Because it is only used for development, most of the time no theming is needed.
-
-![Illustration of the HeadlineWidget](docs/img/example_1.png)
-
-An EventsDisplayWidget with five event bus interactions.
 
 
 ## Usage
