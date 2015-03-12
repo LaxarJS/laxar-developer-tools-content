@@ -4,15 +4,9 @@ The AxDeveloperToolsWidget helps to visualize of the position of host applicatio
 
 
 ## Content
-* [Appearance](#appearance)
 * [Features](#features)
-* [Integration](#Integration)
+* [Integration](#integration)
 * [References](#references)
-
-
-## Appearance
-
-![The AxDeveloperToolbarWidget](docs/img/example_1.png)
 
 
 ### Features

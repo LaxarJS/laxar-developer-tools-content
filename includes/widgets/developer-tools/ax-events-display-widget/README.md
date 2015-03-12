@@ -7,7 +7,7 @@ Shows a list of event bus interactions received through a stream of wrapper even
 * [Appearance](#appearance)
 * [Usage](#usage)
 * [Features](#features)
-* [Integration](#Integration)
+* [Integration](#integration)
 * [References](#references)
 
 
