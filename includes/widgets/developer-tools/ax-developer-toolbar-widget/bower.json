@@ -4,9 +4,9 @@
    "description": "Allows to show widget outlines and to display an alignment grid for the host application",
    "license": "MIT",
    "dependencies": {
-      "laxar": "LaxarJS/laxar#0.x",
-      "laxar_patterns": "LaxarJS/laxar_patterns#0.x",
-      "laxar_uikit": "LaxarJS/laxar_uikit#0.x"
+      "laxar": "LaxarJS/laxar#^1.0.0-alpha.14",
+      "laxar-patterns": "LaxarJS/laxar-patterns#^1.0.0-alpha.3",
+      "laxar-uikit": "LaxarJS/laxar-uikit#^1.0.0-alpha.7"
    },
    "devDependencies": {
       "es5-shim": "2.3.x",

@@ -6,9 +6,12 @@
    "dependencies": {
       "requirejs": "2.1.x",
       "requirejs-plugins": "1.0.x",
-      "laxar": "LaxarJS/laxar#^0.23.0",
-      "laxar_uikit": "LaxarJS/laxar_uikit#0.x",
-      "laxar_patterns": "LaxarJS/laxar_patterns#0.x"
+      "laxar": "LaxarJS/laxar#^1.0.0-alpha.14",
+      "laxar-patterns": "LaxarJS/laxar-patterns#^1.0.0-alpha.3",
+      "laxar-uikit": "LaxarJS/laxar-uikit#^1.0.0-alpha.7",
+
+      "laxar-affix-control": "^v1.0.0-alpha.0",
+      "laxar-input-control": "^v1.0.0-alpha.0"
    },
    "devDependencies": {
       "es5-shim": "2.3.x",

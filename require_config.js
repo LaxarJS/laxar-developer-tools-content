@@ -38,12 +38,7 @@ var require = {
             return angular;
          }
       },
-      'bootstrap-affix': {
-         deps: [
-            'jquery'
-         ]
-      },
-      'bootstrap-tooltip': {
+      'bootstrap': {
          deps: [
             'jquery'
          ]
@@ -61,19 +56,24 @@ var require = {
    },
    packages: [
       {
+         name: 'laxar-application',
+         location: '..',
+         main: 'init'
+      },
+      {
          name: 'laxar',
          location: 'laxar',
          main: 'laxar'
       },
       {
-         name: 'laxar_patterns',
-         location: 'laxar_patterns',
-         main: 'laxar_patterns'
+         name: 'laxar-patterns',
+         location: 'laxar-patterns',
+         main: 'laxar-patterns'
       },
       {
-         name: 'laxar_uikit',
-         location: 'laxar_uikit',
-         main: 'laxar_uikit'
+         name: 'laxar-uikit',
+         location: 'laxar-uikit',
+         main: 'laxar-uikit'
       },
       {
          name: 'moment',
@@ -84,7 +84,6 @@ var require = {
    paths: {
       // LaxarJS Core:
       requirejs: 'requirejs/require',
-      jquery: 'jquery/dist/jquery',
       underscore: 'underscore/underscore',
       angular: 'angular/angular',
       'angular-mocks': 'angular-mocks/angular-mocks',
@@ -105,9 +104,8 @@ var require = {
       'json-patch': 'fast-json-patch/src/json-patch-duplex',
 
       // LaxarJS UIKit:
-      jquery_ui: 'jquery_ui/ui',
-      'bootstrap-tooltip': 'bootstrap-sass-official/assets/javascripts/bootstrap/tooltip',
-      'bootstrap-affix': 'bootstrap-sass-official/assets/javascripts/bootstrap/affix',
+      jquery: 'jquery/dist/jquery',
+      bootstrap: 'bootstrap-sass-official/assets/javascripts/bootstrap',
       trunk8: 'trunk8/trunk8',
 
       // App Parts:
@@ -118,6 +116,6 @@ var require = {
       'laxar-path-themes': '../includes/themes',
       'laxar-path-flow': '../application/flow/flow.json',
 
-      portal_angular_dependencies: '../var/static/portal_angular_dependencies'
+      'laxar-application-dependencies': '../var/static/laxar_application_dependencies'
    }
 };
