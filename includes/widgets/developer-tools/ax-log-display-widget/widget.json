@@ -1,9 +1,6 @@
 {
    "name": "AxLogDisplayWidget",
    "description": "Displays log messages to the user.",
-   "version": {
-      "spec": "[spec missing]"
-   },
 
    "integration": {
       "technology": "angular",
@@ -11,7 +8,7 @@
    },
 
    "controls": [
-      "laxar_uikit/controls/affix"
+      "laxar-affix-control"
    ],
 
    "features": {

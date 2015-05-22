@@ -7,7 +7,7 @@ define( [
    'laxar',
    'angular',
    'jquery',
-   'laxar_patterns'
+   'laxar-patterns'
 ], function( ax, ng, $, axPatterns ) {
    'use strict';
 

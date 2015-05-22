@@ -6,11 +6,11 @@
   /* IE < 9
      The two src data are needed to circumvent a bug in IE for the rendering of the text.
      IE9+ supports the type format *.woff. */
-  src: url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/fontawesome-webfont.eot?v=4.2.0");
+  src: url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/fontawesome-webfont.eot?v=4.2.0");
   /* IE9 Compat Modes */
-  src: url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/fontawesome-webfont.eot?#iefix&v=4.2.0") format("embedded-opentype");
+  src: url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/fontawesome-webfont.eot?#iefix&v=4.2.0") format("embedded-opentype");
   /* IE6-IE8 */
-  src: url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/fontawesome-webfont.svg?v=4.2.0#fontawesomeregular") format("svg"), url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/fontawesome-webfont.woff?v=4.2.0") format("woff"), url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/fontawesome-webfont.ttf?v=4.2.0") format("truetype");
+  src: url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/fontawesome-webfont.svg?v=4.2.0#fontawesomeregular") format("svg"), url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/fontawesome-webfont.woff?v=4.2.0") format("woff"), url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/fontawesome-webfont.ttf?v=4.2.0") format("truetype");
   /* Safari, Android, iOS */
   /* To avoid a bug in Webkit-Browsers set all font-* properties to normal. */
   font-weight: normal;
@@ -5585,8 +5585,8 @@ tbody.collapse.in {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.eot");
-  src: url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.woff") format("woff"), url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.ttf") format("truetype"), url("../../../bower_components/laxar_uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+  src: url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.eot");
+  src: url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.woff") format("woff"), url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.ttf") format("truetype"), url("../../../bower_components/laxar-uikit/themes/default.theme/fonts/bootstrap/glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
 }
 
 .glyphicon {

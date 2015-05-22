@@ -1,9 +1,6 @@
 {
    "name": "AxEventsDisplayWidget",
    "description": "Displays events from the event bus.",
-   "version": {
-      "spec": "1.1"
-   },
 
    "integration": {
       "technology": "angular",
@@ -11,8 +8,8 @@
    },
 
    "controls": [
-      "laxar_uikit/controls/input",
-      "laxar_uikit/controls/affix"
+      "laxar-input-control",
+      "laxar-affix-control"
    ],
 
    "features": {

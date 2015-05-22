@@ -25,10 +25,10 @@ module.exports = function( grunt ) {
             jshintrc: __dirname + '/.jshintrc'
          }
       },
-      portal_angular_dependencies: {
+      laxar_application_dependencies: {
          default: {
             options: {},
-            dest: 'var/static/portal_angular_dependencies.js',
+            dest: 'var/static/laxar_application_dependencies.js',
             src: [ 'application/flow/*.json' ]
          }
       },
@@ -57,10 +57,10 @@ module.exports = function( grunt ) {
          bower_components: {
             dest: 'var/listing/bower_components_resources.json',
             src: [
-               'bower_components/laxar_uikit/themes/**/*.css',
-               'bower_components/laxar_uikit/controls/**/*.+(css|html)'
+               'bower_components/laxar-uikit/themes/**/*.css',
+               'bower_components/laxar-uikit/controls/**/*.+(css|html)'
             ],
-            embedContents: [ 'bower_components/laxar_uikit/controls/**/*.html' ]
+            embedContents: [ 'bower_components/laxar-uikit/controls/**/*.html' ]
          },
          includes: {
             dest: 'var/listing/includes_resources.json',
@@ -80,12 +80,22 @@ module.exports = function( grunt ) {
             }
          }
       },
+      concat: {
+         build: {
+            src: [
+               'require_config.js',
+               'bower_components/requirejs/require.js'
+            ],
+            dest: 'var/build/require_configured.js'
+         }
+      },
       requirejs: {
          default: {
             options: {
                mainConfigFile: 'require_config.js',
+               deps: [ '../var/build/require_configured' ],
                name: '../init',
-               out: 'var/build/optimized_init.js',
+               out: 'var/build/bundle.js',
                optimize: 'uglify2'
             }
          }
@@ -117,7 +127,7 @@ module.exports = function( grunt ) {
             tasks: [
                'directory_tree:application',
                'directory_tree:includes',
-               'portal_angular_dependencies'
+               'laxar_application_dependencies'
             ],
             options: {
                event: [ 'added', 'deleted' ]
@@ -144,11 +154,12 @@ module.exports = function( grunt ) {
 
    grunt.loadNpmTasks( 'grunt-laxar' );
    grunt.loadNpmTasks( 'grunt-contrib-compass' );
+   grunt.loadNpmTasks( 'grunt-contrib-concat' );
    grunt.loadNpmTasks( 'grunt-contrib-watch' );
 
    grunt.registerTask( 'server', [ 'connect' ] );
-   grunt.registerTask( 'build', [ 'directory_tree', 'portal_angular_dependencies' ] );
-   grunt.registerTask( 'optimize', [ 'build', 'css_merger', 'requirejs' ] );
+   grunt.registerTask( 'build', [ 'directory_tree', 'laxar_application_dependencies' ] );
+   grunt.registerTask( 'optimize', [ 'build', 'css_merger', 'concat', 'requirejs' ] );
    grunt.registerTask( 'test', [ 'server', 'widgets' ] );
    grunt.registerTask( 'default', [ 'build', 'test' ] );
    grunt.registerTask( 'dist', [ 'optimize' ] );
