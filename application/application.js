@@ -11,20 +11,12 @@ window.laxar = ( function() {
 
       theme: 'default',
       useMergedCss: mode === 'RELEASE',
-
-      fileListings: {
-         'application': 'var/listing/application_resources.json',
-         'bower_components': 'var/listing/bower_components_resources.json',
-         'includes': 'var/listing/includes_resources.json'
-      },
       useEmbeddedFileListings: mode === 'RELEASE',
-
       i18n: {
          locales: {
             'default': 'en'
          }
       }
-
    };
 
 } )();

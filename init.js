@@ -4,10 +4,21 @@
  * http://www.laxarjs.org
  */
 require( [
+   'laxar',
    'laxar-application-dependencies',
-   'laxar'
-], function( widgetModules, ax ) {
+   'json!laxar-application/var/listing/application_resources.json',
+   'json!laxar-application/var/listing/bower_components_resources.json',
+   'json!laxar-application/var/listing/includes_resources.json'
+], function( ax, applicationDependencies, applicationListing, bowerComponentsListing, includesListing, pageFade ) {
    'use strict';
 
-   ax.bootstrap( widgetModules );
+   // prepare file listings for efficient asset loading
+   window.laxar.fileListings = {
+      application: applicationListing,
+      bower_components: bowerComponentsListing,
+      includes: includesListing
+   };
+
+   ax.bootstrap( applicationDependencies );
+
 } );
