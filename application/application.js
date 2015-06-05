@@ -11,12 +11,7 @@ window.laxar = ( function() {
 
       theme: 'default',
       useMergedCss: mode === 'RELEASE',
-      useEmbeddedFileListings: mode === 'RELEASE',
-      i18n: {
-         locales: {
-            'default': 'en'
-         }
-      }
+      useEmbeddedFileListings: mode === 'RELEASE'
    };
 
 } )();

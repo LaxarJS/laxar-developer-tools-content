@@ -1,3 +1,4 @@
+/* global -require */
 var require = {
    baseUrl: 'bower_components',
    deps: [],
