@@ -163,7 +163,7 @@ define( [
             target: eventInfo.target || '?',
             time: eventInfo.time,
             selected: false,
-            sourceType: eventInfo.source.indexOf( 'widget.' ) === 0 ? 'widgets' : 'runtime'
+            sourceType: ( eventInfo.source || '?' ).indexOf( 'widget.' ) === 0 ? 'widgets' : 'runtime'
          } );
 
          if( $scope.model.eventInfos.length > $scope.features.events.bufferSize ) {
