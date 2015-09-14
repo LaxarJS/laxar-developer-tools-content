@@ -13,9 +13,9 @@ define( [
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   Controller.$inject = [ '$scope' ];
+   Controller.$inject = [ '$scope', '$sanitize' ];
 
-   function Controller( $scope ) {
+   function Controller( $scope, $sanitize ) {
 
       $scope.model = {
          patterns: [
@@ -186,10 +186,10 @@ define( [
          var settings = $scope.model.settings;
          var numVisible = 0;
 
-         var nameRegExp = null;
+         var searchRegExp = null;
          if( settings.namePattern ) {
             try {
-               nameRegExp = new RegExp( settings.namePattern, 'gi' );
+               searchRegExp = new RegExp( settings.namePattern, 'gi' );
             }
             catch( e ) { /* ignore invalid search pattern */ }
          }
@@ -208,10 +208,13 @@ define( [
             if( !settings.sources[ eventInfo.sourceType ] ) {
                return false;
             }
-            if( nameRegExp ) {
-               var matches = nameRegExp.test( eventInfo.name );
-               nameRegExp.lastIndex = 0;
-               if( !matches ) {
+            if( searchRegExp ) {
+               var someMatch = [ eventInfo.name, eventInfo.source, eventInfo.target].some( function( field ) {
+                  var matches = searchRegExp.test( field );
+                  searchRegExp.lastIndex = 0;
+                  return !!matches;
+               } );
+               if( !someMatch ) {
                   return false;
                }
             }
@@ -220,30 +223,37 @@ define( [
          } );
 
          // modify matches in place
-         var invalidEventCharacters = /[^A-Za-z0-9._+-]/g;
          $scope.model.visibleEventInfos.forEach( function( eventInfo ) {
-            eventInfo.htmlName = eventInfo.name.replace( invalidEventCharacters, '' );
-            if( nameRegExp ) {
-               var name = eventInfo.htmlName;
-               var parts = [];
-               var match;
-               var lastIndex = 0;
-               var limit = 1;
-               while( limit-- && ( match = nameRegExp.exec( name ) ) !== null ) {
-                  if( match.index > lastIndex ) {
-                     parts.push( name.substring( lastIndex, match.index ) );
-                  }
-                  parts.push( '<b>' );
-                  parts.push( match[ 0 ] );
-                  parts.push( '</b>' );
-                  lastIndex = nameRegExp.lastIndex;
-               }
-               nameRegExp.lastIndex = 0;
-               parts.push( name.substring( lastIndex, name.length ) );
-               eventInfo.htmlName = parts.join( '' );
-            }
+            eventInfo.htmlName = htmlValue( eventInfo.name, searchRegExp );
+            eventInfo.htmlSource = htmlValue( eventInfo.source, searchRegExp );
+            eventInfo.htmlTarget = htmlValue( eventInfo.target, searchRegExp );
             eventInfo.selected = !!selectionEventInfo && inSelection( eventInfo, selectionEventInfo );
          } );
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function htmlValue( value, searchRegExp ) {
+         if( !searchRegExp ) {
+            return $sanitize( value );
+         }
+         var htmlValue = $sanitize( value );
+         var parts = [];
+         var match;
+         var lastIndex = 0;
+         var limit = 1;
+         while( limit-- && ( match = searchRegExp.exec( htmlValue ) ) !== null ) {
+            if( match.index > lastIndex ) {
+               parts.push( htmlValue.substring( lastIndex, match.index ) );
+            }
+            parts.push( '<b>' );
+            parts.push( match[ 0 ] );
+            parts.push( '</b>' );
+            lastIndex = searchRegExp.lastIndex;
+         }
+         searchRegExp.lastIndex = 0;
+         parts.push( htmlValue.substring( lastIndex, htmlValue.length ) );
+         return parts.join( '' );
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
