@@ -147,7 +147,9 @@
           data-ng-class="'ax-event-interaction-' + event.interaction + ( event.selected ? ' ax-event-selected' : '' )"
           data-ng-click="commands.select( event )">
       <tr class="ax-event-summary">
-         <td class="ax-col-pattern-icon" title="{{ event.pattern }}" data-ng-bind-html="view.patternsByName[ event.pattern ].htmlIcon"></td>
+         <td class="ax-col-pattern-icon"
+             title="{{ event.pattern }}"
+             data-ng-bind-html="view.patternsByName[ event.pattern ].htmlIcon"></td>
          <td class="ax-col-interaction"><em>{{event.interaction}}</em></td>
          <td>
             <button type="button" class="btn-link"
@@ -160,8 +162,8 @@
          <td data-ng-bind-html="event.htmlName"></td>
 
          <td class="ax-col-cycle text-right">{{event.cycleId}}</td>
-         <td>{{event.source}}</td>
-         <td>{{event.target}}</td>
+         <td data-ng-bind-html="event.htmlSource"></td>
+         <td data-ng-bind-html="event.htmlTarget"></td>
          <td class="text-right">{{event.formattedTime}}</td>
       </tr>
       <tr class="ax-event-payload"
