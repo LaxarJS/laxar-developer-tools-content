@@ -1,12 +1,13 @@
 /**
- * Copyright 2014 aixigo AG
+ * Copyright 2015 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
 define( [
    'angular',
+   'angular-sanitize',
    'moment'
-], function( ng, moment ) {
+], function( ng, ngSanitize, moment ) {
    'use strict';
 
    var settingGroups = [ 'patterns', 'interactions', 'sources' ];
@@ -237,14 +238,14 @@ define( [
          if( !searchRegExp ) {
             return $sanitize( value );
          }
-         var htmlValue = $sanitize( value );
+         var html = $sanitize( value );
          var parts = [];
          var match;
          var lastIndex = 0;
          var limit = 1;
-         while( limit-- && ( match = searchRegExp.exec( htmlValue ) ) !== null ) {
+         while( limit-- && ( match = searchRegExp.exec( html ) ) !== null ) {
             if( match.index > lastIndex ) {
-               parts.push( htmlValue.substring( lastIndex, match.index ) );
+               parts.push( html.substring( lastIndex, match.index ) );
             }
             parts.push( '<b>' );
             parts.push( match[ 0 ] );
@@ -252,7 +253,7 @@ define( [
             lastIndex = searchRegExp.lastIndex;
          }
          searchRegExp.lastIndex = 0;
-         parts.push( htmlValue.substring( lastIndex, htmlValue.length ) );
+         parts.push( html.substring( lastIndex, html.length ) );
          return parts.join( '' );
       }
 
@@ -274,6 +275,7 @@ define( [
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return ng.module( 'axEventsDisplayWidget', [] ).controller( 'AxEventsDisplayWidgetController', Controller );
+   return ng.module( 'axEventsDisplayWidget', [ 'ngSanitize' ] )
+      .controller( 'AxEventsDisplayWidgetController', Controller );
 
 } );
