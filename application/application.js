@@ -7,11 +7,11 @@ window.laxar = ( function() {
 
    return {
       name: 'contents',
-      description: 'LaxarJS DeveloperTools',
+      description: 'LaxarJS Developer Tools',
 
       theme: 'default',
-      useMergedCss: mode === 'RELEASE',
-      useEmbeddedFileListings: mode === 'RELEASE'
+      useMergedCss: mode === 'PRODUCTION',
+      useEmbeddedFileListings: mode === 'PRODUCTION'
    };
 
 } )();

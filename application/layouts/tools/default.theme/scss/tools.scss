@@ -2,14 +2,38 @@
 
 @import "variables_all";
 
-.tools-layout {
-   padding-top: $ax-unit-vertical-double;
-   padding-bottom: $ax-unit-vertical-double;
 
-   .app-tab-content {
-      border: 1px solid #ddd;
-      border-top: none;
-      padding: $ax-unit-vertical-double;
-      margin-bottom: $ax-unit-vertical-double;
-   }
+body {
+   display: table;
+}
+
+.tools-layout {
+   display: table-row;
+}
+
+.tools-layout > div {
+   display: table-cell;
+}
+
+html, body, .tools-layout  {
+   height: 100%;
+}
+
+.tools-layout {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background: #fdd;
+}
+
+.tools-layout > .fluid-container,
+.tools-layout [data-ax-widget-area], {
+   height: 100%;
+   background: deeppink;
+}
+
+.tools-layout .app-tab-content {
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 20px;
+  margin-bottom: 20px;
 }
