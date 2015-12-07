@@ -62,7 +62,9 @@ define( [
             if( buffers.events.length ) {
                eventBus.publish( 'didProduce.' + $scope.features.events.stream, {
                   stream: $scope.features.events.stream,
-                  data: buffers.events
+                  // re-wrap the transfer array to avoid bug in MSIE11
+                  // see http://stackoverflow.com/questions/7975655 for details
+                  data: [].concat( buffers.events )
                } );
                buffers.events = [];
             }
@@ -70,7 +72,9 @@ define( [
             if( buffers.log.length ) {
                eventBus.publish( 'didProduce.' + $scope.features.log.stream, {
                   stream: $scope.features.log.stream,
-                  data: buffers.log
+                  // re-wrap the transfer array to avoid bug in MSIE11
+                  // see http://stackoverflow.com/questions/7975655 for details
+                  data: [].concat( buffers.log )
                } );
                buffers.log = [];
             }
