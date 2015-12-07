@@ -43,6 +43,7 @@ define( [
             ] },
             { name: 'other', htmlIcon: '&nbsp;', eventTypes: [] }
          ],
+         index: 0,
          eventInfos: [],
          visibleEventInfos: [],
          selectionEventInfo: null,
@@ -152,6 +153,7 @@ define( [
 
       function addEvent( eventInfo ) {
          $scope.model.eventInfos.unshift( {
+            index: ++$scope.model.index,
             interaction: eventInfo.action,
             cycleId: eventInfo.cycleId > -1 ? eventInfo.cycleId : '-',
             eventObject: eventInfo.eventObject || {},

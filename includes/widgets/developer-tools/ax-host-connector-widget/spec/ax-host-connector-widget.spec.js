@@ -58,7 +58,7 @@ define( [
          jasmine.Clock.tick( 0 );
          expect( testBed.scope.eventBus.publish ).not.toHaveBeenCalled();
 
-         fakeChannel.buffers.events.push( { fake: 'event item' } );
+         fakeChannel.buffers.events.push( JSON.stringify( { fake: 'event item' } ) );
          jasmine.Clock.tick( 99 );
          expect( testBed.scope.eventBus.publish ).not.toHaveBeenCalled();
 
@@ -76,7 +76,7 @@ define( [
          jasmine.Clock.tick( 0 );
          expect( testBed.scope.eventBus.publish ).not.toHaveBeenCalled();
 
-         fakeChannel.buffers.log.push( { fake: 'log item' } );
+         fakeChannel.buffers.log.push( JSON.stringify( { fake: 'log item' } ) );
          jasmine.Clock.tick( 99 );
          expect( testBed.scope.eventBus.publish ).not.toHaveBeenCalled();
 
