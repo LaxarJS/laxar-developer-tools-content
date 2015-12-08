@@ -65,16 +65,17 @@ define( [
          timeout = window.setTimeout( checkForData, REFRESH_DELAY_MS );
 
          function publishStream( bufferFeature ) {
-            // re-wrap the transfer array to avoid bug in MSIE11
-            // see http://stackoverflow.com/questions/7975655 for details
-            var buffer = [].concat( buffers[ bufferFeature ] );
+            var buffer = buffers[ bufferFeature ];
             if( !buffer.length ) {
                return;
             }
             eventBus.publish( 'didProduce.' + $scope.features[ bufferFeature ].stream, {
                stream: $scope.features[ bufferFeature ].stream,
-               // content has been stringified for transfer (MSIE11 performance)
-               data: buffer.map( function ( _ ) { return JSON.parse( _ ); } )
+               // re-wrap the transfer array to avoid bug in MSIE11
+               // see http://stackoverflow.com/questions/7975655 for details
+               data: [].concat( buffer )
+                  // content has been stringified for transfer (MSIE11 performance)
+                  .map( function ( _ ) { return JSON.parse( _ ); } )
             } );
             // modify buffer in place so that no object crosses the window boundary (MSIE11 performance)
             buffer.splice( 0, buffer.length );

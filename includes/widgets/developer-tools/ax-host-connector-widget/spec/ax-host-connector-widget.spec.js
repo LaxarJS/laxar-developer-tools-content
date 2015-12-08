@@ -67,6 +67,8 @@ define( [
             stream: 'eventBusItems',
             data: [ { fake: 'event item' } ]
          } );
+
+         expect( fakeChannel.buffers.events.length ).toBe( 0 );
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +87,8 @@ define( [
             stream: 'logItems',
             data: [ { fake: 'log item' } ]
          } );
+
+         expect( fakeChannel.buffers.log.length ).toBe( 0 );
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
