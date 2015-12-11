@@ -3,13 +3,16 @@
    "areas": {
       "activities": [
          {
-            "widget": "developer-tools/ax-host-connector-widget",
+            "widget": "host-connector-widget",
             "features": {
                "events": {
                   "stream": "eventBusItems"
                },
                "log": {
                   "stream": "logItems"
+               },
+               "pageInfo": {
+                  "resource": "pageInfo"
                },
                "grid": {
                   "resource": "gridSettings"
@@ -19,27 +22,47 @@
       ],
       "toolbar": [
          {
-            "widget": "developer-tools/ax-developer-toolbar-widget",
+            "widget": "developer-toolbar-widget",
+            "id": "tabs",
             "features": {
                "grid": {
                   "resource": "gridSettings"
+               },
+               "tabs": {
+                  "parameter": "tab"
                }
             }
          }
       ],
-      "events": [
+      "tabs.page": [
          {
-            "widget": "developer-tools/ax-events-display-widget",
+            "widget": "page-inspector-widget",
+            "features": {
+               "pageInfo": {
+                  "resource": "pageInfo"
+               },
+               "filter": {
+                  "resource": "eventFilter"
+               }
+            }
+         }
+      ],
+      "tabs.events": [
+         {
+            "widget": "events-display-widget",
             "features": {
                "events": {
                   "stream": "eventBusItems"
+               },
+               "filter": {
+                  "resource": "eventFilter"
                }
             }
          }
       ],
-      "logs": [
+      "tabs.log": [
          {
-            "widget": "developer-tools/ax-log-display-widget",
+            "widget": "log-display-widget",
             "features": {
                "log": {
                   "stream": "logItems"
