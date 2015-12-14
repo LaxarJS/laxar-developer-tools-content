@@ -43,6 +43,22 @@ module.exports = function( grunt ) {
                } ]
             }
          },
+         // Hack to circumvent grunt-laxar jshint validation for generated files.
+         // Unfortunately, babel-generated comments are not placed at the very start of the file.
+         concat: {
+            babel: {
+               options: {
+                  banner: '/* jshint ignore:start */\n'
+               },
+               files: [ {
+                  expand: true,
+                  cwd: 'includes/widgets/page-inspector-widget',
+                  src: [ '*.js' ],
+                  dest: 'includes/widgets/page-inspector-widget',
+                  ext: '.js'
+               } ]
+            }
+         },
          watch: {
             jsx: {
                files: [ 'includes/widgets/*/*.jsx' ],
@@ -57,12 +73,14 @@ module.exports = function( grunt ) {
    grunt.loadNpmTasks( 'grunt-laxar' );
    grunt.loadNpmTasks( 'grunt-laxar-compass' );
    grunt.loadNpmTasks( 'grunt-babel' );
+   grunt.loadNpmTasks( 'grunt-contrib-concat' );
 
    // basic aliases
-   grunt.registerTask( 'test', [ 'babel', 'laxar-test' ] );
-   grunt.registerTask( 'build', [ 'babel', 'laxar-build' ] );
-   grunt.registerTask( 'dist', [ 'babel', 'laxar-dist' ] );
-   grunt.registerTask( 'develop', [ 'babel', 'laxar-develop' ] );
+   grunt.registerTask( 'prepare', [ 'babel', 'concat' ] );
+   grunt.registerTask( 'test', [ 'prepare', 'laxar-test' ] );
+   grunt.registerTask( 'build', [ 'prepare', 'laxar-build' ] );
+   grunt.registerTask( 'dist', [ 'prepare', 'laxar-dist' ] );
+   grunt.registerTask( 'develop', [ 'prepare', 'laxar-develop' ] );
    grunt.registerTask( 'info', [ 'laxar-info' ] );
 
    // additional (possibly) more intuitive aliases
