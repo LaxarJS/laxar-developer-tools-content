@@ -62,7 +62,7 @@ module.exports = function( grunt ) {
          watch: {
             jsx: {
                files: [ 'includes/widgets/*/*.jsx' ],
-               tasks: [ 'babel:widgets' ]
+               tasks: [ 'babel:widgets', 'concat:babel' ]
             }
          }
 
@@ -84,7 +84,7 @@ module.exports = function( grunt ) {
    grunt.registerTask( 'info', [ 'laxar-info' ] );
 
    // additional (possibly) more intuitive aliases
-   grunt.registerTask( 'optimize', [ 'babel', 'laxar-dist' ] );
+   grunt.registerTask( 'optimize', [ 'prepare', 'laxar-dist' ] );
    grunt.registerTask( 'start', [ 'develop' ] );
 
    grunt.registerTask( 'default', [ 'build', 'test' ] );

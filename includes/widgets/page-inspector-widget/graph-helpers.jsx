@@ -134,6 +134,11 @@ export function graph( pageInfo, options ) {
             return;
          }
 
+         if( value.enabled === false ) {
+            // widget feature can be disabled, and was disabled
+            return;
+         }
+
          if( schema.type === 'string' && schema.axRole &&
              ( schema.format === 'topic' || schema.format === 'flag-topic' ) ) {
             const type = schema.axPattern ? schema.axPattern.toUpperCase() : inferEdgeType( path );
