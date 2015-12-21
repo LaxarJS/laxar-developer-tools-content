@@ -59,7 +59,7 @@ export function graph( pageInfo, options ) {
       identifyContainers();
    }
    if( !withIrrelevantWidgets ) {
-      pruneIrrelevantWidgets();
+      pruneIrrelevantWidgets( withContainers );
    }
    pruneEmptyEdges();
 
@@ -185,7 +185,7 @@ export function graph( pageInfo, options ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function pruneIrrelevantWidgets() {
+   function pruneIrrelevantWidgets( withContainers ) {
       let toPrune = [];
       do {
          toPrune.forEach( id => { delete vertices[ id ]; } );
@@ -197,7 +197,7 @@ export function graph( pageInfo, options ) {
          const pruneList = [];
          Object.keys( vertices ).forEach( vId => {
             const ports = vertices[ vId ].ports;
-            if( ports.inbound.length <= 1 ) {
+            if( ports.inbound.length <= withContainers ? 1 : 0 ) {
                if( ports.outbound.every( _ => !_.edgeId ) ) {
                   pruneList.push( vId  );
                }

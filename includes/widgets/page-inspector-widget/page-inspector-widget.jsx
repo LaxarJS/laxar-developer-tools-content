@@ -135,10 +135,12 @@ function create( context, eventBus, reactRender ) {
          <div className='page-inspector-row form-inline'>
             <div className='text-right'>
                <button type='button' className='btn btn-link'
+                       title="Include widgets without any links to relevant topics?"
                        onClick={toggleIrrelevantWidgets}
                   ><i className={'fa fa-toggle-' + ( withIrrelevantWidgets ? 'on' : 'off' ) }
-                  ></i> <span>&quot;Silent&quot; Widgets</span></button>
+                  ></i> <span>Isolated Widgets</span></button>
                <button type='button' className='btn btn-link'
+                       title="Include area-nesting relationships?"
                        onClick={toggleContainers}
                   ><i className={'fa fa-toggle-' + ( withContainers ? 'on' : 'off' ) }
                   ></i> <span>Containers</span></button>
