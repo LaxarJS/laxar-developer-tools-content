@@ -114,7 +114,7 @@ function create( context, eventBus, reactRender ) {
       if( !viewModel ) {
          reactRender(
             <div className='page-inspector-placeholder'>
-               <i className='fa fa-cog fa-spin'></i>layout
+              <i className='fa fa-cog fa-spin'></i>
             </div>
          );
          initializeViewModel();
@@ -137,11 +137,11 @@ function create( context, eventBus, reactRender ) {
                <button type='button' className='btn btn-link'
                        onClick={toggleIrrelevantWidgets}
                   ><i className={'fa fa-toggle-' + ( withIrrelevantWidgets ? 'on' : 'off' ) }
-                  ></i> &quot;Silent&quot; Widgets</button>
+                  ></i> <span>&quot;Silent&quot; Widgets</span></button>
                <button type='button' className='btn btn-link'
                        onClick={toggleContainers}
                   ><i className={'fa fa-toggle-' + ( withContainers ? 'on' : 'off' ) }
-                  ></i> Containers</button>
+                  ></i> <span>Containers</span></button>
             </div>
             <Graph className='nbe-theme-fusebox-app'
                    types={graphStore.types}
