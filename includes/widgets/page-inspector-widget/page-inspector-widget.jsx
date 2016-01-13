@@ -3,13 +3,13 @@ import patterns from 'laxar-patterns';
 
 import wireflow from 'wireflow';
 
-import { types, graph, layout, filterFromSelection } from './graph-helpers';
+import { types, graph, layout, filterFromSelection, ROOT_ID } from './graph-helpers';
 
 const {
   selection: { SelectionStore },
   history: { HistoryStore },
   layout: { LayoutStore },
-  graph: { GraphStore },
+  graph: { GraphStore, actions: { ActivateVertex } },
   settings: {
     actions: { ChangeMode, MinimapResized },
     model: { Settings, READ_ONLY, READ_WRITE },
@@ -29,6 +29,10 @@ function create( context, eventBus, reactRender ) {
 
    let withIrrelevantWidgets = false;
    let withContainers = true;
+   let withFlatCompositions = false;
+
+   let compositionStack = [];
+   let activeComposition = null;
 
    let publishedSelection = null;
 
@@ -76,6 +80,31 @@ function create( context, eventBus, reactRender ) {
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+   function toggleCompositions() {
+      withFlatCompositions = !withFlatCompositions;
+      initializeViewModel( true );
+   }
+
+   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function enterCompositionInstance( id ) {
+      if( id === ROOT_ID ) {
+         id = compositionStack.length > 1 ? compositionStack[ compositionStack.length - 2 ] : null;
+      }
+      const goToTop = id === null;
+      const targetIndex = goToTop ? 0 : compositionStack.indexOf( id );
+      if( targetIndex === -1 ) {
+         compositionStack.push( id );
+      }
+      else {
+         compositionStack.splice( goToTop ? 0 : targetIndex + 1, compositionStack.length - targetIndex );
+      }
+      activeComposition = id;
+      initializeViewModel( true );
+   }
+
+   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    function initializeViewModel( doReset ) {
       if( doReset ) {
          viewModel = null;
@@ -87,16 +116,28 @@ function create( context, eventBus, reactRender ) {
       }
 
       if( visible ) {
+         // setTimeout: used to ensure that the browser shows the spinner before stalling for layout
          viewModelCalculation = viewModelCalculation || setTimeout( () => {
             const pageTypes = types();
             const pageInfo = context.resources.pageInfo;
-            const pageGraph = graph( pageInfo, { withIrrelevantWidgets, withContainers } );
+            const pageGraph = graph( pageInfo, {
+               withIrrelevantWidgets,
+               withContainers,
+               compositionDisplay: withFlatCompositions ? 'FLAT' : 'COMPACT',
+               activeComposition
+            } );
             const dispatcher = new Dispatcher( render );
             new HistoryStore( dispatcher );
             const graphStore = new GraphStore( dispatcher, pageGraph, pageTypes );
             const layoutStore = new LayoutStore( dispatcher, graphStore );
             const settingsStore = new SettingsStore( dispatcher, Settings({ mode: READ_ONLY }) );
             const selectionStore = new SelectionStore( dispatcher, layoutStore, graphStore );
+
+            dispatcher.register( ActivateVertex, ({ vertex }) => {
+               if( vertex.kind === 'COMPOSITION' || vertex.kind === 'PAGE' ) {
+                  enterCompositionInstance( vertex.id );
+               }
+            } );
 
             viewModel = { graphStore, layoutStore, settingsStore, selectionStore, dispatcher };
             render();
@@ -131,10 +172,12 @@ function create( context, eventBus, reactRender ) {
 
       replaceFilter( selectionStore.selection, graphStore.graph );
 
+
       reactRender(
          <div className='page-inspector-row form-inline'>
             <div className='text-right'>
-               <button type='button' className='btn btn-link'
+               <div className='pull-left'>{ renderBreadCrumbs() }</div>
+               <button type='button' className='btn btn-link '
                        title="Include widgets without any links to relevant topics?"
                        onClick={toggleIrrelevantWidgets}
                   ><i className={'fa fa-toggle-' + ( withIrrelevantWidgets ? 'on' : 'off' ) }
@@ -144,6 +187,11 @@ function create( context, eventBus, reactRender ) {
                        onClick={toggleContainers}
                   ><i className={'fa fa-toggle-' + ( withContainers ? 'on' : 'off' ) }
                   ></i> <span>Containers</span></button>
+               <button type='button' className='btn btn-link'
+                       title="Flatten compositions into their runtime contents?"
+                       onClick={toggleCompositions}
+                  ><i className={'fa fa-toggle-' + ( withFlatCompositions ? 'on' : 'off' ) }
+                  ></i> <span>Flatten Compositions</span></button>
             </div>
             <Graph className='nbe-theme-fusebox-app'
                    types={graphStore.types}
@@ -155,6 +203,19 @@ function create( context, eventBus, reactRender ) {
                    eventHandler={dispatcher.dispatch} />
          </div>
       );
+
+      function renderBreadCrumbs() {
+         return [
+            <button key={ROOT_ID} type='button' className='btn btn-link page-inspector-breadcrumb'
+                    onClick={() => enterCompositionInstance( null )}>
+              <i className='fa fa-home'></i>
+           </button>
+         ].concat( compositionStack.map( id =>
+            activeComposition === id ? id :
+               <button key={id} type='button' className='btn btn-link page-inspector-breadcrumb'
+                       onClick={() => enterCompositionInstance( id )}>{ id }</button>
+        ) );
+      }
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////

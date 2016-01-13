@@ -4,7 +4,7 @@
  */
 @charset "UTF-8";
 
-@import "../../../../../bower_components/wireflow/demos/fusebox/css/wireflow.css";
+@import "./wireflow.css";
 
 .page-inspector-widget {
    display: flex;
@@ -27,6 +27,17 @@
    width: 100%;
    height: 100%;
 }
+
+.page-inspector-widget .page-inspector-breadcrumb::after {
+   content: ' / ';
+}
+.page-inspector-widget .page-inspector-breadcrumb {
+   padding-right: 4px;
+}
+.page-inspector-widget .page-inspector-breadcrumb:not(:first-child) {
+   padding-left: 0;
+}
+
 
 .page-inspector-widget button {
    position: relative;
