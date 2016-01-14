@@ -63,6 +63,7 @@
                      </button>
                   </div>
 
+                  <br>
                   <h4>Sources</h4>
                   <div ng-repeat="(source, enabled) in model.settings.sources track by source">
                      <button
@@ -126,6 +127,27 @@
               ng-click="commands.clearFilters()">Show All</button></p>
 </div>
 
+<div ng-if="model.problemSummary.hasProblems"
+     class="text-large">
+   <h4 class="text-primary ax-error">{{ model.problemSummary.eventInfos.length }}/{{ model.eventInfos.length }} Events with Problems</h4>
+   <ul>
+      <li ng-repeat="event in model.problemSummary.eventInfos">
+         <h5><strong>{{ event.name }}</strong> <em>(source: {{ event.source }})</em></h5>
+         <ul>
+            <li ng-repeat="problem in event.problems track by problem.description"
+               class="ax-event-problem">
+               <i class="fa fa-warning ax-error"></i> {{ problem.description }}
+            </li>
+         </ul>
+      </li>
+   </ul>
+   <p class="ax-event-problems-explanation">
+      Events with problems are marked <strong class="ax-error">red</strong> in the events table.
+      Filter by event/source as needed.
+   </p>
+</div>
+
+
 <div ng-if="model.visibleEventInfos.length"
      class="text-large">
    <h4 class="text-primary">{{ model.visibleEventInfos.length }}/{{ model.eventInfos.length }} Events</h4>
@@ -161,7 +183,8 @@
    <tbody ng-repeat="event in model.visibleEventInfos"
           ng-class="'ax-event-pattern-' + event.pattern +
                     ' ax-event-interaction-' + event.interaction +
-                    ( event.selected ? ' ax-event-selected' : '' )"
+                    ( event.selected ? ' ax-event-selected' : '' ) +
+                    ( event.problems.length ? ' ax-event-has-problems' : '' )"
           ng-click="commands.select( event )">
       <tr class="ax-event-summary">
          <td class="ax-col-pattern-icon"
@@ -181,6 +204,18 @@
          <td ng-bind-html="event.htmlTarget"></td>
          <td class="ax-col-cycle text-right">{{event.cycleId}}</td>
          <td class="text-right"><span>{{event.formattedTime.upper}}</span><br /><span>{{event.formattedTime.lower}}</span></td>
+      </tr>
+      <tr class="ax-event-payload"
+          ng-if="event.problems.length">
+         <td colspan="3"></td>
+         <td colspan="5">
+            <ul>
+               <li ng-repeat="problem in event.problems track by problem.description"
+                   class="ax-event-problem">
+                  <i class="fa fa-warning"></i> {{ problem.description }}
+               </li>
+            </ul>
+         </td>
       </tr>
       <tr class="ax-event-payload"
           ng-if="event.showDetails">

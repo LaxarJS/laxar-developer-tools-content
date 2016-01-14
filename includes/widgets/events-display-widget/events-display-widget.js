@@ -7,8 +7,9 @@ define( [
    'angular',
    'angular-sanitize',
    'laxar-patterns',
-   'moment'
-], function( ng, ngSanitize, patterns, moment ) {
+   'moment',
+   './tracker'
+], function( ng, ngSanitize, patterns, moment, tracker ) {
    'use strict';
 
    var settingGroups = [ 'patterns', 'interactions', 'sources' ];
@@ -54,6 +55,10 @@ define( [
          index: 0,
          eventInfos: [],
          visibleEventInfos: [],
+         problemSummary: {
+            count: 0,
+            eventInfos: []
+         },
          selectionEventInfo: null,
          settings: {
             namePattern: '',
@@ -125,6 +130,7 @@ define( [
             $scope.model.eventInfos = [];
             $scope.model.selectionEventInfo = null;
             runFilters();
+            refreshProblemSummary();
          },
          runFilters: runFilters
       };
@@ -150,7 +156,8 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function addEvent( eventInfo ) {
-         $scope.model.eventInfos.unshift( {
+
+         var completeEventInfo = {
             index: ++$scope.model.index,
             interaction: eventInfo.action,
             cycleId: eventInfo.cycleId > -1 ? eventInfo.cycleId : '-',
@@ -167,11 +174,20 @@ define( [
             target: ( eventInfo.target || '?' ).replace( /^-$/, '' ),
             time: eventInfo.time,
             selected: false,
-            sourceType: ( eventInfo.source || '?' ).indexOf( 'widget.' ) === 0 ? 'widgets' : 'runtime'
-         } );
+            sourceType: ( eventInfo.source || '?' ).indexOf( 'widget.' ) === 0 ? 'widgets' : 'runtime',
+            problems: tracker.track( eventInfo )
+         };
+
+         $scope.model.eventInfos.unshift( completeEventInfo );
+         if( completeEventInfo.problems.length ) {
+            refreshProblemSummary();
+         }
 
          if( $scope.model.eventInfos.length > $scope.features.events.bufferSize ) {
-            $scope.model.eventInfos.pop();
+            var removedInfo = $scope.model.eventInfos.pop();
+            if( removedInfo.problems.length ) {
+               refreshProblemSummary();
+            }
          }
 
          function pattern( eventName ) {
@@ -183,6 +199,19 @@ define( [
             return matchingPatthern.length ? matchingPatthern[ 0 ].name : 'other';
          }
 
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function refreshProblemSummary() {
+         var eventInfos = $scope.model.eventInfos.filter( function( info ) {
+            return info.problems.length > 0;
+         } );
+
+         $scope.model.problemSummary = {
+            hasProblems: eventInfos.length > 0,
+            eventInfos: eventInfos
+         };
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
