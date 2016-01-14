@@ -95,10 +95,21 @@ The following fields are supported for the filter resource:
     If missing or `null`, include all senders/participants.
 
 
+### 3. Report Event Problems
+
+The widget must track and validate _pattern events_ (resource, actions, flags) published by widgets on the page.
+
+*R3.1* The widget MUST inspect _takeActionRequest_, _willTakeAction_ and _didTakeAction_ events and indicate problems in the event listing, as well as by a summary at the top of the page (missing payload, missing *action* field in payload).
+
+*R3.2* The widget MUST watch _didUpdate_ and _didReplace_ events and indicate problems in the event listing, as well as by a summary at the top of the page (missing payload, missing *resource* field in payload, update without prior replace, update with inconsistent *patches*).
+
+*R3.3* The widget MUST watch _didChangeFlag_ events and indicate problems in the event listing, as well as by a summary at the top of the page (missing payload, missing *flag* field in payload, missing *state* field in payload).
+
+
 ## Integration
 
 ### Patterns
-The widget does not support any standard event patterns.
+Internally, the widget does not support any standard event patterns.
 Together with other developer-tools widgets it uses the non-standard `didProduce.*` event stream protocol.
 
 
