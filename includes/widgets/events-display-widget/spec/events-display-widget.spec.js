@@ -1,13 +1,12 @@
 /**
- * Copyright 2014 aixigo AG
+ * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
 define( [
    'json!../widget.json',
-   'laxar/laxar_testing',
-   '../events-display-widget'
-], function( descriptor, ax ) {
+   'laxar-mocks'
+], function( descriptor, axMocks ) {
    'use strict';
 
    describe( 'An events-display-widget', function() {
@@ -15,6 +14,8 @@ define( [
       var testBed;
       var metaEvents;
       var bufferSize = 9;
+
+      beforeEach( axMocks.createSetupForWidget( descriptor ) );
 
       beforeEach( function() {
          metaEvents = [
@@ -95,19 +96,18 @@ define( [
             }
          ];
 
-         testBed = ax.testing.portalMocksAngular.createControllerTestBed( descriptor );
-         testBed.featuresMock = {
+         axMocks.widget.configure( {
             events: {
                stream: 'myEventStream',
                bufferSize: bufferSize
             }
-         };
+         } );
+      } );
 
-         testBed.useWidgetJson();
-         testBed.setup();
-
-         testBed.eventBusMock.publish( 'didProduce.myEventStream', { data: metaEvents } );
-         jasmine.Clock.tick( 0 );
+      beforeEach( axMocks.widget.load );
+      beforeEach( function() {
+         axMocks.eventBus.publish( 'didProduce.myEventStream', { data: metaEvents } );
+         axMocks.eventBus.flush();
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ define( [
       describe( 'to display event items (events)', function() {
 
          it( 'subscribes to the configured meta-event, to obtain event items (R1.1)', function() {
-            expect( testBed.scope.eventBus.subscribe ).toHaveBeenCalledWith(
+            expect( axMocks.widget.axEventBus.subscribe ).toHaveBeenCalledWith(
                'didProduce.myEventStream',
                jasmine.any( Function )
             );
@@ -124,33 +124,33 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'represents each event item if not filtered out (R1.2)', function() {
-            var expectedVisibleItems = testBed.scope.model.eventInfos.filter( function( info ) {
+            var expectedVisibleItems = axMocks.widget.$scope.model.eventInfos.filter( function( info ) {
                return info.interaction in { 'publish': 1, 'deliver': 1 } &&
                       -1 === info.source.indexOf( 'AxFlowController' );
             } );
-            expect( testBed.scope.model.visibleEventInfos ).toEqual( expectedVisibleItems );
+            expect( axMocks.widget.$scope.model.visibleEventInfos ).toEqual( expectedVisibleItems );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'maintains a buffer of limited size (R1.3)', function() {
-            expect( testBed.scope.model.eventInfos.length ).toEqual( bufferSize );
+            expect( axMocks.widget.$scope.model.eventInfos.length ).toEqual( bufferSize );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'offers the user to clear the buffer manually, removing all event rows from view (R1.4)', function() {
-            testBed.scope.commands.discard();
-            expect( testBed.scope.model.eventInfos.length ).toEqual( 0 );
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 0 );
+            axMocks.widget.$scope.commands.discard();
+            expect( axMocks.widget.$scope.model.eventInfos.length ).toEqual( 0 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 0 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'allows for the user to select events rows, resulting in a highlighted representation (R1.5)', function() {
-            expect( testBed.scope.model.visibleEventInfos[ 0 ].selected ).toBe( false );
-            testBed.scope.commands.select( testBed.scope.model.visibleEventInfos[ 0 ] );
-            expect( testBed.scope.model.visibleEventInfos[ 0 ].selected ).toBe( true );
+            expect( axMocks.widget.$scope.model.visibleEventInfos[ 0 ].selected ).toBe( false );
+            axMocks.widget.$scope.commands.select( axMocks.widget.$scope.model.visibleEventInfos[ 0 ] );
+            expect( axMocks.widget.$scope.model.visibleEventInfos[ 0 ].selected ).toBe( true );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,16 +158,16 @@ define( [
          describe( 'When a row with interaction type _publish_ or _subscribe_ is highlighted', function() {
 
             beforeEach( function() {
-               testBed.scope.model.settings.sources.runtime = true;
-               testBed.scope.$digest();
+               axMocks.widget.$scope.model.settings.sources.runtime = true;
+               axMocks.widget.$scope.$digest();
                // select publish for takeActionRequest.doStuff
-               testBed.scope.commands.select( testBed.scope.model.visibleEventInfos[ 1 ] );
+               axMocks.widget.$scope.commands.select( axMocks.widget.$scope.model.visibleEventInfos[ 1 ] );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'highlights _related_ rows as well (R1.6)', function() {
-               var selected = testBed.scope.model.visibleEventInfos.map( function( _ ) { return _.selected; } );
+               var selected = axMocks.widget.$scope.model.visibleEventInfos.map( function( _ ) { return _.selected; } );
                // expect publish/deliver for takeActionRequest.doStuff
                expect( selected ).toEqual( [ true, true, false, true, false ] );
             } );
@@ -177,10 +177,10 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'allows for the user to impose a _limit_ on the number of most recent events to display (R1.7)', function() {
-            testBed.scope.model.settings.visibleEventsLimit = 2;
-            testBed.scope.$digest();
+            axMocks.widget.$scope.model.settings.visibleEventsLimit = 2;
+            axMocks.widget.$scope.$digest();
 
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 2 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 2 );
          } );
 
       } );
@@ -190,53 +190,53 @@ define( [
       describe( 'to filter event items (filters)', function() {
 
          it( 'offers to filter events _by name_, using regular expressions (R2.1)', function() {
-            testBed.scope.model.settings.interactions.subscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.subscribe = true;
 
             // select didNavigate, but not didNavigate.here
-            testBed.scope.model.settings.namePattern = 'did[^.]+$';
-            testBed.scope.$digest();
+            axMocks.widget.$scope.model.settings.namePattern = 'did[^.]+$';
+            axMocks.widget.$scope.$digest();
 
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 1 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 1 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'offers to filter events _by pattern_, using a group of toggle controls (R2.2)', function() {
-            testBed.scope.model.settings.sources.runtime = true;
-            testBed.scope.model.settings.interactions.subscribe = true;
-            testBed.scope.model.settings.interactions.unsubscribe = true;
+            axMocks.widget.$scope.model.settings.sources.runtime = true;
+            axMocks.widget.$scope.model.settings.interactions.subscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.unsubscribe = true;
 
-            testBed.scope.model.settings.patterns.actions = false;
-            testBed.scope.$digest();
+            axMocks.widget.$scope.model.settings.patterns.actions = false;
+            axMocks.widget.$scope.$digest();
 
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 3 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 3 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'offers to filter events _by interaction type_, using a group of toggle controls (R2.3)', function() {
-            testBed.scope.model.settings.sources.runtime = true;
+            axMocks.widget.$scope.model.settings.sources.runtime = true;
 
-            testBed.scope.model.settings.interactions.subscribe = true;
-            testBed.scope.model.settings.interactions.unsubscribe = true;
-            testBed.scope.model.settings.interactions.publish = false;
-            testBed.scope.model.settings.interactions.deliver = false;
-            testBed.scope.$digest();
+            axMocks.widget.$scope.model.settings.interactions.subscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.unsubscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.publish = false;
+            axMocks.widget.$scope.model.settings.interactions.deliver = false;
+            axMocks.widget.$scope.$digest();
 
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 4 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 4 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'offers to filter events _by source type_, using a group of toggle controls (R2.4)', function() {
-            testBed.scope.model.settings.interactions.subscribe = true;
-            testBed.scope.model.settings.interactions.unsubscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.subscribe = true;
+            axMocks.widget.$scope.model.settings.interactions.unsubscribe = true;
 
-            testBed.scope.model.settings.sources.widgets = false;
-            testBed.scope.model.settings.sources.runtime = true;
-            testBed.scope.$digest();
+            axMocks.widget.$scope.model.settings.sources.widgets = false;
+            axMocks.widget.$scope.model.settings.sources.runtime = true;
+            axMocks.widget.$scope.$digest();
 
-            expect( testBed.scope.model.visibleEventInfos.length ).toEqual( 2 );
+            expect( axMocks.widget.$scope.model.visibleEventInfos.length ).toEqual( 2 );
          } );
 
       } );

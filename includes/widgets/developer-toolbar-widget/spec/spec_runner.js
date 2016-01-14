@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 aixigo AG
+ * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://www.laxarjs.org
  */
@@ -9,6 +9,8 @@
       title: 'developer-toolbar-widget Specification',
       tests: [
          'developer-toolbar-widget.spec'
-      ]
+      ],
+      testRunner: 'laxar-mocks',
+      jasmineMajorVersion: 2
    };
 } )( this );

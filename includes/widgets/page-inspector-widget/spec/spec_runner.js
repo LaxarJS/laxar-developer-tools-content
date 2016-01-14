@@ -1,5 +1,5 @@
 /**
- * Copyright 2015
+ * Copyright 2016
  * Released under the MIT license
  */
 ( function( global ) {

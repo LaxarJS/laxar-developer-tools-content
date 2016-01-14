@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 aixigo AG
+ * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
@@ -9,6 +9,8 @@
       title: 'events-display-widget Specification',
       tests: [
          'events-display-widget.spec'
-      ]
+      ],
+      testRunner: 'laxar-mocks',
+      jasmineMajorVersion: 2
    };
 } )( this );

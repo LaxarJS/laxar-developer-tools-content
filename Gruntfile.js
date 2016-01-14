@@ -1,5 +1,7 @@
 /**
- * Copyright 2015 aixigo AG
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://www.laxarjs.org
  */
 /*global module,__dirname,__filename */
 module.exports = function( grunt ) {

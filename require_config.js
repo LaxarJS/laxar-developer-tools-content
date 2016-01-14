@@ -13,11 +13,6 @@ var require = {
       'angular-route': 'angular-route/angular-route',
       'angular-sanitize': 'angular-sanitize/angular-sanitize',
 
-      // LaxarJS Core (tests only):
-      'laxar/laxar_testing': 'laxar/dist/laxar_testing',
-      jasmine: 'jasmine/lib/jasmine-core/jasmine',
-      q_mock: 'q_mock/q',
-
       // LaxarJS Patterns:
       'laxar-patterns': 'laxar-patterns/dist/laxar-patterns',
       'json-patch': 'fast-json-patch/src/json-patch-duplex',
