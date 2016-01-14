@@ -9,6 +9,8 @@
       title: 'events-display-widget Specification',
       tests: [
          'events-display-widget.spec'
-      ]
+      ],
+      testRunner: 'laxar-mocks',
+      jasmineMajorVersion: 2
    };
 } )( this );

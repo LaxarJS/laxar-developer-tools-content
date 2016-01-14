@@ -11,9 +11,6 @@ var require = {
       "angular-mocks": "angular-mocks/angular-mocks", 
       "angular-route": "angular-route/angular-route", 
       "angular-sanitize": "angular-sanitize/angular-sanitize", 
-      "laxar/laxar_testing": "laxar/dist/laxar_testing", 
-      "jasmine": "jasmine/lib/jasmine-core/jasmine", 
-      "q_mock": "q_mock/q", 
       "laxar-patterns": "laxar-patterns/dist/laxar-patterns", 
       "json-patch": "fast-json-patch/src/json-patch-duplex", 
       "laxar-uikit": "laxar-uikit/dist/laxar-uikit", 
@@ -38,7 +35,10 @@ var require = {
       "graphlib": "graphlib/dist/graphlib.core", 
       "immutable": "immutable/dist/immutable", 
       "jjv": "jjv/lib/jjv", 
-      "jjve": "jjve/jjve"
+      "jjve": "jjve/jjve", 
+      "laxar/laxar_testing": "laxar/dist/laxar_testing", 
+      "jasmine": "jasmine/lib/jasmine-core/jasmine", 
+      "q_mock": "q_mock/q"
    }, 
    "packages": [
       { 

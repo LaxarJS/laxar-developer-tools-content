@@ -9,6 +9,8 @@
       title: 'log-display-widget Specification',
       tests: [
          'log-display-widget.spec'
-      ]
+      ],
+      testRunner: 'laxar-mocks',
+      jasmineMajorVersion: 2
    };
 } )( this );

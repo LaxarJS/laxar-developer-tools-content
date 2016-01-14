@@ -9,6 +9,8 @@
       title: 'developer-toolbar-widget Specification',
       tests: [
          'developer-toolbar-widget.spec'
-      ]
+      ],
+      testRunner: 'laxar-mocks',
+      jasmineMajorVersion: 2
    };
 } )( this );
