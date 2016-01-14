@@ -90,6 +90,10 @@
   padding-left: 8px;
   margin-top: 0;
 }
+.events-display-widget .ax-event-problems-explanation {
+  padding-left: 8px;
+  margin-bottom: 24px;
+}
 .events-display-widget colgroup .ax-col-pattern-icon {
   width: 32px;
 }
@@ -210,6 +214,16 @@
 .events-display-widget .table tbody.ax-event-selected.ax-event-interaction-subscribe, .events-display-widget .table tbody.ax-event-selected.ax-event-interaction-unsubscribe, .events-display-widget .table tbody.ax-event-selected.ax-event-interaction-subscribe .ax-col-pattern-icon, .events-display-widget .table tbody.ax-event-selected.ax-event-interaction-unsubscribe .ax-col-pattern-icon {
   color: #577894;
 }
+.events-display-widget .table tbody.ax-event-has-problems {
+  background: #f7e4e4;
+}
+.events-display-widget .table tbody.ax-event-has-problems .ax-col-pattern-icon {
+  background: #e09795;
+  color: #aa3532;
+}
+.events-display-widget .table tbody.ax-event-has-problems .ax-event-problem {
+  font-weight: bold;
+}
 .events-display-widget .table td.ax-col-cycle {
   text-align: right;
 }
@@ -257,4 +271,7 @@
 .events-display-widget .fa-folder-close,
 .events-display-widget .fa-folder-open {
   cursor: pointer;
+}
+.events-display-widget li.ax-event-problem {
+  list-style-type: none;
 }

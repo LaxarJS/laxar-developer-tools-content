@@ -118,6 +118,11 @@
       margin-top: 0;
    }
 
+   .ax-event-problems-explanation {
+      padding-left: 8px;
+      margin-bottom: 24px;
+   }
+
    colgroup {
       .ax-col-pattern-icon {
          width: 32px;
@@ -269,7 +274,17 @@
          &.ax-event-interaction-unsubscribe .ax-col-pattern-icon {
             color: desaturate( $selected-fg, 30 );
          }
+      }
 
+      tbody.ax-event-has-problems {
+         background: $problems-bg;
+         .ax-col-pattern-icon {
+            background: darken( $problems-bg, 20 );
+            color: darken( $problems-bg, 50 );
+         }
+         .ax-event-problem {
+            font-weight: bold;
+         }
       }
 
       td.ax-col-cycle {
@@ -316,5 +331,9 @@
    .fa-folder-close,
    .fa-folder-open {
       cursor: pointer;
+   }
+
+   li.ax-event-problem {
+      list-style-type: none;
    }
 }

@@ -5,3 +5,5 @@ $hover-fg: white!default;
 
 $selected-bg: desaturate( lighten( $btn-primary-bg, 35 ), 10 )!default;
 $selected-fg: $btn-primary-bg!default;
+
+$problems-bg: desaturate( lighten( $btn-danger-bg, 35 ), 10 )!default;
