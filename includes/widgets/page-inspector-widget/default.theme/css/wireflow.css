@@ -263,16 +263,16 @@
 
 
 .nbe-theme-fusebox-app .nbe-vertex.nbe-kind-COMPOSITION .nbe-vertex-header {
-   background: #e57373;
+   background: #CC82D9;
 }
 .nbe-theme-fusebox-app .nbe-vertex.nbe-kind-COMPOSITION.nbe-selected .nbe-vertex-header {
-   background: #c62828;
+   background: #AD43BF;
 }
 .nbe-theme-fusebox-app .nbe-minimap-vertex.nbe-kind-COMPOSITION {
-   fill: #e57373;
+   fill: #CC82D9;
 }
 .nbe-theme-fusebox-app .nbe-minimap-vertex.nbe-kind-COMPOSITION.nbe-selected {
-   fill: #c62828;
+   fill: #AD43BF;
 }
 
 
@@ -290,12 +290,10 @@
 }
 
 
-
-
 /* MINIMAP */
 
 .nbe-minimap {
-   background: rgba(255, 255, 255, 0.85);
+   background: rgba(255, 255, 255, 0.95);
    position: absolute;
    left: 10px;
    bottom: 20px;
