@@ -36,6 +36,9 @@ It is a widget (and not an activity) because it heavily uses the browser object 
       "log": {
          "stream": "myLogMessages"
       },
+      "pageInfo": {
+         "resource": "myPageInfo"
+      },
       "grid": {
          "resource": "gridSettings"
       }
@@ -85,10 +88,9 @@ Additionally the widget supports the following event patterns as specified by th
 * Role: Master
 * Description: Publish CSS grid settings from the host application
 
-* Resource: grid.resource
+* Resource: pageInfo.resource
 * Role: Master
-* Description: Publish CSS grid settings from the host application
-
+* Description: Publish page and composition information from the host application
 
 
 ## References
