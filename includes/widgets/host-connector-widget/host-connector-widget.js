@@ -1,7 +1,11 @@
 /**
  * Copyright 2016 aixigo AG
  * Released under the MIT license.
+ * http://laxarjs.org/license
  */
+
+/* global chrome */
+
 define( [
    'laxar',
    'angular'
@@ -19,6 +23,8 @@ define( [
       var pageInfoVersion = -1;
       var timeout;
       var lastIndexByStream = {};
+      var isBrowserExtension = window.chrome && chrome.runtime && chrome.runtime.id;
+      var isLaxarApplication;
 
       // If the development server is used and we don't want the development window to be reloaded each
       // time something changes during development, we shutdown live reload here.
@@ -33,63 +39,101 @@ define( [
       } );
 
       eventBus.subscribe( 'beginLifecycleRequest', function() {
-         if( !window.opener ) {
-            window.alert( 'laxar-developer-tools-widget: window must be opened from a LaxarJS page.' );
-            return;
+         if( !window.opener && !isBrowserExtension ) {
+           window.alert( 'laxar-developer-tools-widget: window must be opened from a LaxarJS page.' );
+           return;
          }
-
-         var hostApplicationAvailable = tryPublishGridSettings();
-         if( hostApplicationAvailable ) {
-            checkForData();
-         }
+         tryPublishData();
       } );
+
+      if( isBrowserExtension ) {
+         chrome.devtools.network.onRequestFinished.addListener( tryPublishData );
+      }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function tryPublishGridSettings() {
+      function tryPublishData() {
          var channel;
-         try {
-            channel = window.opener.axDeveloperTools;
+         var successful = false;
+         if( isBrowserExtension ) {
+            chrome.devtools.inspectedWindow.eval(
+               'axDeveloperToolsExtensionActivate()',
+               { useContentScriptContext: true }
+            );
+            chrome.devtools.inspectedWindow.eval( 'axDeveloperToolsApi', publishDataOrHandleException );
          }
-         catch( exception ) {
-            handleApplicationGone();
-            return false;
+         else {
+            try {
+               channel = window.opener.axDeveloperTools;
+               publishDataOrHandleException( channel, false );
+            }
+            catch( exception ) {
+               publishDataOrHandleException( channel, true );
+            }
          }
+      }
 
-         var channelGridSettings = channel && channel.gridSettings;
-         if( $scope.features.grid.resource && channelGridSettings ) {
-            eventBus.publish( 'didReplace.' + $scope.features.grid.resource, {
-               resource: $scope.features.grid.resource,
-               data: channelGridSettings
-            } );
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function publishDataOrHandleException( channel, isException ) {
+         if( isException ) {
+            handleApplicationGone();
          }
-         return true;
+         else {
+            var channelGridSettings = channel && channel.gridSettings;
+            if( $scope.features.grid.resource && channelGridSettings ) {
+               eventBus.publish( 'didReplace.' + $scope.features.grid.resource, {
+                  resource: $scope.features.grid.resource,
+                  data: channelGridSettings
+               } );
+            }
+            publishLaxarApplicationFlag( true );
+            checkForData();
+         }
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function checkForData() {
          var channel;
-         try {
-            channel = window.opener.axDeveloperTools;
-         } catch (e) {
+         if( isBrowserExtension ){
+            chrome.devtools.inspectedWindow.eval( 'axDeveloperToolsApi', checkForDataOrHandleException );
+         }
+         else {
+            try {
+               channel = window.opener.axDeveloperTools;
+               checkForDataOrHandleException( channel, false );
+            } catch (e) {
+               checkForDataOrHandleException( channel, true );
+            }
+         }
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function checkForDataOrHandleException( channel, isException ) {
+         if( isException ) {
             handleApplicationGone();
-            return;
          }
-         var buffers = channel && channel.buffers;
-         if( buffers ) {
-            publishStream( 'events' );
-            publishStream( 'log' );
-         }
-         if( channel && channel.pageInfoVersion > pageInfoVersion ) {
-            pageInfoVersion = channel.pageInfoVersion;
-            eventBus.publish( 'didReplace.' + $scope.features.pageInfo.resource, {
-               resource: $scope.features.pageInfo.resource,
-               data: channel.pageInfo
-            } );
+         else {
+            var buffers = channel && channel.buffers;
+            if( buffers ) {
+               publishStream( 'events' );
+               publishStream( 'log' );
+            }
+            if( channel && channel.pageInfoVersion > pageInfoVersion ) {
+               pageInfoVersion = channel.pageInfoVersion;
+               eventBus.publish( 'didReplace.' + $scope.features.pageInfo.resource, {
+                  resource: $scope.features.pageInfo.resource,
+                  data: channel.pageInfo
+               } );
+            }
+            publishLaxarApplicationFlag( true );
+            timeout = window.setTimeout( checkForData, REFRESH_DELAY_MS );
          }
 
-         timeout = window.setTimeout( checkForData, REFRESH_DELAY_MS );
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
          function publishStream( bufferFeature ) {
             var buffer = buffers[ bufferFeature ];
             var lastIndex = lastIndexByStream[ bufferFeature ] || -1;
@@ -104,19 +148,51 @@ define( [
                data: events
             } );
             lastIndexByStream[ bufferFeature ] = buffer[ buffer.length - 1 ].index;
+            navigation( events );
          }
 
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         function navigation( events ) {
+            events.forEach( function( event ) {
+               if( event.action === 'publish' && event.event.substr( 0, 11 ) === 'didNavigate') {
+                  eventBus.publish( 'takeActionRequest.navigation', {
+                     action: 'navigation'
+                  } );
+               }
+            } );
+         }
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function handleApplicationGone() {
-         var message =
-            'laxar-developer-tools-widget: Cannot access LaxarJS host window (or tab). Is it still open?';
-         ax.log.error( message );
-         eventBus.publish( 'didEncounterError', message );
+         publishLaxarApplicationFlag( false );
+         if( !isBrowserExtension ){
+            var message =
+               'laxar-developer-tools-widget: Cannot access LaxarJS host window (or tab). Is it still open?';
+            ax.log.error( message );
+            eventBus.publish( 'didEncounterError', message );
+         }
       }
 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function publishLaxarApplicationFlag( state ) {
+         if( isLaxarApplication !== state ) {
+            eventBus.publish( 'didChangeFlag.' + $scope.features.laxarApplication.flag + '.' + state, {
+               flag: $scope.features.laxarApplication.flag,
+               state: state
+            } );
+            isLaxarApplication = state;
+            if( isBrowserExtension ) {
+               chrome.runtime.sendMessage( {
+                  active: state,
+                  id: chrome.devtools.inspectedWindow.tabId
+               } );
+            }
+         }
+      }
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
