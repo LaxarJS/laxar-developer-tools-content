@@ -17,15 +17,17 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    Controller.$inject = [ '$scope' ];
-
+   //Security wrapper denied access to property "buffers" on privileged Javascript object.
+   //Support for exposing privileged objects to untrusted content via __exposedProps__ is being
+   //gradually removed - use WebIDL bindings or Components.utils.cloneInto instead.
+   // Note that only the first denied property access from a given global object will be reported.
    function Controller( $scope ) {
       var eventBus = $scope.eventBus;
       var pageInfoVersion = -1;
       var timeout;
       var lastIndexByStream = {};
-      var isBrowserExtension = window.chrome && chrome.runtime && chrome.runtime.id;
       var isLaxarApplication;
-
+      var isBrowserWebExtension = ( window.chrome && chrome.runtime && chrome.runtime.id );
       // If the development server is used and we don't want the development window to be reloaded each
       // time something changes during development, we shutdown live reload here.
       if( window.LiveReload && !$scope.features.development.liveReload ) {
@@ -38,38 +40,52 @@ define( [
          }
       } );
 
-      eventBus.subscribe( 'beginLifecycleRequest', function() {
-         if( !window.opener && !isBrowserExtension ) {
-           window.alert( 'laxar-developer-tools-widget: window must be opened from a LaxarJS page.' );
-           return;
-         }
-         tryPublishData();
-      } );
+      if( window.opener ) {
+         eventBus.subscribe( 'beginLifecycleRequest', function() {
+            publishLaxarApplicationFlag( true );
+            tryPublishData();
+         } );
+      }
+      else {
+         eventBus.subscribe( 'beginLifecycleRequest', function() {
+            publishLaxarApplicationFlag( false );
+            window.addEventListener( 'message', extensionEventListener );
+         } );
+      }
 
-      if( isBrowserExtension ) {
-         chrome.devtools.network.onRequestFinished.addListener( tryPublishData );
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function extensionEventListener( event ) {
+         var channel = JSON.parse( event.detail || event.data );
+         if( channel.text === 'noLaxarDeveloperToolsApi' ) {
+            publishLaxarApplicationFlag( false );
+            return;
+         }
+         var channelGridSettings = channel && channel.gridSettings;
+         if( $scope.features.grid.resource && channelGridSettings ) {
+            publishGridSettings( channelGridSettings );
+         }
+         if( channel && channel.pageInfoVersion > pageInfoVersion ) {
+            publishAndSetPageInfoVersion( channel.pageInfo, channel.pageInfoVersion );
+         }
+         var buffers = channel && channel.buffers;
+         if( buffers ) {
+            publishStream( 'events', buffers );
+            publishStream( 'log', buffers );
+            publishLaxarApplicationFlag( true );
+         }
+
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function tryPublishData() {
-         var channel;
-         var successful = false;
-         if( isBrowserExtension ) {
-            chrome.devtools.inspectedWindow.eval(
-               'axDeveloperToolsExtensionActivate()',
-               { useContentScriptContext: true }
-            );
-            chrome.devtools.inspectedWindow.eval( 'axDeveloperToolsApi', publishDataOrHandleException );
+         try {
+            var channel = window.opener.axDeveloperTools;
+            publishDataOrHandleException( channel, false );
          }
-         else {
-            try {
-               channel = window.opener.axDeveloperTools;
-               publishDataOrHandleException( channel, false );
-            }
-            catch( exception ) {
-               publishDataOrHandleException( channel, true );
-            }
+         catch( exception ) {
+            publishDataOrHandleException( undefined, true );
          }
       }
 
@@ -77,15 +93,12 @@ define( [
 
       function publishDataOrHandleException( channel, isException ) {
          if( isException ) {
-            handleApplicationGone();
+            publishLaxarApplicationFlag( false );
          }
          else {
             var channelGridSettings = channel && channel.gridSettings;
             if( $scope.features.grid.resource && channelGridSettings ) {
-               eventBus.publish( 'didReplace.' + $scope.features.grid.resource, {
-                  resource: $scope.features.grid.resource,
-                  data: channelGridSettings
-               } );
+               publishGridSettings( channelGridSettings );
             }
             publishLaxarApplicationFlag( true );
             checkForData();
@@ -94,18 +107,21 @@ define( [
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      function publishGridSettings( channelGridSettings ) {
+         eventBus.publish( 'didReplace.' + $scope.features.grid.resource, {
+            resource: $scope.features.grid.resource,
+            data: channelGridSettings
+         } );
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       function checkForData() {
-         var channel;
-         if( isBrowserExtension ){
-            chrome.devtools.inspectedWindow.eval( 'axDeveloperToolsApi', checkForDataOrHandleException );
-         }
-         else {
-            try {
-               channel = window.opener.axDeveloperTools;
-               checkForDataOrHandleException( channel, false );
-            } catch (e) {
-               checkForDataOrHandleException( channel, true );
-            }
+         try {
+            var channel = window.opener.axDeveloperTools;
+            checkForDataOrHandleException( channel, false );
+         } catch (e) {
+            checkForDataOrHandleException( undefined, true );
          }
       }
 
@@ -113,67 +129,61 @@ define( [
 
       function checkForDataOrHandleException( channel, isException ) {
          if( isException ) {
-            handleApplicationGone();
+            publishLaxarApplicationFlag( false );
          }
          else {
             var buffers = channel && channel.buffers;
             if( buffers ) {
-               publishStream( 'events' );
-               publishStream( 'log' );
+               publishStream( 'events', buffers );
+               publishStream( 'log', buffers );
             }
             if( channel && channel.pageInfoVersion > pageInfoVersion ) {
-               pageInfoVersion = channel.pageInfoVersion;
-               eventBus.publish( 'didReplace.' + $scope.features.pageInfo.resource, {
-                  resource: $scope.features.pageInfo.resource,
-                  data: channel.pageInfo
-               } );
+               publishAndSetPageInfoVersion( channel.pageInfo, channel.pageInfoVersion );
             }
             publishLaxarApplicationFlag( true );
             timeout = window.setTimeout( checkForData, REFRESH_DELAY_MS );
-         }
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         function publishStream( bufferFeature ) {
-            var buffer = buffers[ bufferFeature ];
-            var lastIndex = lastIndexByStream[ bufferFeature ] || -1;
-            var events = buffer
-               .filter( function( _ ) { return lastIndex < _.index; } )
-               .map( function ( _ ) { return JSON.parse( _.json ); } );
-            if( !events.length ) {
-               return;
-            }
-            eventBus.publish( 'didProduce.' + $scope.features[ bufferFeature ].stream, {
-               stream: $scope.features[ bufferFeature ].stream,
-               data: events
-            } );
-            lastIndexByStream[ bufferFeature ] = buffer[ buffer.length - 1 ].index;
-            navigation( events );
-         }
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         function navigation( events ) {
-            events.forEach( function( event ) {
-               if( event.action === 'publish' && event.event.substr( 0, 11 ) === 'didNavigate') {
-                  eventBus.publish( 'takeActionRequest.navigation', {
-                     action: 'navigation'
-                  } );
-               }
-            } );
          }
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function handleApplicationGone() {
-         publishLaxarApplicationFlag( false );
-         if( !isBrowserExtension ){
-            var message =
-               'laxar-developer-tools-widget: Cannot access LaxarJS host window (or tab). Is it still open?';
-            ax.log.error( message );
-            eventBus.publish( 'didEncounterError', message );
+      function publishAndSetPageInfoVersion( pageInfo, version ) {
+         pageInfoVersion = version;
+         eventBus.publish( 'didReplace.' + $scope.features.pageInfo.resource, {
+            resource: $scope.features.pageInfo.resource,
+            data: pageInfo
+         } );
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function publishStream( bufferFeature, buffers ) {
+         var buffer = buffers[ bufferFeature ];
+         var lastIndex = lastIndexByStream[ bufferFeature ] || -1;
+         var events = buffer
+            .filter( function( _ ) { return lastIndex < _.index; } )
+            .map( function ( _ ) { return JSON.parse( _.json ); } );
+         if( !events.length ) {
+            return;
          }
+         eventBus.publish( 'didProduce.' + $scope.features[ bufferFeature ].stream, {
+            stream: $scope.features[ bufferFeature ].stream,
+            data: events
+         } );
+         lastIndexByStream[ bufferFeature ] = buffer[ buffer.length - 1 ].index;
+         navigation( events );
+      }
+
+      /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function navigation( events ) {
+         events.forEach( function( event ) {
+            if( event.action === 'publish' && event.event.substr( 0, 11 ) === 'didNavigate') {
+               eventBus.publish( 'takeActionRequest.navigation', {
+                  action: 'navigation'
+               } );
+            }
+         } );
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +195,7 @@ define( [
                state: state
             } );
             isLaxarApplication = state;
-            if( isBrowserExtension ) {
+            if( isBrowserWebExtension ) {
                chrome.runtime.sendMessage( {
                   active: state,
                   id: chrome.devtools.inspectedWindow.tabId

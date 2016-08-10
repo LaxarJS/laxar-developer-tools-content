@@ -24,7 +24,17 @@ define( [
          { name: 'page', label: 'Page' },
          { name: 'log', label: 'Log' }
       ];
-      var isBrowserExtension = window.chrome && chrome.runtime && chrome.runtime.id;
+      var isBrowserWebExtension = ( window.chrome && chrome.runtime && chrome.runtime.id );
+      var firefoxExtensionMessagePort;
+
+      if( !window.opener ) {
+         window.addEventListener( 'message', function( event ) {
+            if( event.ports ) {
+               firefoxExtensionMessagePort = event.ports[ 0 ];
+               firefoxExtensionMessagePort.start();
+            }
+         } );
+      }
 
       $scope.resources = {};
 
@@ -34,8 +44,16 @@ define( [
          activeTab: null,
          gridOverlay: false,
          widgetOverlay: false,
-         toggleGridTitle: 'Configure grid settings in application to enable this feature!'
+         toggleGridTitle: 'Configure grid settings in application to enable this feature!',
+         noLaxar: 'Reload page to enable LaxarJS developer tools!'
       };
+
+      if( !window.opener && !isBrowserWebExtension && !firefoxExtensionMessagePort ) {
+         $scope.model.noLaxar = 'laxar-developer-tools-widget: window must be opened from a LaxarJS page!';
+      }
+      if( window.opener ) {
+         $scope.model.noLaxar = 'Cannot access LaxarJS host window (or tab). Reopen laxar-developer-tools from LaxarJS host window.';
+      }
 
       axPatterns.resources.handlerFor( $scope ).registerResourceFromFeature(
          'grid',
@@ -53,7 +71,7 @@ define( [
          }
       } );
 
-      if( isBrowserExtension ) {
+      if( isBrowserWebExtension ) {
          chrome.devtools.network.onNavigated.addListener( function() {
             $scope.model.gridOverlay = false;
             $scope.model.widgetOverlay = false;
@@ -134,31 +152,40 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function toggleGrid() {
-         if( isBrowserExtension ) {
-            chrome.devtools.inspectedWindow.eval(
-               'axDeveloperToolsToggleGrid( '+ JSON.stringify( $scope.resources.grid ) + ', ' +
-                                            JSON.stringify( chrome.runtime.id ) + ' )',
-               { useContentScriptContext: true }
-            );
-         }
-         else {
+         if( window.opener ) {
             /* global axDeveloperToolsToggleGrid */
             axDeveloperToolsToggleGrid( $scope.resources.grid, $scope.id( 'axGrid' ) );
+            return;
+         }
+         if( isBrowserWebExtension ) {
+            var event;
+            event = new CustomEvent( 'toogleGrid', {
+               detail: JSON.stringify( $scope.resources.grid )
+            } );
+            window.dispatchEvent( event );
+         }
+         else if( firefoxExtensionMessagePort ) {
+            var message = { text: 'toogleGrid', data: $scope.resources.grid };
+            firefoxExtensionMessagePort.postMessage( JSON.stringify( message ) );
          }
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function toggleWidgetOutline(){
-         if( isBrowserExtension ) {
-            chrome.devtools.inspectedWindow.eval(
-               'axDeveloperToolsToggleWidgetOutline(' + JSON.stringify( chrome.runtime.id ) + ')' ,
-               { useContentScriptContext: true }
-            );
-         }
-         else {
+      function toggleWidgetOutline() {
+         if( window.opener ) {
             /* global axDeveloperToolsToggleWidgetOutline */
             axDeveloperToolsToggleWidgetOutline( $scope.id( 'axInfo' ) );
+            return;
+         }
+         if( isBrowserWebExtension ) {
+            var event;
+            event = new CustomEvent( 'widgetOutline', { } );
+            window.dispatchEvent( event );
+         }
+         else if( firefoxExtensionMessagePort ) {
+            var message = { text: 'widgetOutline', data: {} };
+            firefoxExtensionMessagePort.postMessage( JSON.stringify( message ) );
          }
       }
    }
