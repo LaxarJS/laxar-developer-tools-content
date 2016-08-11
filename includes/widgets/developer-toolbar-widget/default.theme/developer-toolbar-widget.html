@@ -21,7 +21,7 @@
    <li ng-if="model.laxar"
        ng-repeat="tab in model.tabs"
        ng-class="{ 'ax-active': model.activeTab.name == tab.name }"
-      ><a href="javascript:void(0);" ng-click="activateTab( tab )">{{ tab.label }}</a></li>
+      ><a href="" ng-click="activateTab( tab )">{{ tab.label }}</a></li>
    <li class="developer-toolbar-hint"
        ng-if="!model.laxar">
        {{model.noLaxar}}

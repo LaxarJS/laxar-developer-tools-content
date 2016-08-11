@@ -7,7 +7,7 @@
 /* global chrome */
 var axDeveloperToolsToggleWidgetOutline = (function() {
    var infoId;
-   var isBrowserExtension;
+   var isBrowserWebExtension;
    var document;
 
    var INFO_LAYER_STYLE = {
@@ -26,7 +26,7 @@ var axDeveloperToolsToggleWidgetOutline = (function() {
 
    return function( id ) {
       infoId = infoId ||'axInfo-' + id;
-      isBrowserExtension = isBrowserExtension || ( window.chrome && chrome.runtime && chrome.runtime.id );
+      isBrowserWebExtension = isBrowserWebExtension || ( window.chrome && chrome.runtime && chrome.runtime.id );
       document = hostDocument();
 
       var cssClassName = 'ax-developer-tools-widget-outline';
@@ -78,7 +78,7 @@ var axDeveloperToolsToggleWidgetOutline = (function() {
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function hostDocument() {
-      if( isBrowserExtension ) {
+      if( isBrowserWebExtension ) {
          return window.document;
       }
       else {
