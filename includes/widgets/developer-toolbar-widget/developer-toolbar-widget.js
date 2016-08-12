@@ -29,9 +29,12 @@ define( [
 
       if( !window.opener ) {
          window.addEventListener( 'message', function( event ) {
-            if( event.ports ) {
+            if( !firefoxExtensionMessagePort && event.ports ) {
+               $scope.model.noLaxar = 'Reload page to enable LaxarJS developer tools!';
                firefoxExtensionMessagePort = event.ports[ 0 ];
                firefoxExtensionMessagePort.start();
+               var message = { text: 'messagePortStarted' };
+               firefoxExtensionMessagePort.postMessage( JSON.stringify( message ) );
             }
          } );
       }

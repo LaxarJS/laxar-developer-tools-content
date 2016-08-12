@@ -23,8 +23,8 @@
        ng-class="{ 'ax-active': model.activeTab.name == tab.name }"
       ><a href="" ng-click="activateTab( tab )">{{ tab.label }}</a></li>
    <li class="developer-toolbar-hint"
-       ng-if="!model.laxar">
-       {{model.noLaxar}}
+       ng-if="!model.laxar"
+       ng-bind="model.noLaxar">
    </li>
 </ul>
 
