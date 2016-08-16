@@ -62,7 +62,7 @@ define( [
             return;
          }
          var channelGridSettings = channel && channel.gridSettings;
-         if( $scope.features.grid.resource && channelGridSettings ) {
+         if( $scope.features.grid.resource ) {
             publishGridSettings( channelGridSettings );
          }
          if( channel && channel.pageInfoVersion > pageInfoVersion ) {
@@ -74,7 +74,6 @@ define( [
             publishStream( 'log', buffers );
             publishLaxarApplicationFlag( true );
          }
-
       }
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +96,7 @@ define( [
          }
          else {
             var channelGridSettings = channel && channel.gridSettings;
-            if( $scope.features.grid.resource && channelGridSettings ) {
+            if( $scope.features.grid.resource ) {
                publishGridSettings( channelGridSettings );
             }
             publishLaxarApplicationFlag( true );
@@ -108,6 +107,9 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function publishGridSettings( channelGridSettings ) {
+         if( !channelGridSettings ) {
+            channelGridSettings = null;
+         }
          eventBus.publish( 'didReplace.' + $scope.features.grid.resource, {
             resource: $scope.features.grid.resource,
             data: channelGridSettings
