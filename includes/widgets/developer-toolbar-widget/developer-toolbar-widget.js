@@ -19,6 +19,13 @@ define( [
    Controller.$inject = [ 'axEventBus', '$scope', '$window' ];
 
    function Controller( eventBus, $scope, $window ) {
+      var HINT_NO_LAXAR_EXTENSION = 'Reload page to enable LaxarJS developer tools!';
+      var HINT_NO_LAXAR_WIDGET = 'laxar-developer-tools-widget: window must be opened from a LaxarJS page!';
+      var HINT_DISABLE_TOGGLE_GRID = 'Configure grid settings in application to enable this feature!';
+      var HINT_NO_LAXAR_ANYMORE_WIDGET = 'Cannot access LaxarJS host window (or tab).' +
+                                          ' Reopen laxar-developer-tools from LaxarJS host window.';
+      var HINT_CONFIGURE_GRID = 'Configure grid settings in application to enable this feature!';
+
       var TABS = [
          { name: 'events', label: 'Events' },
          { name: 'page', label: 'Page' },
@@ -30,7 +37,7 @@ define( [
       if( !window.opener ) {
          window.addEventListener( 'message', function( event ) {
             if( !firefoxExtensionMessagePort && event.ports ) {
-               $scope.model.noLaxar = 'Reload page to enable LaxarJS developer tools!';
+               $scope.model.noLaxar = HINT_NO_LAXAR_EXTENSION;
                firefoxExtensionMessagePort = event.ports[ 0 ];
                firefoxExtensionMessagePort.start();
                var message = { text: 'messagePortStarted' };
@@ -47,22 +54,28 @@ define( [
          activeTab: null,
          gridOverlay: false,
          widgetOverlay: false,
-         toggleGridTitle: 'Configure grid settings in application to enable this feature!',
-         noLaxar: 'Reload page to enable LaxarJS developer tools!'
+         toggleGridTitle: HINT_DISABLE_TOGGLE_GRID,
+         noLaxar: HINT_NO_LAXAR_EXTENSION
       };
 
       if( !window.opener && !isBrowserWebExtension && !firefoxExtensionMessagePort ) {
-         $scope.model.noLaxar = 'laxar-developer-tools-widget: window must be opened from a LaxarJS page!';
+         $scope.model.noLaxar = HINT_NO_LAXAR_WIDGET;
       }
       if( window.opener ) {
-         $scope.model.noLaxar = 'Cannot access LaxarJS host window (or tab). Reopen laxar-developer-tools from LaxarJS host window.';
+         $scope.model.noLaxar = HINT_NO_LAXAR_ANYMORE_WIDGET;
       }
 
       axPatterns.resources.handlerFor( $scope ).registerResourceFromFeature(
          'grid',
          {
             onReplace: function( event ) {
-               $scope.model.toggleGridTitle = '';
+               if( event.data === null ) {
+                  $scope.model.toggleGridTitle = HINT_CONFIGURE_GRID;
+                  $scope.model.gridOverlay = false;
+               }
+               else {
+                  $scope.model.toggleGridTitle = '';
+               }
             }
          }
       );
@@ -157,7 +170,7 @@ define( [
       function toggleGrid() {
          if( window.opener ) {
             /* global axDeveloperToolsToggleGrid */
-            axDeveloperToolsToggleGrid( $scope.resources.grid, $scope.id( 'axGrid' ) );
+            axDeveloperToolsToggleGrid( $scope.resources.grid );
             return;
          }
          if( isBrowserWebExtension ) {
@@ -178,7 +191,7 @@ define( [
       function toggleWidgetOutline() {
          if( window.opener ) {
             /* global axDeveloperToolsToggleWidgetOutline */
-            axDeveloperToolsToggleWidgetOutline( $scope.id( 'axInfo' ) );
+            axDeveloperToolsToggleWidgetOutline();
             return;
          }
          if( isBrowserWebExtension ) {

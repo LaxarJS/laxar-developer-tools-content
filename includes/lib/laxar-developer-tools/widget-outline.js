@@ -24,8 +24,8 @@ var axDeveloperToolsToggleWidgetOutline = (function() {
       'color': 'white'
    };
 
-   return function( id ) {
-      infoId = infoId ||'axInfo-' + id;
+   return function() {
+      infoId = infoId ||'laxar-developer-tools-info-box';
       isBrowserWebExtension = isBrowserWebExtension || ( window.chrome && chrome.runtime && chrome.runtime.id );
       document = hostDocument();
 
