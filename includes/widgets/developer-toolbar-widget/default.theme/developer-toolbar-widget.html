@@ -1,7 +1,7 @@
 <div class="pull-right"
      ng-if="model.laxar">
    <button class="btn btn-link"
-           ng-class="{ 'developer-toolbar-disable': !resources.grid }"
+           ng-show="resources.grid"
            ng-attr-title="{{ model.toggleGridTitle }}"
            type="button"
            ng-click="toggleGrid()"

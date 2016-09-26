@@ -20,7 +20,6 @@ define( [
 
    function Controller( eventBus, $scope, $window ) {
       var HINT_NO_LAXAR_EXTENSION = 'Reload page to enable LaxarJS developer tools!';
-      var HINT_NO_LAXAR_WIDGET = 'laxar-developer-tools-widget: window must be opened from a LaxarJS page!';
       var HINT_DISABLE_TOGGLE_GRID = 'Configure grid settings in application to enable this feature!';
       var HINT_NO_LAXAR_ANYMORE_WIDGET = 'Cannot access LaxarJS host window (or tab).' +
                                           ' Reopen laxar-developer-tools from LaxarJS host window.';
@@ -42,6 +41,13 @@ define( [
                firefoxExtensionMessagePort.start();
                var message = { text: 'messagePortStarted' };
                firefoxExtensionMessagePort.postMessage( JSON.stringify( message ) );
+            } else {
+               var channel = JSON.parse( event.detail || event.data );
+               if( channel.text === 'reloadedPage' ) {
+                  $scope.model.gridOverlay = false;
+                  $scope.model.widgetOverlay = false;
+                  $scope.$apply();
+               }
             }
          } );
       }
@@ -58,9 +64,8 @@ define( [
          noLaxar: HINT_NO_LAXAR_EXTENSION
       };
 
-      if( !window.opener && !isBrowserWebExtension && !firefoxExtensionMessagePort ) {
-         $scope.model.noLaxar = HINT_NO_LAXAR_WIDGET;
-      }
+
+
       if( window.opener ) {
          $scope.model.noLaxar = HINT_NO_LAXAR_ANYMORE_WIDGET;
       }
@@ -123,6 +128,8 @@ define( [
             }
          }
       } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       eventBus.subscribe( 'takeActionRequest.navigation', function( event ) {
          eventBus.publish( 'willTakeAction.navigation', {

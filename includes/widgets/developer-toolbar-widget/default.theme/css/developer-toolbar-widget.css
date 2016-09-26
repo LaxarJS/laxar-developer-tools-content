@@ -21,9 +21,3 @@
    padding: 9px;
    color: #737373;
 }
-
-.developer-toolbar-widget button.developer-toolbar-disable {
-   color: #737373;
-   cursor: default;
-   text-decoration: none;
-}
