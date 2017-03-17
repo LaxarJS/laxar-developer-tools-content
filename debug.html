@@ -8,10 +8,10 @@
 </head>
 <body>
    <div data-ax-page></div>
-   <div data-ng-view></div>
 
-   <script data-ax-application-mode="DEBUG" src="application/application.js"></script>
-   <script src="require_config.js"></script>
-   <script data-main="../init.js" src="bower_components/requirejs/require.js"></script>
+   <script src="node_modules/source-map-support/browser-source-map-support.js"></script>
+
+   <script src="var/build/vendor.bundle.js"></script>
+   <script src="var/build/app.bundle.js"></script>
 </body>
 </html>

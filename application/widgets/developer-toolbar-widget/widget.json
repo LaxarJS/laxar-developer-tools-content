@@ -1,0 +1,51 @@
+{
+   "name": "developer-toolbar-widget",
+   "description": "Allows to show widget outlines and to display an alignment grid for the host application",
+
+   "integration": {
+      "technology": "react",
+      "type": "widget"
+   },
+
+   "styleSource": "scss/developer-toolbar-widget.scss",
+
+   "features": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "type": "object",
+      "required": [ "grid", "detailsOn" ],
+      "properties": {
+         "grid": {
+            "type": "object",
+            "required": [ "resource" ],
+            "properties": {
+               "resource": {
+                  "type": "string",
+                  "format": "topic",
+                  "axRole": "inlet"
+               }
+            }
+         },
+         "tabs": {
+            "type": "object",
+            "required": [ "parameter" ],
+            "properties": {
+               "parameter": {
+                  "type": "string",
+                  "format": "topic",
+                  "default": "events"
+               }
+            }
+         },
+         "detailsOn": {
+            "type": "array",
+            "description": "List to the listed flags which report the state if a LaxarJS application is running in the inspected window.",
+            "items": {
+               "type": "string",
+               "format": "flag-topic",
+               "axPattern": "flag",
+               "description": "The topic through which to subscribe to flag events."
+            }
+         }
+      }
+   }
+}

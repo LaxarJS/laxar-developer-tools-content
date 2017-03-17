@@ -1,22 +1,34 @@
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://www.laxarjs.org
- */
-require( [
-   'laxar',
-   'laxar-react-adapter',
-   'laxar-application/var/flows/main/dependencies',
-   'json!laxar-application/var/flows/main/resources.json'
-], function( ax, axReactAdapter, mainDependencies, mainResources ) {
-   'use strict';
+import 'polyfills';
+import { bootstrap } from 'laxar';
 
-   window.laxar.fileListings = {
-      application: mainResources,
-      bower_components: mainResources,
-      includes: mainResources
-   };
+import * as reactAdapter from 'laxar-react-adapter';
 
-   ax.bootstrap( mainDependencies, [ axReactAdapter ] );
+import artifacts from 'laxar-loader/artifacts?flow=main&theme=default';
 
+const config = {
+   name: 'LaxarJS Developer Tools',
+   router: {
+      query: {
+         enabled: true
+      },
+      pagejs: {
+         hashbang: true
+      }
+   },
+   flow: {
+      name: 'main'
+   },
+   logging: {
+      threshold: 'TRACE'
+   },
+   theme: 'default',
+   tooling: {
+      enabled: true
+   }
+};
+
+bootstrap( document.querySelector( '[data-ax-page]' ), {
+   widgetAdapters: [ reactAdapter ],
+   configuration: config,
+   artifacts
 } );

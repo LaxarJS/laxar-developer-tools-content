@@ -1,0 +1,13 @@
+{
+   "places": {
+      "entry": {
+         "patterns": [ "/" ],
+         "redirectTo": "tools"
+      },
+
+      "tools": {
+         "patterns": [ "/tools/:tabId",  "/tools" ],
+         "page":  "tools"
+      }
+   }
+}
