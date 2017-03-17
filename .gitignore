@@ -1,0 +1,14 @@
+.idea
+atlassian-ide-plugin.xml
+*.orig
+.sass-cache
+/node_modules
+*.backup.json
+contents-*.zip
+npm-debug.log
+
+/var/build/*.map
+/var/build/require_configured.js
+
+/spec-output
+
