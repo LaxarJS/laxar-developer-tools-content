@@ -10,12 +10,12 @@ import { object } from 'laxar';
 const TYPE_CONTAINER = 'CONTAINER';
 
 const {
-  layout: {
-     model: layoutModel
-  },
-  graph: {
-    model: graphModel
-  }
+   layout: {
+      model: layoutModel
+   },
+   graph: {
+     model: graphModel
+   }
 } = wireflow;
 
 const edgeTypes = {
@@ -219,6 +219,7 @@ export function graph( pageInfo, options ) {
             // feature can be disabled, and was disabled
             return ports;
          }
+
          if( schema.type === 'string' && schema.axRole &&
              ( schema.format === 'topic' || schema.format === 'flag-topic' ) ) {
             const type = schema.axPattern ? schema.axPattern.toUpperCase() : inferEdgeType( path );
@@ -234,12 +235,39 @@ export function graph( pageInfo, options ) {
             }
          }
 
-         if( schema.type === 'object' && schema.properties ) {
-            Object.keys( schema.properties ).forEach( key => {
-               const propertySchema = schema.properties[ key ] || schema.additionalProperties;
-               identifyPorts( value[ key ], propertySchema, path.concat( [ key ] ), ports );
+         if( schema.type === 'object' ) {
+            const {
+               properties = {},
+               patternProperties = {},
+               additionalProperties
+            } = schema;
+
+            const propertyPatterns = object.tabulate(
+               pattern => new RegExp( pattern ),
+               Object.keys( patternProperties ) );
+
+            Object.keys( value ).forEach( key => {
+               if( properties[ key ] ) {
+                  identifyPorts( value[ key ], properties[ key ], path.concat( [ key ] ), ports );
+                  return;
+               }
+
+               const patterns = Object
+                  .keys( propertyPatterns )
+                  .filter( pattern => propertyPatterns[ pattern ].test( key ) );
+
+               if( patterns.length > 0 ) {
+                  identifyPorts( value[ key ], patternProperties[ patterns[ 0 ] ], path.concat( [ key ] ), ports );
+                  return;
+               }
+
+               if( additionalProperties ) {
+                  identifyPorts( value[ key ], additionalProperties, path.concat( [ key ] ), ports );
+                  return;
+               }
             } );
          }
+
          if( schema.type === 'array' ) {
             value.forEach( (item, i) => {
                identifyPorts( item, schema.items, path.concat( [ i ] ), ports );
