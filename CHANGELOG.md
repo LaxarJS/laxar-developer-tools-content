@@ -2,6 +2,7 @@
 
 ## Last Changes
 
+- [#2](https://github.com/LaxarJS/laxar-developer-tools-content/issues/2): Fixed the identification of ports from JSON schemas that use `patternProperties`
 - [#5](https://github.com/LaxarJS/laxar-developer-tools-content/issues/5): adapt to latest changes in LaxarJS
 - [#6](https://github.com/LaxarJS/laxar-developer-tools-content/issues/6): pin lodash to version 3
 - [#4](https://github.com/LaxarJS/laxar-developer-tools-content/issues/4): fixed problems with AxWidgetArea when rendering site after main window reload

@@ -49729,6 +49729,34 @@ graph = graph;exports.
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 layout = layout;exports.
 
 
@@ -49776,7 +49804,7 @@ filterFromSelection = filterFromSelection;var _wireflow = __webpack_require__(24
       function processCompositionInstance(compositionInstance) {var id = compositionInstance.id;var definition = compositionDefinitions[pageReference][id].COMPACT;var schema = definition.features.type ? definition.features : { type: 'object', properties: definition.features };var ports = identifyPorts(compositionInstance.features || {}, _laxar.object.options(schema));vertices[id] = { id: id, label: id, kind: 'COMPOSITION', ports: ports };} ////////////////////////////////////////////////////////////////////////////////////////////////////////
       function identifyPorts(value, passedSchema, passedPath, passedPorts) {var path = passedPath || [];var ports = passedPorts || { inbound: [], outbound: [] };var schema = passedSchema;if (!value || !schema) {return ports;}if (!schema.type) {// TODO: cleanup, invert role
             schema = { type: 'object', properties: schema };}if (value.enabled === false) {// feature can be disabled, and was disabled
-            return ports;}if (schema.type === 'string' && schema.axRole && (schema.format === 'topic' || schema.format === 'flag-topic')) {var type = schema.axPattern ? schema.axPattern.toUpperCase() : inferEdgeType(path);if (!type) {return undefined;}var edgeId = type + ':' + value;var label = path.join('.');var id = path.join(':');ports[schema.axRole === 'outlet' ? 'outbound' : 'inbound'].push({ label: label, id: id, type: type, edgeId: edgeId });if (edgeId && !edges[edgeId]) {edges[edgeId] = { type: type, id: edgeId, label: value };}}if (schema.type === 'object' && schema.properties) {Object.keys(schema.properties).forEach(function (key) {var propertySchema = schema.properties[key] || schema.additionalProperties;identifyPorts(value[key], propertySchema, path.concat([key]), ports);});}if (schema.type === 'array') {value.forEach(function (item, i) {identifyPorts(item, schema.items, path.concat([i]), ports);});}return ports;} ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            return ports;}if (schema.type === 'string' && schema.axRole && (schema.format === 'topic' || schema.format === 'flag-topic')) {var type = schema.axPattern ? schema.axPattern.toUpperCase() : inferEdgeType(path);if (!type) {return undefined;}var edgeId = type + ':' + value;var label = path.join('.');var id = path.join(':');ports[schema.axRole === 'outlet' ? 'outbound' : 'inbound'].push({ label: label, id: id, type: type, edgeId: edgeId });if (edgeId && !edges[edgeId]) {edges[edgeId] = { type: type, id: edgeId, label: value };}}if (schema.type === 'object') {var _schema = schema,_schema$properties = _schema.properties,properties = _schema$properties === undefined ? {} : _schema$properties,_schema$patternProper = _schema.patternProperties,patternProperties = _schema$patternProper === undefined ? {} : _schema$patternProper,additionalProperties = _schema.additionalProperties;var propertyPatterns = _laxar.object.tabulate(function (pattern) {return new RegExp(pattern);}, Object.keys(patternProperties));Object.keys(value).forEach(function (key) {if (properties[key]) {identifyPorts(value[key], properties[key], path.concat([key]), ports);return;}var patterns = Object.keys(propertyPatterns).filter(function (pattern) {return propertyPatterns[pattern].test(key);});if (patterns.length > 0) {identifyPorts(value[key], patternProperties[patterns[0]], path.concat([key]), ports);return;}if (additionalProperties) {identifyPorts(value[key], additionalProperties, path.concat([key]), ports);return;}});}if (schema.type === 'array') {value.forEach(function (item, i) {identifyPorts(item, schema.items, path.concat([i]), ports);});}return ports;} ////////////////////////////////////////////////////////////////////////////////////////////////////////
       function inferEdgeType(path) {if (!path.length) {return null;}var lastSegment = path[path.length - 1];if (['action', 'flag', 'resource'].indexOf(lastSegment) !== -1) {return lastSegment.toUpperCase();}if (lastSegment === 'onActions') {return 'ACTION';}return inferEdgeType(path.slice(0, path.length - 1));}} ///////////////////////////////////////////////////////////////////////////////////////////////////////////
    function identifyContainers() {var type = TYPE_CONTAINER;Object.keys(page.areas).forEach(function (areaName) {insertEdge(areaName);var owner = findOwner(areaName);if (!owner) {return;}var containsAnything = false;page.areas[areaName].filter(function (item) {return isComposition(item) ? compositionDisplay === 'COMPACT' : true;}).forEach(function (item) {if (vertices[item.id]) {insertUplink(vertices[item.id], areaName);containsAnything = true;}});if (containsAnything) {insertOwnerPort(owner, areaName);}});function findOwner(areaName) {if (areaName.indexOf('.') <= 0) {return vertices[ROOT_ID];}var prefix = areaName.slice(0, areaName.lastIndexOf('.'));return vertices[prefix];}function insertOwnerPort(vertex, areaName) {vertex.ports.outbound.unshift({ id: 'CONTAINER:' + areaName, type: TYPE_CONTAINER, edgeId: areaEdgeId(areaName), label: areaName });}function insertUplink(vertex, areaName) {vertex.ports.inbound.unshift({ id: 'CONTAINER:anchor', type: TYPE_CONTAINER, edgeId: areaEdgeId(areaName), label: 'anchor' });}function insertEdge(areaName) {var id = areaEdgeId(areaName);edges[id] = { id: id, type: type, label: areaName };}function areaEdgeId(areaName) {return TYPE_CONTAINER + ':' + areaName;}} ///////////////////////////////////////////////////////////////////////////////////////////////////////////
    function pruneIrrelevantWidgets(withContainers) {var toPrune = [];do {toPrune.forEach(function (id) {delete vertices[id];});pruneEmptyEdges();toPrune = mark();} while (toPrune.length);function mark() {var pruneList = [];Object.keys(vertices).forEach(function (vId) {var ports = vertices[vId].ports;if (ports.inbound.length <= withContainers ? 1 : 0) {if (ports.outbound.every(function (_) {return !_.edgeId;})) {pruneList.push(vId);}}});return pruneList;}} ///////////////////////////////////////////////////////////////////////////////////////////////////////////
