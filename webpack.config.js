@@ -8,7 +8,6 @@
 
 const path = require( 'path' );
 const webpack = require( 'webpack' );
-const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const nodeEnv = process.env.NODE_ENV;
 const isBrowserSpec = nodeEnv === 'browser-spec';
 const processPlugins = { 'browser-spec': browserSpecPlugins }[ nodeEnv ] || ( _ => _ );
