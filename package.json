@@ -13,7 +13,7 @@
       "browser-spec-run": "cross-env NODE_ENV=browser-spec webpack-dev-server --port 8180",
       "eslint": "eslint init.js widgets *.config.js",
       "karma": "node karma.config.js",
-      "optimize": "cross-env NODE_ENV=production webpack --progress",
+      "optimize": "webpack --progress",
       "prepublish": "webpack --progress",
       "start": "webpack --watch",
       "test": "npm run karma && npm run eslint",

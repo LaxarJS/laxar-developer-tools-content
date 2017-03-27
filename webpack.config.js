@@ -10,12 +10,10 @@ const path = require( 'path' );
 const webpack = require( 'webpack' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
 const nodeEnv = process.env.NODE_ENV;
-const isProduction = nodeEnv === 'production';
 const isBrowserSpec = nodeEnv === 'browser-spec';
-const processPlugins = {
-   'production': productionPlugins, 'browser-spec': browserSpecPlugins }[ nodeEnv ] || ( _ => _ );
+const processPlugins = { 'browser-spec': browserSpecPlugins }[ nodeEnv ] || ( _ => _ );
 
-const publicPath = isProduction ? '/var/dist/' : '/var/build/';
+const publicPath = '/var/dist/';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +26,7 @@ const config = {
    output: {
       path: path.resolve( `./${publicPath}` ),
       publicPath: publicPath.substr(1),
-      filename: isProduction ? '[name].bundle.min.js' : '[name].bundle.js'
+      filename: '[name].bundle.js'
    },
 
    plugins: processPlugins( basePlugins().concat( reactPlugins() ) ),
@@ -61,13 +59,12 @@ const config = {
             exclude: /(node_modules)/,
             loader: 'laxar-mocks/spec-loader'
          },
-
          {  // load styles, images and fonts with the file-loader
             // (out-of-bundle in var/build/assets/)
             test: /\.(gif|jpe?g|png|ttf|woff2?|svg|eot|otf)(\?.*)?$/,
             loader: 'file-loader',
             options: {
-               name: isProduction ? 'assets/[name]-[sha1:hash:8].[ext]' : 'assets/[name].[ext]'
+               name: 'assets/[name].[ext]'
             }
          },
          {  // ... after optimizing graphics with the image-loader ...
@@ -77,9 +74,7 @@ const config = {
          {  // ... and resolving CSS url()s with the css loader
             // (extract-loader extracts the CSS string from the JS module returned by the css-loader)
             test: /\.(css|s[ac]ss)$/,
-            loader: isProduction ?
-               ExtractTextPlugin.extract( { fallbackLoader: 'style-loader', loader: 'css-loader' } ) :
-               'style-loader!css-loader'
+            loader: 'style-loader!css-loader'
          },
          {  // load scss files by precompiling with the sass-loader
             test: /\/default.theme\/.*\.s[ac]ss$/,
@@ -126,19 +121,6 @@ if( isBrowserSpec ) {
 }
 
 module.exports = config;
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function productionPlugins( plugins ) {
-   return plugins.concat( [
-      new webpack.SourceMapDevToolPlugin( { filename: '[name].bundle.min.js.map' } ),
-      new webpack.optimize.UglifyJsPlugin( {
-         compress: { warnings: false },
-         sourceMap: true
-      } ),
-      new ExtractTextPlugin( { filename: '[name].bundle.css' } )
-   ] );
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

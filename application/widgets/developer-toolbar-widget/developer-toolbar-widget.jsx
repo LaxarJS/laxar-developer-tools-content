@@ -20,8 +20,7 @@ const injections = [
 ];
 function create( context, eventBus, reactRender, flowService, areaHelper, axVisibility) {
    'use strict';
-   const HINT_NO_LAXAR_EXTENSION = 'Reload page to enable LaxarJS developer tools!';
-   const HINT_DISABLE_TOGGLE_GRID = 'Configure grid settings in application to enable this feature!';
+   const HINT_NO_LAXAR_EXTENSION = 'No LaxarJS application in main window!';
    const HINT_NO_LAXAR_ANYMORE_WIDGET = 'Cannot access LaxarJS host window (or tab).' +
                                        ' Reopen laxar-developer-tools from LaxarJS host window.';
    const HINT_CONFIGURE_GRID = 'Configure grid settings in application to enable this feature!';
@@ -38,7 +37,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       activeTab: TABS[ 0 ],
       gridOverlay: false,
       widgetOverlay: false,
-      toggleGridTitle: HINT_DISABLE_TOGGLE_GRID,
+      toggleGridTitle: HINT_CONFIGURE_GRID,
       noLaxar: HINT_NO_LAXAR_EXTENSION
    };
 
@@ -132,7 +131,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       render();
    } );
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function onClickToggleGrid() {
       if( !context.resources.grid ){ return; }
@@ -141,7 +140,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       render();
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function onClickToggleWidgetOutline() {
       toggleWidgetOutline();
@@ -149,7 +148,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       render();
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function toggleGrid() {
       if( window.opener ) {
@@ -168,7 +167,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       }
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function toggleWidgetOutline() {
       if( window.opener ) {
@@ -223,29 +222,32 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
                areaName={ tab.name }
                cssClassName="app-tab app-tab-page"
                axAreaHelper={ areaHelper }
-               visible={ model.activeTab.name === tab.name }
+               visible={ model.laxar && model.activeTab.name === tab.name }
                axVisibility={ axVisibility }
             />
          );
       } );
 
-      const tabListItems = model.tabs.map( tab => {
-         const url = flowService.constructAbsoluteUrl( 'tools', { 'tab': tab.name } );
-         if( model.activeTab && model.activeTab.name === tab.name ) {
+      let tabListItems = '';
+      if( model.laxar ) {
+         tabListItems = model.tabs.map( tab => {
+            const url = flowService.constructAbsoluteUrl( 'tools', { 'tab': tab.name } );
+            if( model.activeTab && model.activeTab.name === tab.name ) {
+               return (
+                  <li key={tab.name} className='ax-active'
+                  ><a href={url}
+                  >{tab.label}</a></li>
+               );
+            }
+
             return (
-               <li key={tab.name} className='ax-active'
-                  ><a href={url}
-                  >{tab.label}</a></li>
-            );
-         }
-
-         return (
                <li key={tab.name}
-                  ><a href={url}
-                  >{tab.label}</a></li>
-         );
+               ><a href={url}
+               >{tab.label}</a></li>
+            );
 
-      } );
+         } );
+      }
 
       const navTab = (
          <ul className="nav nav-tabs" role="tablist">
@@ -254,7 +256,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
                    href="http://www.laxarjs.org/docs"
                    target="_blank" />
             </li>
-            { tabListItems }
+            { model.laxar === true && tabListItems }
             { model.laxar === false &&
                <li className="developer-toolbar-hint">{ model.noLaxar }</li>
             }
@@ -265,7 +267,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
          <div>
             { optionButtons }
             { navTab }
-            { model.laxar && widgetAreas }
+            { widgetAreas }
          </div>
       );
    }

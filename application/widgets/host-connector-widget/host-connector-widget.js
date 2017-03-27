@@ -17,6 +17,9 @@ export function create( context, eventBus ) {
    const lastIndexByStream = {};
    let isLaxarApplication;
    const isBrowserWebExtension = ( window.chrome && chrome.runtime && chrome.runtime.id );
+
+   let gridResource = {};
+
    // If the development server is used and we don't want the development window to be reloaded each
    // time something changes during development, we shutdown live reload here.
    if( window.LiveReload && !context.features.development.liveReload ) {
@@ -96,6 +99,7 @@ export function create( context, eventBus ) {
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function publishGridSettings( channelGridSettings ) {
+      if( JSON.stringify( gridResource ) === JSON.stringify( channelGridSettings ) ) { return; }
       let data = channelGridSettings;
       if( !channelGridSettings ) {
          data = null;
@@ -104,6 +108,7 @@ export function create( context, eventBus ) {
          resource: context.features.grid.resource,
          data
       } );
+      gridResource = data;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////

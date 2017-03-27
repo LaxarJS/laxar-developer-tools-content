@@ -120,7 +120,7 @@ function create( context, eventBus, reactRender ) {
          }
       }
 
-      if( visible ) {
+      if( visible && context.resources.pageInfo ) {
          // setTimeout: used to ensure that the browser shows the spinner before stalling for layout
          viewModelCalculation = viewModelCalculation || setTimeout( () => {
             const pageTypes = types();
