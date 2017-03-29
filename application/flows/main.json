@@ -2,11 +2,11 @@
    "places": {
       "entry": {
          "patterns": [ "/" ],
-         "redirectTo": "tools"
+         "redirectToPath": "/tools"
       },
 
       "tools": {
-         "patterns": [ "/tools/:tabId",  "/tools" ],
+         "patterns": [ "/tools/:tab",  "/tools" ],
          "page":  "tools"
       }
    }

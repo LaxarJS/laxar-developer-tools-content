@@ -65,10 +65,17 @@
 /******/ 		if(installedChunks[chunkId] === 0)
 /******/ 			return Promise.resolve();
 /******/
-/******/ 		// an Promise means "currently loading".
+/******/ 		// a Promise means "currently loading".
 /******/ 		if(installedChunks[chunkId]) {
 /******/ 			return installedChunks[chunkId][2];
 /******/ 		}
+/******/
+/******/ 		// setup Promise in chunk cache
+/******/ 		var promise = new Promise(function(resolve, reject) {
+/******/ 			installedChunks[chunkId] = [resolve, reject];
+/******/ 		});
+/******/ 		installedChunks[chunkId][2] = promise;
+/******/
 /******/ 		// start chunk loading
 /******/ 		var head = document.getElementsByTagName('head')[0];
 /******/ 		var script = document.createElement('script');
@@ -93,13 +100,8 @@
 /******/ 				installedChunks[chunkId] = undefined;
 /******/ 			}
 /******/ 		};
-/******/
-/******/ 		var promise = new Promise(function(resolve, reject) {
-/******/ 			installedChunks[chunkId] = [resolve, reject];
-/******/ 		});
-/******/ 		installedChunks[chunkId][2] = promise;
-/******/
 /******/ 		head.appendChild(script);
+/******/
 /******/ 		return promise;
 /******/ 	};
 /******/
@@ -142,7 +144,7 @@
 /******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 469);
+/******/ 	return __webpack_require__(__webpack_require__.s = 467);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -998,14 +1000,14 @@ module.exports = ReactPropTypesSecret;
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(true)
-		module.exports = factory(__webpack_require__(354));
+		module.exports = factory(__webpack_require__(355));
 	else if(typeof define === 'function' && define.amd)
-		define("laxar", ["page"], factory);
+		define("laxar", ["navigo"], factory);
 	else if(typeof exports === 'object')
-		exports["laxar"] = factory(require("page"));
+		exports["laxar"] = factory(require("navigo"));
 	else
-		root["laxar"] = factory(root["page"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_33__) {
+		root["laxar"] = factory(root["navigo"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_31__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1071,7 +1073,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -2005,15 +2007,20 @@ function create(page, log) {
     *    the area name as used in the page definition
     * @param {HTMLElement} element
     *    an HTML element representing the widget area
+    * @param {String} [localName]
+    *    the area name as used within the widget. Defaults to the qualified `name`
     *
     * @return {Function}
     *    removes the according area from the registry again
     */
-   function register(name, element) {
+   function register(name, element, localName) {
       if (name in areaToElement) {
-         throw new Error('The area "' + name + '" is defined twice in the current layout.');
+         throw new Error('The area "' + name + '" is defined twice.');
       }
 
+      if (!element.hasAttribute('data-ax-widget-area') && !element.hasAttribute('ax-widget-area')) {
+         element.setAttribute('data-ax-widget-area', localName || name);
+      }
       areaToElement[name] = element;
       if (freeToAttach && isVisible(name)) {
          attachWaitingAdapters(name);
@@ -3071,41 +3078,34 @@ function bootstrap(artifacts, _ref) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_page__ = __webpack_require__(33);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_page___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_page__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__configuration__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__browser__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__log__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__runtime_event_bus__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__adapter_utilities__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__artifact_provider__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__loaders_control_loader__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__loaders_css_loader__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__loaders_layout_loader__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__loaders_page_loader__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__loaders_theme_loader__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__loaders_widget_loader__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__storage__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__timer__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__flow_controller__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__flow_service__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__heartbeat__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__page_service__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__pagejs_router__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__locale_event_manager__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__visibility_event_manager__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__widget_services__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__tooling_tooling__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__configuration__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__browser__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__log__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__adapter_utilities__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__artifact_provider__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__storage__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__timer__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__flow_controller__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__flow_service__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__heartbeat__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__navigo_router__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__page_service__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__locale_event_manager__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__widget_services__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__tooling_tooling__ = __webpack_require__(30);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 /**
  * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
-
-
-
 
 
 
@@ -3138,8 +3138,8 @@ function create(configurationSource, assets) {
          query: {
             enabled: false
          }
-         // 'pagejs' is not configured here:
-         // any deviation from the page.js library defaults must be set by the application
+         // 'navigo' is not configured here:
+         // any deviation from the Navigo library defaults must be set by the application
       },
       flow: {
          entryPoint: {
@@ -3166,61 +3166,58 @@ function create(configurationSource, assets) {
       }
    };
 
-   var adapterUtilities = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__adapter_utilities__["a" /* create */])();
+   var adapterUtilities = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__adapter_utilities__["a" /* create */])();
 
-   var configuration = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__configuration__["a" /* create */])(configurationSource, configurationDefaults);
+   var configuration = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__configuration__["a" /* create */])(configurationSource, configurationDefaults);
 
-   var browser = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__browser__["a" /* create */])();
-   var log = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__log__["a" /* create */])(configuration, browser);
-   var collectors = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_24__tooling_tooling__["a" /* createCollectors */])(configuration, log);
+   var browser = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__browser__["a" /* create */])();
+   var log = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__log__["a" /* create */])(configuration, browser);
+   var collectors = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__tooling_tooling__["a" /* createCollectors */])(configuration, log);
 
-   var storage = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_14__storage__["a" /* create */])(configuration, browser);
-   var timer = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_15__timer__["a" /* create */])(log, storage);
+   var storage = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_11__storage__["a" /* create */])(configuration, browser);
+   var timer = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__timer__["a" /* create */])(log, storage);
 
-   var artifactProvider = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__artifact_provider__["a" /* create */])(assets, browser, configuration, log);
+   var artifactProvider = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__artifact_provider__["a" /* create */])(assets, browser, configuration, log);
 
-   var heartbeat = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_18__heartbeat__["a" /* create */])();
+   var heartbeat = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_15__heartbeat__["a" /* create */])();
 
    // MSIE Bug we have to wrap setTimeout to pass assertion
    var timeoutFn = function timeoutFn(f, t) {
       return setTimeout(f, t);
    };
-   var globalEventBus = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__runtime_event_bus__["a" /* create */])(configuration, log, heartbeat.onNext, timeoutFn);
+   var globalEventBus = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__["a" /* create */])(configuration, log, heartbeat.onNext, timeoutFn);
 
-   var cssLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__loaders_css_loader__["a" /* create */])();
-   var themeLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__loaders_theme_loader__["a" /* create */])(artifactProvider, cssLoader);
-   var layoutLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__loaders_layout_loader__["a" /* create */])(artifactProvider, cssLoader);
-   var pageLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_11__loaders_page_loader__["a" /* create */])(artifactProvider, collectors.pages);
-   var controlLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__loaders_control_loader__["a" /* create */])(artifactProvider, cssLoader);
+   var layoutLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__["a" /* create */])(artifactProvider);
+   var pageLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__["a" /* create */])(artifactProvider, collectors.pages);
+   var controlLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__["a" /* create */])(artifactProvider);
    var widgetServices = {
       forWidget: function forWidget() {
-         __WEBPACK_IMPORTED_MODULE_1__utilities_assert__["a" /* default */].codeIsUnreachable('Using widget services before they are available');
+         __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].codeIsUnreachable('Using widget services before they are available');
       }
    };
-   var widgetLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__loaders_widget_loader__["a" /* create */])(log, artifactProvider, controlLoader, cssLoader, collectors.pages, function () {
+   var widgetLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__["a" /* create */])(log, artifactProvider, controlLoader, collectors.pages, function () {
       var _widgetServices;
 
       return (_widgetServices = widgetServices).forWidget.apply(_widgetServices, arguments);
    });
 
-   var localeManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__locale_event_manager__["a" /* create */])(globalEventBus, configuration);
-   var visibilityManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_22__visibility_event_manager__["a" /* create */])(globalEventBus);
-   var pageService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_19__page_service__["a" /* create */])(globalEventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, collectors.pages, log);
+   var localeManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_18__locale_event_manager__["a" /* create */])(globalEventBus, configuration);
+   var visibilityManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__["a" /* create */])(globalEventBus);
+   var pageService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_17__page_service__["a" /* create */])(globalEventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, collectors.pages, log);
 
-   var router = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_20__pagejs_router__["a" /* create */])(__WEBPACK_IMPORTED_MODULE_0_page___default.a, browser, configuration);
+   var router = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_16__navigo_router__["a" /* create */])(browser, configuration);
 
-   var flowController = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_16__flow_controller__["a" /* create */])(artifactProvider, configuration, globalEventBus, log, pageService, router, timer);
-   var flowService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_17__flow_service__["a" /* create */])(flowController);
+   var flowController = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__flow_controller__["a" /* create */])(artifactProvider, configuration, globalEventBus, log, pageService, router, timer);
+   var flowService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_14__flow_service__["a" /* create */])(flowController);
 
-   var toolingProviders = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_24__tooling_tooling__["b" /* createProviders */])(collectors);
+   var toolingProviders = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__tooling_tooling__["b" /* createProviders */])(collectors);
 
-   widgetServices = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_23__widget_services__["a" /* create */])(artifactProvider, configuration, controlLoader, globalEventBus, flowService, log, heartbeat, pageService, storage, toolingProviders);
+   widgetServices = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_20__widget_services__["a" /* create */])(artifactProvider, configuration, controlLoader, globalEventBus, flowService, log, heartbeat, pageService, storage, toolingProviders);
 
    return {
       adapterUtilities: adapterUtilities,
       artifactProvider: artifactProvider,
       configuration: configuration,
-      cssLoader: cssLoader,
       flowController: flowController,
       flowService: flowService,
       globalEventBus: globalEventBus,
@@ -3229,7 +3226,6 @@ function create(configurationSource, assets) {
       log: log,
       pageService: pageService,
       storage: storage,
-      themeLoader: themeLoader,
       timer: timer,
       toolingProviders: toolingProviders,
       widgetLoader: widgetLoader
@@ -3257,7 +3253,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
  */
 
 
-function create(artifactProvider, cssLoader) {
+function create(artifactProvider) {
 
    var notDeclaredMessage = 'Tried to load control reference [0] without declaration in widget.json.\nDetails: [1]';
    var errorInfoLink = 'https://github.com/LaxarJS/laxar/blob/master/docs/manuals/providing_controls.md#compatibility';
@@ -3320,7 +3316,6 @@ function create(artifactProvider, cssLoader) {
     */
    function load(controlRef) {
       var _artifactProvider$for = artifactProvider.forControl(controlRef),
-          assetUrlForTheme = _artifactProvider$for.assetUrlForTheme,
           descriptor = _artifactProvider$for.descriptor,
           module = _artifactProvider$for.module;
 
@@ -3333,66 +3328,13 @@ function create(artifactProvider, cssLoader) {
 
          aliases[controlRef] = name;
          modules[name] = module;
-         return assetUrlForTheme(descriptor.styleSource || 'css/' + name + '.css').then(function (url) {
-            if (url) {
-               cssLoader.load(url);
-            }
-         }).then(function () {
-            return descriptor;
-         });
+         return descriptor;
       });
    }
 }
 
 /***/ }),
 /* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-function create() {
-   var mergedCssFileLoaded = Array.from(document.getElementsByTagName('link')).some(function (link) {
-      return link.hasAttribute('data-ax-merged-css');
-   });
-
-   if (mergedCssFileLoaded) {
-      return {
-         load: function load() {}
-      };
-   }
-
-   var loadedFiles = [];
-   return {
-      /**
-       * If not already loaded, loads the given file into the current page by appending a `link` element to
-       * the document's `head` element.
-       *
-       * @param {String} url
-       *    the url of the css file to load. If `null`, loading is skipped
-       */
-      load: function load(url) {
-         if (!loadedFiles.includes(url)) {
-            var element = document.createElement('link');
-            element.type = 'text/css';
-            element.id = 'cssLoaderStyleSheet' + loadedFiles.length;
-            element.rel = 'stylesheet';
-            element.href = url;
-            document.getElementsByTagName('head')[0].appendChild(element);
-
-            loadedFiles.push(url);
-         }
-      }
-   };
-}
-
-/***/ }),
-/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3405,36 +3347,30 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
  * http://laxarjs.org/license
  */
 
-function create(artifactProvider, cssLoader) {
+function create(artifactProvider) {
    return {
       load: function load(layoutRef) {
          var _artifactProvider$for = artifactProvider.forLayout(layoutRef),
              descriptor = _artifactProvider$for.descriptor,
-             assetForTheme = _artifactProvider$for.assetForTheme,
-             assetUrlForTheme = _artifactProvider$for.assetUrlForTheme;
+             assetForTheme = _artifactProvider$for.assetForTheme;
 
          return descriptor().then(function (_ref) {
             var name = _ref.name,
-                templateSource = _ref.templateSource,
-                styleSource = _ref.styleSource;
-            return Promise.all([assetForTheme(templateSource || name + ".html"), assetUrlForTheme(styleSource || "css/" + name + ".css"), Promise.resolve(name)]);
+                templateSource = _ref.templateSource;
+            return Promise.all([Promise.resolve(name), assetForTheme(templateSource || name + ".html")]);
          }).then(function (_ref2) {
-            var _ref3 = _slicedToArray(_ref2, 3),
-                html = _ref3[0],
-                cssUrl = _ref3[1],
-                name = _ref3[2];
+            var _ref3 = _slicedToArray(_ref2, 2),
+                name = _ref3[0],
+                html = _ref3[1];
 
-            if (cssUrl) {
-               cssLoader.load(cssUrl);
-            }
-            return { name: name, className: name + "-layout", html: html };
+            return { name: name, html: html, className: name + "-layout" };
          });
       }
    };
 }
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3495,37 +3431,12 @@ function create(artifactProvider, pagesCollector) {
 }
 
 /***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-function create(artifactProvider, cssLoader) {
-   return {
-      load: function load() {
-         var themeProvider = artifactProvider.forTheme();
-         themeProvider.descriptor(function (descriptor) {
-            return themeProvider.assetUrl(descriptor.styleSource || 'css/theme.css').then(cssLoader.load);
-         });
-      }
-   };
-}
-
-/***/ }),
-/* 13 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_string__ = __webpack_require__(2);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 /**
  * Copyright 2016 aixigo AG
  * Released under the MIT license.
@@ -3555,8 +3466,6 @@ var noOp = function noOp() {};
  *    an artifact provider for looking up widget descriptors and assets
  * @param {ControlLoader} controlLoader
  *    helps loading controls and their assets
- * @param {CssLoader} cssLoader
- *    helps loading widget- and control-stylesheets during development
  * @param {PagesCollector} pagesCollector
  *    used for inspection tools
  * @param {Function} servicesForWidget
@@ -3565,7 +3474,7 @@ var noOp = function noOp() {};
  * @return {WidgetLoader}
  *    a new widget loader
  */
-function create(log, artifactProvider, controlLoader, cssLoader, pagesCollector, servicesForWidget) {
+function create(log, artifactProvider, controlLoader, pagesCollector, servicesForWidget) {
 
    var widgetAdapters = {};
 
@@ -3700,25 +3609,11 @@ function create(log, artifactProvider, controlLoader, cssLoader, pagesCollector,
     * @private
     */
    function loadAssets(widgetDescriptor, _ref2) {
-      var assetForTheme = _ref2.assetForTheme,
-          assetUrlForTheme = _ref2.assetUrlForTheme;
+      var assetForTheme = _ref2.assetForTheme;
       var type = widgetDescriptor.integration.type,
           name = widgetDescriptor.name;
 
-      if (type === TYPE_ACTIVITY) {
-         return Promise.resolve(null);
-      }
-
-      return Promise.all([assetForTheme(widgetDescriptor.templateSource || name + '.html'), assetUrlForTheme(widgetDescriptor.styleSource || 'css/' + name + '.css')]).then(function (_ref3) {
-         var _ref4 = _slicedToArray(_ref3, 2),
-             html = _ref4[0],
-             cssUrl = _ref4[1];
-
-         if (cssUrl) {
-            cssLoader.load(cssUrl);
-         }
-         return html;
-      });
+      return type === TYPE_ACTIVITY ? Promise.resolve(null) : assetForTheme(widgetDescriptor.templateSource || name + '.html');
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3748,7 +3643,7 @@ function throwError(widgetConfiguration, message) {
 }
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3780,9 +3675,9 @@ function create() {
    *
    * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
    * application bootstrapping configuration. The configuration values are passed to
-   * {@link laxar#bootstrap()} on startup (before LaxarJS v2.x, these configuration values were read from
+   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
    * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
-   * file `application/application.js` under your project's root directory.
+   * file `init.js` under your project's root directory.
    *
    * @name AdapterUtilities
    * @constructor
@@ -3792,6 +3687,8 @@ function create() {
     /**
      * Creates (but does not throw) an error indicating that an activity tried accessing the DOM.
      *
+     * @param {Object} details
+     *    details for the error
      * @param {String} details.technology
      *    the complaining adapter's technology
      * @param {String} details.widgetName
@@ -3812,6 +3709,8 @@ function create() {
      * Creates (but does not throw) an error indicating that a widget requested an injection that cannot be
      * provided by the adapter.
      *
+     * @param {Object} details
+     *    details for the error
      * @param {String} details.technology
      *    the complaining adapter's technology
      * @param {String} details.injection
@@ -3835,6 +3734,8 @@ function create() {
      * Creates (but does not throw) an error indicating that a widget was not registered with the current
      * adapter.
      *
+     * @param {Object} details
+     *    details for the error
      * @param {String} details.technology
      *    the complaining adapter's technology
      * @param {String} details.widgetName
@@ -3853,7 +3754,7 @@ function create() {
 }
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4002,7 +3903,7 @@ function create(artifacts, browser, configuration, log) {
 }
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4164,7 +4065,7 @@ function create() {
 }
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4194,9 +4095,9 @@ function create(source, defaults) {
    *
    * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
    * application bootstrapping configuration. The configuration values are passed to
-   * {@link laxar#bootstrap()} on startup (before LaxarJS v2.x, these configuration values were read from
+   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
    * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
-   * file `application/application.js` under your project's root directory.
+   * file `init.js` under your project's root directory.
    *
    * @name Configuration
    * @constructor
@@ -4220,7 +4121,7 @@ function create(source, defaults) {
    * ```
    *
    * @param {String} key
-   *    a  path (using `.` as separator) to the property in the configuration object
+   *    a path (using `.` as separator) to the property in the configuration object
    * @param {*} [optionalDefault]
    *    the value to return if no value was set for `key`
    *
@@ -4249,7 +4150,7 @@ function create(source, defaults) {
    * ```
    *
    * @param {String} key
-   *    a  path (using `.` as separator) to the property in the configuration object
+   *    a path (using `.` as separator) to the property in the configuration object
    *
    * @return {*}
    *    the configured value (if `undefined` or `null`, an exception is thrown instead)
@@ -4264,7 +4165,7 @@ function create(source, defaults) {
 }
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4920,7 +4821,7 @@ function create(configuration, log, nextTick, timeoutFunction, errorHandler) {
 }
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5010,14 +4911,17 @@ function create(artifactProvider, configuration, eventBus, log, pageService, rou
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    /**
-    * Starts loading the configured flow definition and configures the router.
+    * Load the given flow definition and configure the router.
+    *
+    * @param {String} name
+    *    name of the flow to load
     *
     * @return {Promise}
     *    a promise that is resolved when all routes have been registered
     */
-   function loadFlow() {
-      var flowName = configuration.ensure('flow.name');
-      return artifactProvider.forFlow(flowName).definition().then(function (flow) {
+   function loadFlow(name) {
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+      return artifactProvider.forFlow(name).definition().then(function (flow) {
          return router.registerRoutes(assembleRoutes(flow), createFallbackHandler(flow));
       });
    }
@@ -5232,7 +5136,7 @@ function equals(a, b) {
 }
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5252,7 +5156,7 @@ function equals(a, b) {
  */
 
 /**
- * Creates a flow service  backed by the given flow controller.
+ * Creates a flow service backed by the given flow controller.
  *
  * @param {FlowController} flowController
  *    a flow controller, needed to respect default parameter values when generating URLs
@@ -5300,7 +5204,7 @@ function create(flowController) {
 }
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5481,7 +5385,7 @@ function create(customNextTick, customTimeout) {
 }
 
 /***/ }),
-/* 22 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5526,7 +5430,7 @@ function create(areaHelper, className, widget) {
 
       var areas = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__area_helper__["b" /* findWidgetAreas */])(layoutNode);
       var deregisterFuncs = Object.keys(areas).map(function (areaName) {
-         return areaHelper.register(widget.id + '.' + areaName, areas[areaName]);
+         return areaHelper.register(widget.id + '.' + areaName, areas[areaName], areaName);
       });
       deregister = function deregister() {
          return deregisterFuncs.forEach(function (func) {
@@ -5558,7 +5462,7 @@ function create(areaHelper, className, widget) {
 }
 
 /***/ }),
-/* 23 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5637,13 +5541,356 @@ function create(eventBus, configuration) {
 }
 
 /***/ }),
-/* 24 */
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_navigo__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_navigo___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_navigo__);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * Module providing the Navigo router factory.
+ *
+ * @module navigo_router
+ */
+
+
+var ROUTE_PARAM_MATCHER = /\/:([^/?(]+)?/g;
+var TRAILING_SEGMENTS_MATCHER = /\/(_\/)*_?$/;
+
+/**
+ * Creates and returns a new Navigo router instance from its dependencies.
+ *
+ * @param {Browser} browser
+ *    the browser, used to determine the document base href
+ * @param {Configuration} configuration
+ *    the configuration instance, used to lookup router configuration as described above
+ * @param {Function} [Navigo]
+ *    a Navigo constructor or mock to use instead of the original implementation. Intended for testing only
+ *
+ * @return {NavigoRouter}
+ *    a router instance that will route as soon as `registerRoutes` is invoked
+ *
+ * @private
+ */
+function create(browser, configuration) {
+   var Navigo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : __WEBPACK_IMPORTED_MODULE_0_navigo___default.a;
+
+
+   var useHash = configuration.get('router.navigo.useHash', false);
+   var hash = configuration.get('router.navigo.hash', '#');
+   var queryEnabled = configuration.ensure('router.query.enabled');
+
+   var absoluteBase = function () {
+      if (useHash) {
+         return null;
+      }
+      var base = configuration.get('router.base') || fallbackBase();
+      var origin = originFromLocation(browser.location());
+      return browser.resolve(base, origin).replace(/\/$/, '');
+   }();
+
+   var router = new Navigo(absoluteBase, useHash, hash);
+
+   /**
+    * Router implementation based on [Navigo](https://github.com/krasimir/navigo).
+    *
+    * This router allows to register flow patterns in Navigo syntax so that their handler is activated when
+    * the corresponding URL is entered in the browser. While that alone does not add much to the
+    * functionality built into Navigo, this router also allows to construct URLs based on a pattern and
+    * corresponding substitution parameters. Finally, users can trigger navigation directly.
+    *
+    * Note that the router supports various configuration options:
+    *
+    *  - `router.navigo`: configuration object that is directly passed to Navigo (such as `useHash`). The
+    *    application is responsible for specifying the required options, as LaxarJS does not touch the Navigo
+    *    defaults otherwise. Consult the Navigo documentation for more information
+    *  - `router.query.enabled`: if `true`, query parameters are automatically transformed into additional
+    *    place parameters and vice versa. The default is `false`
+    *  - `router.base`: The base path under which to perform routing. If omitted, the document base href is
+    *    used
+    *
+    * Note that this router encodes/decodes certain parameters in a way that is different from Navigo:
+    *
+    *  - when the value `null` is encoded into a URL path segment, it is encoded as `_`
+    *  - the value `/` is double-encoded
+    *
+    * @name NavigoRouter
+    * @constructor
+    */
+   return {
+      registerRoutes: registerRoutes,
+      navigateTo: navigateTo,
+      navigateToPath: navigateToPath,
+      constructAbsoluteUrl: constructAbsoluteUrl
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Registers all routes defined in the given route map, as well as a fallback route that should be used
+    * when none of the other routes match. Also causes the initial route to be triggered.
+    *
+    * @param {Object.<String, Function>} routeMap
+    *    a map of routing patterns in Navigo syntax to the corresponding handler functions. When invoked,
+    *    the handler functions will receive the decoded parameter values for their pattern and (if configured)
+    *    from the query string, as a map from string parameter name to string value
+    * @param {Function} fallbackHandler
+    *    a handler that is invoked when none of the configured routes match. It receives the failed location
+    *    href as a string argument
+    *
+    * @memberof NavigoRouter
+    */
+   function registerRoutes(routeMap, fallbackHandler) {
+      var emptyHashRouteHandler = null;
+      if (useHash && '/' in routeMap) {
+         emptyHashRouteHandler = routeMap['/'];
+         delete routeMap['/'];
+      }
+      var preparedRoutes = Object.keys(routeMap).reduce(function (routes, pattern) {
+         return Object.assign({}, routes, _defineProperty({}, pattern, function (params, querystring) {
+            routeMap[pattern](collectParameters(params, querystring));
+         }));
+      }, {});
+
+      router.on(preparedRoutes).on('*', function (querystring) {
+         if (emptyHashRouteHandler) {
+            var _browser$location = browser.location(),
+                _hash = _browser$location.hash;
+
+            if (['', _hash, _hash + '/'].indexOf(_hash) !== -1) {
+               emptyHashRouteHandler(collectParameters({}, querystring));
+               return;
+            }
+         }
+         fallbackHandler(browser.location().href);
+      }).resolve();
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Change the browser location to a different routable URL, from pattern and parameters. This is also
+    * called reverse-routing.
+    *
+    * @param {String[]} patterns
+    *    a list of patterns to choose from. This allows the router to pick the "best" pattern, such as the
+    *    pattern containing the largest number of given parameters. This router always picks the first pattern
+    *    for now
+    * @param {Object} parameters
+    *    parameter values to substitute into the pattern to generate a URL
+    * @param {Boolean} [replaceHistory=true]
+    *    if `true`, the current history entry is replaced with the new one, otherwise a new entry is pushed.
+    *    Useful to express redirects
+    *
+    * @memberof NavigoRouter
+    */
+   function navigateTo(patterns, parameters) {
+      var replaceHistory = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      navigateToPath(constructPath(patterns, parameters), replaceHistory);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Change the browser location to a different routable URL, from a complete path. This is also
+    * called reverse-routing.
+    *
+    * @param {String} path
+    *    the complete path to navigate to. This includes values for all relevant parameters
+    * @param {Boolean} [replaceHistory=true]
+    *    if `true`, the current history entry is replaced with the new one, otherwise a new entry is pushed.
+    *    Useful to express redirects
+    *
+    * @memberof NavigoRouter
+    */
+   function navigateToPath(path) {
+      var replaceHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (!replaceHistory) {
+         router.navigate(path);
+         return;
+      }
+
+      // Navigo uses replaceState only if the router is paused. Alas, if the router is paused, routes will no
+      // longer be resolved. Hence, we call resolve again manually after changing history and the location.
+      router.pause();
+      router.navigate(path);
+      router.resume();
+      router.resolve();
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Create a routable URL, from pattern and parameters. This allows to create link-hrefs without repeating
+    * URL patterns throughout the code base.
+    *
+    * @param {Array<String>} patterns
+    *    a list of patterns to choose from. This allows the router to pick the "best" pattern, such as the
+    *    pattern containing the largest number of given parameters. This router always picks the first pattern
+    *    for now
+    * @param {Object} parameters
+    *    parameter values to substitute into the pattern to generate a URL
+    *
+    * @return {String} the resulting URL, including schema and host
+    *
+    * @memberof NavigoRouter
+    */
+   function constructAbsoluteUrl(patterns, parameters) {
+      return router.link((useHash ? hash : '') + constructPath(patterns, parameters));
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function constructPath(patterns, parameters) {
+      var bestPattern = patterns[0];
+      var remainingParameters = Object.assign({}, parameters);
+      var path = bestPattern.replace(ROUTE_PARAM_MATCHER, function ($0, $param) {
+         var replacement = encodeSegment(parameters[$param]);
+         delete remainingParameters[$param];
+         return '/' + replacement;
+      }).replace(TRAILING_SEGMENTS_MATCHER, '/');
+
+      if (queryEnabled) {
+         var query = Object.keys(remainingParameters).map(function (parameterName) {
+            var value = remainingParameters[parameterName];
+            var encodedKey = encodeURIComponent(parameterName);
+            if (value === true) {
+               return encodedKey;
+            }
+            if (value === false || value == null) {
+               return null;
+            }
+            return encodedKey + '=' + encodeURIComponent(value);
+         }).filter(function (_) {
+            return _;
+         });
+
+         if (query.length) {
+            return path + '?' + query.join('&');
+         }
+      }
+
+      return path;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function collectParameters(params, querystring) {
+      var parameters = {};
+      if (queryEnabled && querystring && querystring.length) {
+         querystring.split('&').map(function (_) {
+            return _.split('=').map(decodeURIComponent);
+         }).forEach(function (_ref) {
+            var _ref2 = _slicedToArray(_ref, 2),
+                key = _ref2[0],
+                value = _ref2[1];
+
+            parameters[key] = value !== undefined ? value : true;
+         });
+      }
+      Object.keys(params || {}).forEach(function (key) {
+         parameters[key] = decodeSegment(params[key]);
+      });
+      return parameters;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Encode a parameter value for use as path segment(s) in routing.
+    *
+    * Usually, values are simply URL-encoded, but there are special cases:
+    *
+    *  - `null` and `undefined` are encoded as '_',
+    *  - other non-string values are converted to strings before URL encoding,
+    *  - slashes ('/') are double-encoded to '%252F', so that Navigo ignores them during route matching,
+    *  - underscore ('_') is double-encoded to '%255F', to avoid confusion with '_' (null).
+    *
+    * When decoded, for use in didNavigate events, the original values will be restored, except for:
+    *  - non-string input values, which will always be decoded into strings,
+    *  - `undefined` values which will be decoded to `null`.
+    *
+    * @param {*} value
+    *   the parameter to encode
+    * @return {String}
+    *   the encoded value, for use as a path segment in URLs
+    *
+    * @private
+    */
+   function encodeSegment(value) {
+      if (value == null) {
+         return '_';
+      }
+      var urlSegment = encodeURIComponent(value).replace(/_/g, '%255F');
+      return urlSegment.replace(/%2F/g, '%252F');
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Decodes a place parameter value from a path segment, to restore it for use in will/didNavigate events.
+    *
+    * Usually, this reverses the application of {#encodeSegment} after the browser has decoded a URL, except:
+    *  - path-segments based on non-string input values, which will always be decoded into strings,
+    *  - path-segments based on `undefined` values which will be decoded to `null`.
+    *
+    * Note that while the browser has already performed URL-decoding, this function replaces `%2F` into `/`
+    * and `%5F` to `_`, to be compatible with the double-encoding performaed by {#encodeSegment}.
+    *
+    * @param {String} value
+    *   the encoded parameter segment to decode
+    * @return {String}
+    *   the decoded value, for use as a path segment in URLs
+    *
+    * @private
+    */
+   function decodeSegment(value) {
+      if (value === '_' || value == null) {
+         return null;
+      }
+      var segment = decodeURIComponent(value).replace(/%5F/g, '_');
+      return segment.replace(/%2F/g, '/');
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function fallbackBase() {
+      // relies on the HTML `base` element being present
+      var documentBase = browser.resolve('.').replace(/\/$/, '');
+      return documentBase;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function originFromLocation(_ref3) {
+      var protocol = _ref3.protocol,
+          hostname = _ref3.hostname,
+          port = _ref3.port;
+
+      return protocol + '://' + hostname + (port ? ':' + port : '');
+   }
+}
+
+/***/ }),
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__area_helper__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__layout_widget_adapter__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__layout_widget_adapter__ = __webpack_require__(20);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -5813,12 +6060,10 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
             }
 
             var node = document.createElement('div');
-            // We only set the attribute here for debugging purposes
-            node.setAttribute('ax-widget-area', area.name);
             if (area.hidden) {
                node.style.display = 'none';
             }
-            deregisterFuncs.push(areaHelper.register(area.name, node));
+            deregisterFuncs.push(areaHelper.register(area.name, node, area.name));
             pageElement.appendChild(node);
          });
 
@@ -5873,340 +6118,7 @@ function delay(ms) {
 }
 
 /***/ }),
-/* 25 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_object__ = __webpack_require__(1);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-/**
- * Module providing the page.js router factory.
- *
- * @module pagejs_router
- */
-
-var ROUTE_PARAM_MATCHER = /\/:([^/?(]+)(\(\.\*\)|\?)?/g;
-var TRAILING_SEGMENTS_MATCHER = /\/(_\/)*_?$/;
-
-/**
- * Creates and returns a new page.js router instance from its dependencies.
- *
- * @param {Object} pagejs
- *    the pagejs router module (or a compatible mock)
- * @param {Browser} browser
- *    the browser, used to determine the document base href
- * @param {Configuration} configuration
- *    the configuration instance, used to lookup router configuration as described above
- *
- * @return {PagejsRouter}
- *    a router instance that will route as soon as `registerRoutes` is invoked
- *
- * @private
- */
-function create(pagejs, browser, configuration) {
-
-   var hashbang = configuration.get('router.pagejs.hashbang', false);
-   var queryEnabled = configuration.ensure('router.query.enabled');
-
-   var base = configuration.get('router.base') || fallbackBase(hashbang);
-   var origin = originFromLocation(browser.location());
-   var absoluteBase = browser.resolve(base, origin);
-
-   /**
-    * Router implementation based on [page.js](https://visionmedia.github.io/page.js/).
-    *
-    * This router allows to register flow patterns in page.js syntax so that their handler is activated when
-    * the corresponding URL is entered in the browser. While that alone does not add much to the
-    * functionality built into page.js, this router also allows to construct URLs based on a pattern and
-    * corresponding substitution parameters. Finally, users can trigger navigation directly.
-    *
-    * Note that the router supports various configuration options:
-    *
-    *  - `router.pagejs`: configuration object that is directly passed to page.js (such as `click`,
-    *    `popstate`, `dispatch`, `hashbang`). The application is responsible for specifying the required
-    *    options, as LaxarJS does not touch the page.js defaults otherwise. Consult the page.js documentation
-    *    for more information
-    *  - `router.query.enabled`: if `true`, query parameters are automatically transformed into additional
-    *    place parameters and vice versa. The default is `false`
-    *  - `router.base`: The base path under which to perform routing. If omitted, the document base href is
-    *    used
-    *
-    * Note that this router encodes/decodes certain parameters in a way that is different from page.js:
-    *
-    *  - when the value `null` is encoded into a URL path segment, it is encoded as `_`
-    *  - the value `/` is double-encoded
-    *
-    * @name PagejsRouter
-    * @constructor
-    */
-   return {
-      registerRoutes: registerRoutes,
-      navigateTo: navigateTo,
-      navigateToPath: navigateToPath,
-      constructAbsoluteUrl: constructAbsoluteUrl
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Register all routes defined in the given route map, as well as a fallback route that should be used
-    * when none of the other routes match. Also causes the initial route to be triggered.
-    *
-    * @param {Object.<String, Function>} routeMap
-    *    a map of routing patterns in page.js syntax to the corresponding handler functions. When invoked,
-    *    the handler functions will receive the decoded parameter values for their pattern and (if configured)
-    *    from the query string, as a map from string parameter name to string value
-    * @param {Function} fallbackHandler
-    *    a handler that is invoked when none of the configured routes match. It receives the failed path as
-    *    a string argument
-    *
-    * @memberof PagejsRouter
-    */
-   function registerRoutes(routeMap, fallbackHandler) {
-      pagejs.base(base);
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(routeMap, function (handler, pattern) {
-         pagejs(pattern, function (context) {
-            handler(collectParameters(pattern, context));
-         });
-      });
-      pagejs('*', function (context) {
-         fallbackHandler(context.path);
-      });
-      pagejs.start(configuration.get('router.pagejs', {}));
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Change the browser location to a different routable URL, from pattern and parameters. This is also
-    * called reverse-routing.
-    *
-    * @param {String[]} patterns
-    *    a list of patterns to choose from. This allows the router to pick the "best" pattern, such as the
-    *    pattern containing the largest number of given parameters. This router always picks the first pattern
-    *    for now.
-    * @param {Object} parameters
-    *    parameter values to substitute into the pattern to generate a URL
-    * @param {Boolean} [replaceHistory=true]
-    *    if `true`, the current history entry is replaced with the new one, otherwise a new entry is pushed.
-    *    Useful to express redirects
-    *
-    * @memberof PagejsRouter
-    */
-   function navigateTo(patterns, parameters) {
-      var replaceHistory = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-      navigateToPath(constructPath(patterns, parameters), replaceHistory);
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-   * Change the browser location to a different routable URL, from a complete path. This is also
-   * called reverse-routing.
-   *
-   * @param {String} path
-   *    the complete path to navigate to. This includes values for all relevant parameters
-   * @param {Boolean} [replaceHistory=true]
-   *    if `true`, the current history entry is replaced with the new one, otherwise a new entry is pushed.
-   *    Useful to express redirects
-   *
-   * @memberof PagejsRouter
-   */
-   function navigateToPath(path) {
-      var replaceHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      (replaceHistory ? pagejs.redirect : pagejs.show)((hashbang ? base + '#!' : '') + path);
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Create a routable URL, from pattern and parameters. This allows to create link-hrefs without repeating
-    * URL patterns throughout the code base.
-    *
-    * @param {Array<String>} patterns
-    *    a list of patterns to choose from. This allows the router to pick the "best" pattern, such as the
-    *    pattern containing the largest number of given parameters. This router always picks the first pattern
-    *    for now.
-    * @param {Object} parameters
-    *    parameter values to substitute into the pattern to generate a URL
-    * @param {Object} parameterDefaults
-    *    only applicable if query strings are enabled by configuration: before a parameter is encoded into the
-    *    query string, it is checked against the default. Only values that are different from their default
-    *    are kept
-    *
-    * @return {String} the resulting URL, including schema and host
-    *
-    * @memberof PagejsRouter
-    */
-   function constructAbsoluteUrl(patterns, parameters, parameterDefaults) {
-      var routingPath = constructPath(patterns, parameters, parameterDefaults);
-      return hashbang ? absoluteBase + '#!' + routingPath : '' + absoluteBase + routingPath;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function constructPath(patterns, parameters) {
-      var bestPattern = patterns[0];
-      var path = bestPattern.replace(ROUTE_PARAM_MATCHER, function ($0, $param, $modifier) {
-         var replacement = encodeSegment(parameters[$param], $modifier === '(.*)');
-         delete parameters[$param];
-         return '/' + replacement;
-      }).replace(TRAILING_SEGMENTS_MATCHER, '/');
-
-      if (queryEnabled) {
-         var _ret = function () {
-            var query = [];
-            __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(parameters, function (value, parameterName) {
-               var encodedKey = encodeURIComponent(parameterName);
-               if (value === true) {
-                  query.push(encodedKey);
-                  return;
-               }
-               if (value === false || value == null) {
-                  return;
-               }
-               query.push(encodedKey + '=' + encodeURIComponent(value));
-            });
-
-            if (query.length) {
-               return {
-                  v: path + '?' + query.join('&')
-               };
-            }
-         }();
-
-         if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-      }
-
-      return path;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function collectParameters(pattern, context) {
-      var _context$querystring = context.querystring,
-          querystring = _context$querystring === undefined ? '' : _context$querystring,
-          _context$params = context.params,
-          params = _context$params === undefined ? {} : _context$params;
-
-      var parameters = {};
-      if (queryEnabled && querystring.length) {
-         querystring.split('&').map(function (_) {
-            return _.split('=').map(decodeURIComponent);
-         }).forEach(function (_ref) {
-            var _ref2 = _slicedToArray(_ref, 2),
-                key = _ref2[0],
-                value = _ref2[1];
-
-            parameters[key] = value !== undefined ? value : true;
-         });
-      }
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(params, function (value, key) {
-         var isMultiSegment = pattern.indexOf('/:' + key + '(.*)') !== -1;
-         parameters[key] = decodeSegment(value, isMultiSegment);
-      });
-      return parameters;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Encode a parameter value for use as path segment(s) in routing.
-    *
-    * Usually, values are simply URL-encoded, but there are special cases:
-    *
-    *  - `null` and `undefined` are encoded as '_',
-    *  - other non-string values are converted to strings before URL encoding,
-    *  - slashes ('/') are double-encoded to '%252F', so that page.js ignores them during route matching,
-    *  - underscore ('_') is double-encoded to '%255F', to avoid confusion with '_' (null).
-    *
-    * When decoded, for use in didNavigate events, the original values will be restored, except for:
-    *  - non-string input values, which will always be decoded into strings,
-    *  - `undefined` values which will be decoded to `null`.
-    *
-    * @param {*} value
-    *   the parameter to encode
-    * @param {Boolean} [isMultiSegment=false]
-    *   determines if encoded value may contain slashes (true) or if slashes are double-encoded so that the
-    *   parameter can always be matched by a single path segment (false)
-    * @return {String}
-    *   the encoded value, for use as a path segment in URLs
-    *
-    * @private
-    */
-   function encodeSegment(value, isMultiSegment) {
-      if (value == null) {
-         return '_';
-      }
-      var urlSegments = encodeURIComponent(value).replace(/_/g, '%255F');
-      return isMultiSegment ? urlSegments : urlSegments.replace(/%2F/g, '%252F');
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Decodes a place parameter value from a path segment, to restore it for use in will/didNavigate events.
-    *
-    * Usually, this reverses the application of {#encodeSegment} after the browser has decoded a URL, except:
-    *  - path-segments based on non-string input values, which will always be decoded into strings,
-    *  - path-segments based on `undefined` values which will be decoded to `null`.
-    *
-    * Note that while the browser has already performed URL-decoding, this function replaces `%2F` into `/`
-    * and `%5F` to `_`, to be compatible with the double-encoding performaed by {#encodeSegment}.
-    *
-    * @param {String} value
-    *   the encoded parameter segment to decode
-    * @param {Boolean} [isMultiSegment=false]
-    *   determines if url-encoded slashes in the value were part of the original input (true) or if slashes
-    *   in the given value were double-encoded by {#encodeSegment} and need additional decoding (false)
-    * @return {String}
-    *   the decoded value, for use as a path segment in URLs
-    *
-    * @private
-    */
-   function decodeSegment(value, isMultiSegment) {
-      if (value === '_' || value == null) {
-         return null;
-      }
-      var segments = value.replace(/%5F/g, '_');
-      return isMultiSegment ? segments : segments.replace(/%2F/g, '/');
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function fallbackBase(hashbang) {
-      if (hashbang) {
-         return browser.location().pathname;
-      }
-      // relies on the HTML `base` element being present
-      var documentBase = browser.resolve('.').replace(/\/$/, '');
-      return documentBase;
-   }
-}
-
-function originFromLocation(_ref3) {
-   var protocol = _ref3.protocol,
-       hostname = _ref3.hostname,
-       port = _ref3.port;
-
-   return protocol + '://' + hostname + (port ? ':' + port : '');
-}
-
-/***/ }),
-/* 26 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6481,7 +6393,7 @@ function create(configuration, browser, localStorageBackend, sessionStorageBacke
 }
 
 /***/ }),
-/* 27 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6583,7 +6495,7 @@ function create(log) {
 }
 
 /***/ }),
-/* 28 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6738,14 +6650,14 @@ function create(eventBus) {
 }
 
 /***/ }),
-/* 29 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__runtime_log__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__widget_services_i18n__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widget_services_visibility__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__widget_services_i18n__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widget_services_visibility__ = __webpack_require__(29);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 /**
  * Copyright 2016 aixigo AG
@@ -6781,42 +6693,42 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
          var instances = {
             /**
-             * Area helper service instance.
+             * Allows to manage the widget's areas.
              *
              * @type {AxAreaHelper}
              */
             axAreaHelper: null,
 
             /**
-             * widget asset accessor instance.
+             * Provides access to the widget's assets.
              *
              * @type {AxAssets}
              */
             axAssets: null,
 
             /**
-             * Interface to the configuration the application was bootstrapped with.
+             * Interface to the full configuration the application was bootstrapped with.
              *
              * @type {Configuration}
              */
             axConfiguration: null,
 
             /**
-             * Context information and tiny service collection.
+             * Combines essential widget services with some instance information to be passed around en bloc.
              *
              * @type {AxContext}
              */
             axContext: null,
 
             /**
-             * The control loader api to provide access to control modules used by a widget.
+             * Provides access to implementation modules of the controls used by the widget.
              *
              * @type {ControlLoader}
              */
             axControls: null,
 
             /**
-             * Event bus instance specifically enriched for a widget instance.
+             * Event bus instance specifically enriched for the widget instance.
              *
              * @type {AxEventBus}
              */
@@ -6824,15 +6736,14 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
             /**
              * The features the widget was configured with.
-             * Its structure depends solely on the schema defined in the widget's descriptor file
-             * (`widget.json`)
+             * Its structure depends on the schema defined in the widget descriptor (`widget.json`).
              *
              * @type {Object}
              */
             axFeatures: null,
 
             /**
-             * Injection for the flow service.
+             * Allows to generate URLs based on navigation targets or place IDs, in order to create links.
              *
              * @type {FlowService}
              */
@@ -6840,53 +6751,57 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
             /**
              * The global event bus instance of the application.
-             * {@link axEventBus} should always be prefered over this, since for example unsubscribing from
-             * event subscriptions on widget destruction needs be done manually and can lead to severe memory
-             * leaks if omitted.
-             * One valid use case could be an activity, that has permanent knowledge about the application's
-             * state and lifetime, and for example adds an inspector to the event bus.
+             *
+             * The widget-specific {@link axEventBus} should always be prefered over this, since subscriptions
+             * to the global event bus will not be cleaned up automatically as clients are destroyed, which
+             * can lead to severe memory leaks.
+             * A valid use case could be an activity that needs to add an inspector to the event bus in order
+             * to provide debuggig information about application events, or to log specific events without
+             * stopping on page navigation.
              *
              * @type {EventBus}
              */
             axGlobalEventBus: null,
 
             /**
-             * The global logger instance.
+             * Allows to log messages, taking into account the configured log level.
              *
              * @type {Logger}
              */
             axGlobalLog: null,
 
             /**
-             * The global storage factory.
+             * The global storage factory allows to share storage items across widgets.
              *
              * @type {StorageFactory}
              */
             axGlobalStorage: null,
 
             /**
-             * The heartbeat instance.
+             * The heartbeat instance allows to perform actions such as dirty checking after each event
+             * bus cycle.
              *
              * @type {Heartbeat}
              */
             axHeartbeat: null,
 
             /**
-             * I18n api specifically for the widget instance.
+             * I18n API that allows to localize values depending on the locale configured for the widget.
              *
              * @type {AxI18n}
              */
             axI18n: null,
 
             /**
-             * A function that generates page wide unique ids based on ids that are unique within the scope
+             * A function that generates page-wide unique IDs based on IDs that are unique within the scope
              * of a widget.
              *
              * A common use case is the connection of a `label` HTML element and an `input` element via `for`
              * and `id` attributes.
-             * For such cases ids should **always** be generated using this service.
+             * To avoid collisions, IDs should **always** be generated using this service.
              *
              * Example:
+             *
              * ```js
              * widgetDom.querySelector( 'label' ).setAttribute( 'for', axId( 'myField' ) );
              * widgetDom.querySelector( 'input' ).setAttribute( 'id', axId( 'myField' ) );
@@ -6904,16 +6819,16 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
             /**
              * The widget logger instance.
-             * This is basically the same as the {@link #axGlobalLog}, but adds the name of the widget as
-             * prefix and its id as suffix to every log message.
+             * Similar to {@link #axGlobalLog}, but adds the name of the widget as prefix and the widget ID
+             * as suffix to every log message.
              *
              * @type {Logger}
              */
             axLog: null,
 
             /**
-             * Ready to use storage apis for a widget.
-             * All keys are namespaced by the widget id to limit visibility to this specific instance.
+             * Preconfigured storage API for a widget: all keys are namespaced using the widget ID,
+             * in order to limit item visibility to this specific instance.
              *
              * @type {AxStorage}
              */
@@ -6921,7 +6836,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
             /**
              * Access to the tooling provider API.
-             * TODO Fix the type (and document toolingProviders)
+             * TODO (#404) Fix the type (and document toolingProviders)
              *
              * @type {*}
              */
@@ -7163,7 +7078,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(localAreaName).hasType(String).isNotNull();
             __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(element).hasType(Object).isNotNull();
             var areaHelper = pageService.controller().areaHelper();
-            deregisterFuncs.push(areaHelper.register(qualify(localAreaName), element));
+            deregisterFuncs.push(areaHelper.register(qualify(localAreaName), element, localAreaName));
          },
          release: function release() {
             deregisterFuncs.forEach(function (_) {
@@ -7452,7 +7367,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 }
 
 /***/ }),
-/* 30 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7538,7 +7453,7 @@ function create(context, configuration) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   var release = eventBus.subscribe('didChangeLocale', handleLocaleChange);
+   var unsubscribe = eventBus.subscribe('didChangeLocale', handleLocaleChange);
 
    var fallbackLocale = configuration.get('i18n.locales.default', fallback);
    var defaultLocale = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(features, 'i18n.locale', fallbackLocale);
@@ -7556,7 +7471,9 @@ function create(context, configuration) {
     */
    return Object.assign({
       forFeature: forFeature,
-      release: release
+      release: function release() {
+         return unsubscribe();
+      }
    }, forLocale(defaultLocale, 'i18n'));
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -7839,7 +7756,7 @@ function memoize(f) {
 }
 
 /***/ }),
-/* 31 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8172,7 +8089,7 @@ function create(context, areaHelper) {
 }
 
 /***/ }),
-/* 32 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8212,13 +8129,13 @@ function createProviders(collectors) {
 }
 
 /***/ }),
-/* 33 */
+/* 31 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_31__;
 
 /***/ }),
-/* 34 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8232,7 +8149,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "object", function() { return __WEBPACK_IMPORTED_MODULE_1__lib_utilities_object__; });
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "string", function() { return __WEBPACK_IMPORTED_MODULE_2__lib_utilities_string__; });
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "plainAdapter", function() { return __WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__; });
-/* harmony export (immutable) */ __webpack_exports__["bootstrap"] = bootstrap;
+/* harmony export (immutable) */ __webpack_exports__["create"] = create;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instances", function() { return instances; });
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -8267,84 +8184,123 @@ try {
    global = window;
 }
 
+var MESSAGE_ADAPTERS = 'laxar.create: `adapters` must be an array';
+var MESSAGE_ARTIFACTS = 'laxar.create: `artifacts` object must have at least: aliases, themes, widgets';
+var MESSAGE_CONFIGURATION = 'laxar.create: `configuration` must be an object';
+
 /**
- * Bootstraps AngularJS on the provided `anchorElement` and sets up the LaxarJS runtime.
+ * Prepares a LaxarJS application instance from a list of adapters, a bundle of artifacts, and application
+ * configuration. The instance then allows to configure which DOM node should receive an application flow.
+ * Running this has no effect until `.bootstrap()` is called on the returned instance API.
  *
- * @param {HTMLElement} anchorElement
- *    the element to insert the page in
- * @param {Object} [optionalOptions]
- *    optional options for bootstrapping
- * @param {Array} optionalOptions.widgetAdapters
- *    widget adapters that are used in this application
- * @param {Object} optionalOptions.configuration
- *    configuration for the laxar application. See http://laxarjs.org/docs/laxar-latest/manuals/configuration/
- *    for further information on available properties
- * @param {Object} optionalOptions.artifacts
+ * @param {Array} adapters
+ *    widget adapters to use in this bootstrapping instance
+ * @param {Object} artifacts
  *    an artifact listing for the application, generated by the utilized built tool (e.g. webpack)
+ * @param {Object} configuration
+ *    application-wide LaxarJS configuration. See http://laxarjs.org/docs/laxar-latest/manuals/configuration/
+ *    for further information on available properties
+ *
+ * @return {BootstrappingInstance}
+ *    a handle on the bootstrapping instance, to load and bootstrap a flow
  *
  * @memberof laxar
  */
-function bootstrap(anchorElement) {
-   var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-       _ref$widgetAdapters = _ref.widgetAdapters,
-       widgetAdapters = _ref$widgetAdapters === undefined ? [] : _ref$widgetAdapters,
-       _ref$configuration = _ref.configuration,
-       configuration = _ref$configuration === undefined ? {} : _ref$configuration,
-       _ref$artifacts = _ref.artifacts,
-       artifacts = _ref$artifacts === undefined ? {} : _ref$artifacts;
-
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(anchorElement).isNotNull();
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(widgetAdapters).hasType(Array).isNotNull();
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts).hasType(Object).isNotNull();
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(configuration).hasType(Object).isNotNull();
+function create(adapters, artifacts, configuration) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(adapters).hasType(Array).isNotNull(MESSAGE_ADAPTERS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.aliases).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.themes).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.widgets).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(configuration).hasType(Object).isNotNull(MESSAGE_CONFIGURATION);
 
    var services = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib_runtime_services__["a" /* create */])(configuration, artifacts);
-
-   var log = services.log,
-       themeLoader = services.themeLoader,
-       widgetLoader = services.widgetLoader;
-
-   themeLoader.load();
-
-   var adapterServices = {
-      adapterUtilities: services.adapterUtilities,
-      artifactProvider: services.artifactProvider,
-      configuration: services.configuration,
-      flowService: services.flowService,
-      globalEventBus: services.globalEventBus,
-      heartbeat: services.heartbeat,
-      log: log,
-      storage: services.storage,
-      tooling: services.toolingProviders,
-      // TODO (https://github.com/LaxarJS/laxar/issues/363 and https://github.com/LaxarJS/laxar/issues/397)
-      // Fixing the latter issue broke laxar-mocks, since it could no longer access the widget loader.
-      // To temporarily fix this, we re-add the widget loader to the exposed services.
-      // Nevertheless on the medium /short term we want to be able to load single widgets into the page
-      // (the first issue above) and use the api that will be created for this in laxar-mocks.
-      widgetLoader: widgetLoader
+   var bootstrappingSchedule = {
+      items: [],
+      testing: false
    };
-   var adapterModules = [__WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__].concat(_toConsumableArray(widgetAdapters));
-   var adapters = bootstrapWidgetAdapters(anchorElement, adapterServices, adapterModules, artifacts);
-   widgetLoader.registerWidgetAdapters(adapters);
 
-   announceInstance(services);
+   /**
+    * Handle on a LaxarJS bootstrapping instance.
+    *
+    * @name BootstrappingInstance
+    * @constructor
+    */
+   var api = { flow: flow, testing: testing, bootstrap: bootstrap };
+   return api;
 
-   var flowName = services.configuration.get('flow.name');
-   if (!flowName) {
-      log.trace('LaxarJS Bootstrap complete: No `flow.name` configured.');
-      return;
+   /**
+    * Registers a flow to control routing for this application.
+    *
+    * @param {String} name
+    *    widget adapters to use in this bootstrapping instance
+    * @param {HTMLElement} anchorElement
+    *    container element to determine where to put the flow
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function flow(name, anchorElement) {
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(anchorElement).isNotNull();
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(anchorElement.nodeType === Node.ELEMENT_NODE);
+      bootstrappingSchedule.items.push({ type: 'flow', name: name, anchorElement: anchorElement });
+      return api;
    }
 
-   whenDocumentReady(function () {
-      log.trace('LaxarJS loading Flow: ' + flowName);
-      services.pageService.createControllerFor(anchorElement);
-      services.flowController.loadFlow().then(function () {
-         log.trace('Flow loaded');
-      }, function (err) {
-         log.fatal('LaxarJS failed to load flow.');
-         log.fatal('Error [0].\nStack: [1]', err, err && err.stack);
+   /**
+    * Declare that this instance is used for testing.
+    * This will cause .bootstrap not to fail if no flow was configured.
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function testing() {
+      bootstrappingSchedule.testing = true;
+      return api;
+   }
+
+   /**
+    * Performs the actual application bootstrapping.
+    * This includes bootstrapping the application adapters and starting the router.
+    *
+    * @memberof BootstrappingInstance
+    */
+   function bootstrap() {
+      var testing = bootstrappingSchedule.testing,
+          items = bootstrappingSchedule.items;
+
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(testing || items.length > 0, 'Nothing configured for bootstrap()');
+
+      var adapterInstances = bootstrapAdapters(services, [__WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__].concat(_toConsumableArray(adapters)), artifacts);
+      services.widgetLoader.registerWidgetAdapters(adapterInstances);
+      announceInstance(services);
+
+      var log = services.log;
+
+      items.forEach(function (item) {
+         // other item types will be added in future commits, but for now:
+         __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(item.type === 'flow');
+         var name = item.name,
+             anchorElement = item.anchorElement;
+
+
+         whenDocumentReady(function () {
+            log.trace('laxar.bootstrap: loading fow: ' + name);
+            services.pageService.createControllerFor(anchorElement);
+            services.flowController.loadFlow(name).then(function () {
+               log.trace('laxar.bootstrap: flow loaded');
+            }, function (err) {
+               log.fatal('laxar.bootstrap: failed to load flow.');
+               log.fatal('Error [0].\nStack: [1]', err, err && err.stack);
+            });
+         });
       });
-   });
+   }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8359,7 +8315,26 @@ function whenDocumentReady(callback) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function bootstrapWidgetAdapters(anchorElement, services, adapterModules, artifacts) {
+function bootstrapAdapters(services, adapterModules, artifacts) {
+
+   var adapterServices = {
+      adapterUtilities: services.adapterUtilities,
+      artifactProvider: services.artifactProvider,
+      configuration: services.configuration,
+      flowService: services.flowService,
+      globalEventBus: services.globalEventBus,
+      heartbeat: services.heartbeat,
+      log: services.log,
+      storage: services.storage,
+      tooling: services.toolingProviders,
+      // TODO (https://github.com/LaxarJS/laxar/issues/363 and https://github.com/LaxarJS/laxar/issues/397)
+      // Fixing the latter issue broke laxar-mocks, since it could no longer access the widget loader.
+      // To temporarily fix this, we re-add the widget loader to the exposed services.
+      // Nevertheless on the medium /short term we want to be able to load single widgets into the page
+      // (the first issue above) and use the api that will be created for this in laxar-mocks.
+      widgetLoader: services.widgetLoader
+   };
+
    var log = services.log;
 
    var adapterModulesByTechnology = {};
@@ -8388,7 +8363,7 @@ function bootstrapWidgetAdapters(anchorElement, services, adapterModules, artifa
    Object.keys(adapterModulesByTechnology).forEach(function (technology) {
       var adapterModule = adapterModulesByTechnology[technology];
       var artifacts = artifactsByTechnology[technology];
-      adaptersByTechnology[technology] = adapterModule.bootstrap(artifacts, services, anchorElement);
+      adaptersByTechnology[technology] = adapterModule.bootstrap(artifacts, adapterServices);
    });
    return adaptersByTechnology;
 }
@@ -8454,6 +8429,7 @@ function instances(optionalName) {
 /***/ })
 /******/ ]);
 });
+//# sourceMappingURL=laxar.js.map
 //# sourceMappingURL=laxar.js.map
 
 /***/ }),
@@ -8945,1041 +8921,463 @@ module.exports = React;
 
 /***/ }),
 
-/***/ 344:
-/***/ (function(module, exports) {
-
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-
-/***/ }),
-
-/***/ 354:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {  /* globals require, module */
-
-  
-
-  /**
-   * Module dependencies.
-   */
-
-  var pathtoRegexp = __webpack_require__(355);
-
-  /**
-   * Module exports.
-   */
-
-  module.exports = page;
-
-  /**
-   * Detect click event
-   */
-  var clickEvent = ('undefined' !== typeof document) && document.ontouchstart ? 'touchstart' : 'click';
-
-  /**
-   * To work properly with the URL
-   * history.location generated polyfill in https://github.com/devote/HTML5-History-API
-   */
-
-  var location = ('undefined' !== typeof window) && (window.history.location || window.location);
-
-  /**
-   * Perform initial dispatch.
-   */
-
-  var dispatch = true;
-
-
-  /**
-   * Decode URL components (query string, pathname, hash).
-   * Accommodates both regular percent encoding and x-www-form-urlencoded format.
-   */
-  var decodeURLComponents = true;
-
-  /**
-   * Base path.
-   */
-
-  var base = '';
-
-  /**
-   * Running flag.
-   */
-
-  var running;
-
-  /**
-   * HashBang option
-   */
-
-  var hashbang = false;
-
-  /**
-   * Previous context, for capturing
-   * page exit events.
-   */
-
-  var prevContext;
-
-  /**
-   * Register `path` with callback `fn()`,
-   * or route `path`, or redirection,
-   * or `page.start()`.
-   *
-   *   page(fn);
-   *   page('*', fn);
-   *   page('/user/:id', load, user);
-   *   page('/user/' + user.id, { some: 'thing' });
-   *   page('/user/' + user.id);
-   *   page('/from', '/to')
-   *   page();
-   *
-   * @param {string|!Function|!Object} path
-   * @param {Function=} fn
-   * @api public
-   */
-
-  function page(path, fn) {
-    // <callback>
-    if ('function' === typeof path) {
-      return page('*', path);
-    }
-
-    // route <path> to <callback ...>
-    if ('function' === typeof fn) {
-      var route = new Route(/** @type {string} */ (path));
-      for (var i = 1; i < arguments.length; ++i) {
-        page.callbacks.push(route.middleware(arguments[i]));
-      }
-      // show <path> with [state]
-    } else if ('string' === typeof path) {
-      page['string' === typeof fn ? 'redirect' : 'show'](path, fn);
-      // start [options]
-    } else {
-      page.start(path);
-    }
-  }
-
-  /**
-   * Callback functions.
-   */
-
-  page.callbacks = [];
-  page.exits = [];
-
-  /**
-   * Current path being processed
-   * @type {string}
-   */
-  page.current = '';
-
-  /**
-   * Number of pages navigated to.
-   * @type {number}
-   *
-   *     page.len == 0;
-   *     page('/login');
-   *     page.len == 1;
-   */
-
-  page.len = 0;
-
-  /**
-   * Get or set basepath to `path`.
-   *
-   * @param {string} path
-   * @api public
-   */
-
-  page.base = function(path) {
-    if (0 === arguments.length) return base;
-    base = path;
-  };
-
-  /**
-   * Bind with the given `options`.
-   *
-   * Options:
-   *
-   *    - `click` bind to click events [true]
-   *    - `popstate` bind to popstate [true]
-   *    - `dispatch` perform initial dispatch [true]
-   *
-   * @param {Object} options
-   * @api public
-   */
-
-  page.start = function(options) {
-    options = options || {};
-    if (running) return;
-    running = true;
-    if (false === options.dispatch) dispatch = false;
-    if (false === options.decodeURLComponents) decodeURLComponents = false;
-    if (false !== options.popstate) window.addEventListener('popstate', onpopstate, false);
-    if (false !== options.click) {
-      document.addEventListener(clickEvent, onclick, false);
-    }
-    if (true === options.hashbang) hashbang = true;
-    if (!dispatch) return;
-    var url = (hashbang && ~location.hash.indexOf('#!')) ? location.hash.substr(2) + location.search : location.pathname + location.search + location.hash;
-    page.replace(url, null, true, dispatch);
-  };
-
-  /**
-   * Unbind click and popstate event handlers.
-   *
-   * @api public
-   */
-
-  page.stop = function() {
-    if (!running) return;
-    page.current = '';
-    page.len = 0;
-    running = false;
-    document.removeEventListener(clickEvent, onclick, false);
-    window.removeEventListener('popstate', onpopstate, false);
-  };
-
-  /**
-   * Show `path` with optional `state` object.
-   *
-   * @param {string} path
-   * @param {Object=} state
-   * @param {boolean=} dispatch
-   * @param {boolean=} push
-   * @return {!Context}
-   * @api public
-   */
-
-  page.show = function(path, state, dispatch, push) {
-    var ctx = new Context(path, state);
-    page.current = ctx.path;
-    if (false !== dispatch) page.dispatch(ctx);
-    if (false !== ctx.handled && false !== push) ctx.pushState();
-    return ctx;
-  };
-
-  /**
-   * Goes back in the history
-   * Back should always let the current route push state and then go back.
-   *
-   * @param {string} path - fallback path to go back if no more history exists, if undefined defaults to page.base
-   * @param {Object=} state
-   * @api public
-   */
-
-  page.back = function(path, state) {
-    if (page.len > 0) {
-      // this may need more testing to see if all browsers
-      // wait for the next tick to go back in history
-      history.back();
-      page.len--;
-    } else if (path) {
-      setTimeout(function() {
-        page.show(path, state);
-      });
-    }else{
-      setTimeout(function() {
-        page.show(base, state);
-      });
-    }
-  };
-
-
-  /**
-   * Register route to redirect from one path to other
-   * or just redirect to another route
-   *
-   * @param {string} from - if param 'to' is undefined redirects to 'from'
-   * @param {string=} to
-   * @api public
-   */
-  page.redirect = function(from, to) {
-    // Define route from a path to another
-    if ('string' === typeof from && 'string' === typeof to) {
-      page(from, function(e) {
-        setTimeout(function() {
-          page.replace(/** @type {!string} */ (to));
-        }, 0);
-      });
-    }
-
-    // Wait for the push state and replace it with another
-    if ('string' === typeof from && 'undefined' === typeof to) {
-      setTimeout(function() {
-        page.replace(from);
-      }, 0);
-    }
-  };
-
-  /**
-   * Replace `path` with optional `state` object.
-   *
-   * @param {string} path
-   * @param {Object=} state
-   * @param {boolean=} init
-   * @param {boolean=} dispatch
-   * @return {!Context}
-   * @api public
-   */
-
-
-  page.replace = function(path, state, init, dispatch) {
-    var ctx = new Context(path, state);
-    page.current = ctx.path;
-    ctx.init = init;
-    ctx.save(); // save before dispatching, which may redirect
-    if (false !== dispatch) page.dispatch(ctx);
-    return ctx;
-  };
-
-  /**
-   * Dispatch the given `ctx`.
-   *
-   * @param {Context} ctx
-   * @api private
-   */
-  page.dispatch = function(ctx) {
-    var prev = prevContext,
-      i = 0,
-      j = 0;
-
-    prevContext = ctx;
-
-    function nextExit() {
-      var fn = page.exits[j++];
-      if (!fn) return nextEnter();
-      fn(prev, nextExit);
-    }
-
-    function nextEnter() {
-      var fn = page.callbacks[i++];
-
-      if (ctx.path !== page.current) {
-        ctx.handled = false;
-        return;
-      }
-      if (!fn) return unhandled(ctx);
-      fn(ctx, nextEnter);
-    }
-
-    if (prev) {
-      nextExit();
-    } else {
-      nextEnter();
-    }
-  };
-
-  /**
-   * Unhandled `ctx`. When it's not the initial
-   * popstate then redirect. If you wish to handle
-   * 404s on your own use `page('*', callback)`.
-   *
-   * @param {Context} ctx
-   * @api private
-   */
-  function unhandled(ctx) {
-    if (ctx.handled) return;
-    var current;
-
-    if (hashbang) {
-      current = base + location.hash.replace('#!', '');
-    } else {
-      current = location.pathname + location.search;
-    }
-
-    if (current === ctx.canonicalPath) return;
-    page.stop();
-    ctx.handled = false;
-    location.href = ctx.canonicalPath;
-  }
-
-  /**
-   * Register an exit route on `path` with
-   * callback `fn()`, which will be called
-   * on the previous context when a new
-   * page is visited.
-   */
-  page.exit = function(path, fn) {
-    if (typeof path === 'function') {
-      return page.exit('*', path);
-    }
-
-    var route = new Route(path);
-    for (var i = 1; i < arguments.length; ++i) {
-      page.exits.push(route.middleware(arguments[i]));
-    }
-  };
-
-  /**
-   * Remove URL encoding from the given `str`.
-   * Accommodates whitespace in both x-www-form-urlencoded
-   * and regular percent-encoded form.
-   *
-   * @param {string} val - URL component to decode
-   */
-  function decodeURLEncodedURIComponent(val) {
-    if (typeof val !== 'string') { return val; }
-    return decodeURLComponents ? decodeURIComponent(val.replace(/\+/g, ' ')) : val;
-  }
-
-  /**
-   * Initialize a new "request" `Context`
-   * with the given `path` and optional initial `state`.
-   *
-   * @constructor
-   * @param {string} path
-   * @param {Object=} state
-   * @api public
-   */
-
-  function Context(path, state) {
-    if ('/' === path[0] && 0 !== path.indexOf(base)) path = base + (hashbang ? '#!' : '') + path;
-    var i = path.indexOf('?');
-
-    this.canonicalPath = path;
-    this.path = path.replace(base, '') || '/';
-    if (hashbang) this.path = this.path.replace('#!', '') || '/';
-
-    this.title = document.title;
-    this.state = state || {};
-    this.state.path = path;
-    this.querystring = ~i ? decodeURLEncodedURIComponent(path.slice(i + 1)) : '';
-    this.pathname = decodeURLEncodedURIComponent(~i ? path.slice(0, i) : path);
-    this.params = {};
-
-    // fragment
-    this.hash = '';
-    if (!hashbang) {
-      if (!~this.path.indexOf('#')) return;
-      var parts = this.path.split('#');
-      this.path = parts[0];
-      this.hash = decodeURLEncodedURIComponent(parts[1]) || '';
-      this.querystring = this.querystring.split('#')[0];
-    }
-  }
-
-  /**
-   * Expose `Context`.
-   */
-
-  page.Context = Context;
-
-  /**
-   * Push state.
-   *
-   * @api private
-   */
-
-  Context.prototype.pushState = function() {
-    page.len++;
-    history.pushState(this.state, this.title, hashbang && this.path !== '/' ? '#!' + this.path : this.canonicalPath);
-  };
-
-  /**
-   * Save the context state.
-   *
-   * @api public
-   */
-
-  Context.prototype.save = function() {
-    history.replaceState(this.state, this.title, hashbang && this.path !== '/' ? '#!' + this.path : this.canonicalPath);
-  };
-
-  /**
-   * Initialize `Route` with the given HTTP `path`,
-   * and an array of `callbacks` and `options`.
-   *
-   * Options:
-   *
-   *   - `sensitive`    enable case-sensitive routes
-   *   - `strict`       enable strict matching for trailing slashes
-   *
-   * @constructor
-   * @param {string} path
-   * @param {Object=} options
-   * @api private
-   */
-
-  function Route(path, options) {
-    options = options || {};
-    this.path = (path === '*') ? '(.*)' : path;
-    this.method = 'GET';
-    this.regexp = pathtoRegexp(this.path,
-      this.keys = [],
-      options);
-  }
-
-  /**
-   * Expose `Route`.
-   */
-
-  page.Route = Route;
-
-  /**
-   * Return route middleware with
-   * the given callback `fn()`.
-   *
-   * @param {Function} fn
-   * @return {Function}
-   * @api public
-   */
-
-  Route.prototype.middleware = function(fn) {
-    var self = this;
-    return function(ctx, next) {
-      if (self.match(ctx.path, ctx.params)) return fn(ctx, next);
-      next();
-    };
-  };
-
-  /**
-   * Check if this route matches `path`, if so
-   * populate `params`.
-   *
-   * @param {string} path
-   * @param {Object} params
-   * @return {boolean}
-   * @api private
-   */
-
-  Route.prototype.match = function(path, params) {
-    var keys = this.keys,
-      qsIndex = path.indexOf('?'),
-      pathname = ~qsIndex ? path.slice(0, qsIndex) : path,
-      m = this.regexp.exec(decodeURIComponent(pathname));
-
-    if (!m) return false;
-
-    for (var i = 1, len = m.length; i < len; ++i) {
-      var key = keys[i - 1];
-      var val = decodeURLEncodedURIComponent(m[i]);
-      if (val !== undefined || !(hasOwnProperty.call(params, key.name))) {
-        params[key.name] = val;
-      }
-    }
-
-    return true;
-  };
-
-
-  /**
-   * Handle "populate" events.
-   */
-
-  var onpopstate = (function () {
-    var loaded = false;
-    if ('undefined' === typeof window) {
-      return;
-    }
-    if (document.readyState === 'complete') {
-      loaded = true;
-    } else {
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          loaded = true;
-        }, 0);
-      });
-    }
-    return function onpopstate(e) {
-      if (!loaded) return;
-      if (e.state) {
-        var path = e.state.path;
-        page.replace(path, e.state);
-      } else {
-        page.show(location.pathname + location.hash, undefined, undefined, false);
-      }
-    };
-  })();
-  /**
-   * Handle "click" events.
-   */
-
-  function onclick(e) {
-
-    if (1 !== which(e)) return;
-
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-    if (e.defaultPrevented) return;
-
-
-
-    // ensure link
-    // use shadow dom when available
-    var el = e.path ? e.path[0] : e.target;
-    while (el && 'A' !== el.nodeName) el = el.parentNode;
-    if (!el || 'A' !== el.nodeName) return;
-
-
-
-    // Ignore if tag has
-    // 1. "download" attribute
-    // 2. rel="external" attribute
-    if (el.hasAttribute('download') || el.getAttribute('rel') === 'external') return;
-
-    // ensure non-hash for the same path
-    var link = el.getAttribute('href');
-    if (!hashbang && el.pathname === location.pathname && (el.hash || '#' === link)) return;
-
-
-
-    // Check for mailto: in the href
-    if (link && link.indexOf('mailto:') > -1) return;
-
-    // check target
-    if (el.target) return;
-
-    // x-origin
-    if (!sameOrigin(el.href)) return;
-
-
-
-    // rebuild path
-    var path = el.pathname + el.search + (el.hash || '');
-
-    // strip leading "/[drive letter]:" on NW.js on Windows
-    if (typeof process !== 'undefined' && path.match(/^\/[a-zA-Z]:\//)) {
-      path = path.replace(/^\/[a-zA-Z]:\//, '/');
-    }
-
-    // same page
-    var orig = path;
-
-    if (path.indexOf(base) === 0) {
-      path = path.substr(base.length);
-    }
-
-    if (hashbang) path = path.replace('#!', '');
-
-    if (base && orig === path) return;
-
-    e.preventDefault();
-    page.show(orig);
-  }
-
-  /**
-   * Event button.
-   */
-
-  function which(e) {
-    e = e || window.event;
-    return null === e.which ? e.button : e.which;
-  }
-
-  /**
-   * Check if `href` is the same origin.
-   */
-
-  function sameOrigin(href) {
-    var origin = location.protocol + '//' + location.hostname;
-    if (location.port) origin += ':' + location.port;
-    return (href && (0 === href.indexOf(origin)));
-  }
-
-  page.sameOrigin = sameOrigin;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(39)))
-
-/***/ }),
-
 /***/ 355:
 /***/ (function(module, exports, __webpack_require__) {
 
-var isarray = __webpack_require__(344)
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(true)
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("Navigo", [], factory);
+	else if(typeof exports === 'object')
+		exports["Navigo"] = factory();
+	else
+		root["Navigo"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports) {
 
-/**
- * Expose `pathToRegexp`.
- */
-module.exports = pathToRegexp
-module.exports.parse = parse
-module.exports.compile = compile
-module.exports.tokensToFunction = tokensToFunction
-module.exports.tokensToRegExp = tokensToRegExp
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+	
+	function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+	
+	var PARAMETER_REGEXP = /([:*])(\w+)/g;
+	var WILDCARD_REGEXP = /\*/g;
+	var REPLACE_VARIABLE_REGEXP = '([^\/]+)';
+	var REPLACE_WILDCARD = '(?:.*)';
+	var FOLLOWED_BY_SLASH_REGEXP = '(?:\/$|$)';
+	
+	function clean(s) {
+	  if (s instanceof RegExp) return s;
+	  return s.replace(/\/+$/, '').replace(/^\/+/, '/');
+	}
+	
+	function regExpResultToParams(match, names) {
+	  if (names.length === 0) return null;
+	  if (!match) return null;
+	  return match.slice(1, match.length).reduce(function (params, value, index) {
+	    if (params === null) params = {};
+	    params[names[index]] = value;
+	    return params;
+	  }, null);
+	}
+	
+	function replaceDynamicURLParts(route) {
+	  var paramNames = [],
+	      regexp;
+	
+	  if (route instanceof RegExp) {
+	    regexp = route;
+	  } else {
+	    regexp = new RegExp(clean(route).replace(PARAMETER_REGEXP, function (full, dots, name) {
+	      paramNames.push(name);
+	      return REPLACE_VARIABLE_REGEXP;
+	    }).replace(WILDCARD_REGEXP, REPLACE_WILDCARD) + FOLLOWED_BY_SLASH_REGEXP);
+	  }
+	  return { regexp: regexp, paramNames: paramNames };
+	}
+	
+	function getUrlDepth(url) {
+	  return url.replace(/\/$/, '').split('/').length;
+	}
+	
+	function compareUrlDepth(urlA, urlB) {
+	  return getUrlDepth(urlB) - getUrlDepth(urlA);
+	}
+	
+	function findMatchedRoutes(url) {
+	  var routes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+	
+	  return routes.map(function (route) {
+	    var _replaceDynamicURLPar = replaceDynamicURLParts(route.route),
+	        regexp = _replaceDynamicURLPar.regexp,
+	        paramNames = _replaceDynamicURLPar.paramNames;
+	
+	    var match = url.match(regexp);
+	    var params = regExpResultToParams(match, paramNames);
+	
+	    return match ? { match: match, route: route, params: params } : false;
+	  }).filter(function (m) {
+	    return m;
+	  });
+	}
+	
+	function match(url, routes) {
+	  return findMatchedRoutes(url, routes)[0] || false;
+	}
+	
+	function root(url, routes) {
+	  var matched = findMatchedRoutes(url, routes.filter(function (route) {
+	    var u = clean(route.route);
+	
+	    return u !== '' && u !== '*';
+	  }));
+	  var fallbackURL = clean(url);
+	
+	  if (matched.length > 0) {
+	    return matched.map(function (m) {
+	      return clean(url.substr(0, m.match.index));
+	    }).reduce(function (root, current) {
+	      return current.length < root.length ? current : root;
+	    }, fallbackURL);
+	  }
+	  return fallbackURL;
+	}
+	
+	function isPushStateAvailable() {
+	  return !!(typeof window !== 'undefined' && window.history && window.history.pushState);
+	}
+	
+	function isHashChangeAPIAvailable() {
+	  return !!(typeof window !== 'undefined' && 'onhashchange' in window);
+	}
+	
+	function extractGETParameters(url, useHash, hash) {
+	  var _url$split = url.split(/\?(.*)?$/),
+	      _url$split2 = _toArray(_url$split),
+	      onlyURL = _url$split2[0],
+	      query = _url$split2.slice(1);
+	
+	  if (typeof hash === 'undefined') {
+	    // To preserve BC
+	    hash = '#';
+	  }
+	
+	  if (!useHash) {
+	    onlyURL = onlyURL.split(hash)[0];
+	  }
+	
+	  return { onlyURL: onlyURL, GETParameters: query.join('') };
+	}
+	
+	function manageHooks(handler, route) {
+	  if (route && route.hooks && _typeof(route.hooks) === 'object') {
+	    if (route.hooks.before) {
+	      route.hooks.before(function () {
+	        var shouldRoute = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	
+	        if (!shouldRoute) return;
+	        handler();
+	        route.hooks.after && route.hooks.after();
+	      });
+	    } else if (route.hooks.after) {
+	      handler();
+	      route.hooks.after && route.hooks.after();
+	    }
+	    return;
+	  }
+	  handler();
+	};
+	
+	function Navigo(r, useHash, hash) {
+	  this.root = null;
+	  this._routes = [];
+	  this._useHash = useHash;
+	  this._hash = typeof hash === 'undefined' ? '#' : hash;
+	  this._paused = false;
+	  this._destroyed = false;
+	  this._lastRouteResolved = null;
+	  this._notFoundHandler = null;
+	  this._defaultHandler = null;
+	  this._usePushState = !useHash && isPushStateAvailable();
+	
+	  if (r) {
+	    this.root = useHash ? r.replace(/\/$/, '/' + this._hash) : r.replace(/\/$/, '');
+	  } else if (useHash) {
+	    this.root = this._cLoc().split(this._hash)[0].replace(/\/$/, '/' + this._hash);
+	  }
+	
+	  this._listen();
+	  this.updatePageLinks();
+	}
+	
+	Navigo.prototype = {
+	  helpers: {
+	    match: match,
+	    root: root,
+	    clean: clean
+	  },
+	  navigate: function navigate(path, absolute) {
+	    var to;
+	
+	    path = path || '';
+	    if (this._usePushState) {
+	      to = (!absolute ? this._getRoot() + '/' : '') + path.replace(/^\/+/, '/');
+	      to = to.replace(/([^:])(\/{2,})/g, '$1/');
+	      history[this._paused ? 'replaceState' : 'pushState']({}, '', to);
+	      this.resolve();
+	    } else if (typeof window !== 'undefined') {
+	      path = path.replace(new RegExp('^' + this._hash), '');
+	      window.location.href = window.location.href.replace(new RegExp('(#|' + this._hash + ')(.*)$'), '') + this._hash + path;
+	    }
+	    return this;
+	  },
+	  on: function on() {
+	    var _this = this;
+	
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    if (typeof args[0] === 'function') {
+	      this._defaultHandler = { handler: args[0], hooks: args[1] };
+	    } else if (args.length >= 2) {
+	      if (args[0] === '/') {
+	        var func = args[1];
+	
+	        if (_typeof(args[1]) === 'object') {
+	          func = args[1].uses;
+	        }
+	
+	        this._defaultHandler = { handler: func, hooks: args[2] };
+	      } else {
+	        this._add(args[0], args[1], args[2]);
+	      }
+	    } else if (_typeof(args[0]) === 'object') {
+	      var orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+	
+	      orderedRoutes.forEach(function (route) {
+	        _this.on(route, args[0][route]);
+	      });
+	    }
+	    return this;
+	  },
+	  off: function off(handler) {
+	    if (this._defaultHandler !== null && handler === this._defaultHandler.handler) {
+	      this._defaultHandler = null;
+	    } else if (this._notFoundHandler !== null && handler === this._notFoundHandler.handler) {
+	      this._notFoundHandler = null;
+	    }
+	    this._routes = this._routes.reduce(function (result, r) {
+	      if (r.handler !== handler) result.push(r);
+	      return result;
+	    }, []);
+	    return this;
+	  },
+	  notFound: function notFound(handler, hooks) {
+	    this._notFoundHandler = { handler: handler, hooks: hooks };
+	    return this;
+	  },
+	  resolve: function resolve(current) {
+	    var _this2 = this;
+	
+	    var handler, m;
+	    var url = (current || this._cLoc()).replace(this._getRoot(), '');
+	
+	    if (this._useHash) {
+	      url = url.replace(new RegExp('^\/' + this._hash), '/');
+	    }
+	
+	    var _extractGETParameters = extractGETParameters(url, this._useHash, this._hash),
+	        onlyURL = _extractGETParameters.onlyURL,
+	        GETParameters = _extractGETParameters.GETParameters;
+	
+	    if (this._paused || this._lastRouteResolved && onlyURL === this._lastRouteResolved.url && GETParameters === this._lastRouteResolved.query) {
+	      return false;
+	    }
+	
+	    m = match(onlyURL, this._routes);
+	
+	    if (m) {
+	      this._lastRouteResolved = { url: onlyURL, query: GETParameters };
+	      handler = m.route.handler;
+	      manageHooks(function () {
+	        m.route.route instanceof RegExp ? handler.apply(undefined, _toConsumableArray(m.match.slice(1, m.match.length))) : handler(m.params, GETParameters);
+	      }, m.route);
+	      return m;
+	    } else if (this._defaultHandler && (onlyURL === '' || onlyURL === '/' || onlyURL === this._hash)) {
+	      manageHooks(function () {
+	        _this2._lastRouteResolved = { url: onlyURL, query: GETParameters };
+	        _this2._defaultHandler.handler(GETParameters);
+	      }, this._defaultHandler);
+	      return true;
+	    } else if (this._notFoundHandler) {
+	      manageHooks(function () {
+	        _this2._lastRouteResolved = { url: onlyURL, query: GETParameters };
+	        _this2._notFoundHandler.handler(GETParameters);
+	      }, this._notFoundHandler);
+	    }
+	    return false;
+	  },
+	  destroy: function destroy() {
+	    this._routes = [];
+	    this._destroyed = true;
+	    clearTimeout(this._listenningInterval);
+	    typeof window !== 'undefined' ? window.onpopstate = null : null;
+	  },
+	  updatePageLinks: function updatePageLinks() {
+	    var self = this;
+	
+	    if (typeof document === 'undefined') return;
+	
+	    this._findLinks().forEach(function (link) {
+	      if (!link.hasListenerAttached) {
+	        link.addEventListener('click', function (e) {
+	          var location = link.getAttribute('href');
+	
+	          if (!self._destroyed) {
+	            e.preventDefault();
+	            self.navigate(clean(location));
+	          }
+	        });
+	        link.hasListenerAttached = true;
+	      }
+	    });
+	  },
+	  generate: function generate(name) {
+	    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    var result = this._routes.reduce(function (result, route) {
+	      var key;
+	
+	      if (route.name === name) {
+	        result = route.route;
+	        for (key in data) {
+	          result = result.replace(':' + key, data[key]);
+	        }
+	      }
+	      return result;
+	    }, '');
+	
+	    return this._useHash ? this._hash + result : result;
+	  },
+	  link: function link(path) {
+	    return this._getRoot() + path;
+	  },
+	  pause: function pause() {
+	    var status = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	
+	    this._paused = status;
+	  },
+	  resume: function resume() {
+	    this.pause(false);
+	  },
+	  disableIfAPINotAvailable: function disableIfAPINotAvailable() {
+	    if (!isPushStateAvailable()) {
+	      this.destroy();
+	    }
+	  },
+	  _add: function _add(route) {
+	    var handler = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	    var hooks = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+	
+	    if (typeof route === 'string') {
+	      route = encodeURI(route);
+	    }
+	    if ((typeof handler === 'undefined' ? 'undefined' : _typeof(handler)) === 'object') {
+	      this._routes.push({
+	        route: route,
+	        handler: handler.uses,
+	        name: handler.as,
+	        hooks: hooks || handler.hooks
+	      });
+	    } else {
+	      this._routes.push({ route: route, handler: handler, hooks: hooks });
+	    }
+	    return this._add;
+	  },
+	  _getRoot: function _getRoot() {
+	    if (this.root !== null) return this.root;
+	    this.root = root(this._cLoc(), this._routes);
+	    return this.root;
+	  },
+	  _listen: function _listen() {
+	    var _this3 = this;
+	
+	    if (this._usePushState) {
+	      window.onpopstate = function () {
+	        _this3.resolve();
+	      };
+	    } else if (isHashChangeAPIAvailable()) {
+	      window.addEventListener('hashchange', function () {
+	        _this3.resolve();
+	      });
+	    } else {
+	      var cached = this._cLoc(),
+	          current = void 0,
+	          _check = void 0;
+	
+	      _check = function check() {
+	        current = _this3._cLoc();
+	        if (cached !== current) {
+	          cached = current;
+	          _this3.resolve();
+	        }
+	        _this3._listenningInterval = setTimeout(_check, 200);
+	      };
+	      _check();
+	    }
+	  },
+	  _cLoc: function _cLoc() {
+	    if (typeof window !== 'undefined') {
+	      return clean(window.location.href);
+	    }
+	    return '';
+	  },
+	  _findLinks: function _findLinks() {
+	    return [].slice.call(document.querySelectorAll('[data-navigo]'));
+	  }
+	};
+	
+	exports.default = Navigo;
+	module.exports = exports['default'];
 
-/**
- * The main path matching regexp utility.
- *
- * @type {RegExp}
- */
-var PATH_REGEXP = new RegExp([
-  // Match escaped characters that would otherwise appear in future matches.
-  // This allows the user to escape special characters that won't transform.
-  '(\\\\.)',
-  // Match Express-style parameters and un-named parameters with a prefix
-  // and optional suffixes. Matches appear as:
-  //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
-  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
-  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
-].join('|'), 'g')
-
-/**
- * Parse a string for the raw tokens.
- *
- * @param  {String} str
- * @return {Array}
- */
-function parse (str) {
-  var tokens = []
-  var key = 0
-  var index = 0
-  var path = ''
-  var res
-
-  while ((res = PATH_REGEXP.exec(str)) != null) {
-    var m = res[0]
-    var escaped = res[1]
-    var offset = res.index
-    path += str.slice(index, offset)
-    index = offset + m.length
-
-    // Ignore already escaped sequences.
-    if (escaped) {
-      path += escaped[1]
-      continue
-    }
-
-    // Push the current path onto the tokens.
-    if (path) {
-      tokens.push(path)
-      path = ''
-    }
-
-    var prefix = res[2]
-    var name = res[3]
-    var capture = res[4]
-    var group = res[5]
-    var suffix = res[6]
-    var asterisk = res[7]
-
-    var repeat = suffix === '+' || suffix === '*'
-    var optional = suffix === '?' || suffix === '*'
-    var delimiter = prefix || '/'
-    var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?')
-
-    tokens.push({
-      name: name || key++,
-      prefix: prefix || '',
-      delimiter: delimiter,
-      optional: optional,
-      repeat: repeat,
-      pattern: escapeGroup(pattern)
-    })
-  }
-
-  // Match any characters still remaining.
-  if (index < str.length) {
-    path += str.substr(index)
-  }
-
-  // If the path exists, push it onto the end.
-  if (path) {
-    tokens.push(path)
-  }
-
-  return tokens
-}
-
-/**
- * Compile a string to a template function for the path.
- *
- * @param  {String}   str
- * @return {Function}
- */
-function compile (str) {
-  return tokensToFunction(parse(str))
-}
-
-/**
- * Expose a method for transforming tokens into the path function.
- */
-function tokensToFunction (tokens) {
-  // Compile all the tokens into regexps.
-  var matches = new Array(tokens.length)
-
-  // Compile all the patterns before compilation.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] === 'object') {
-      matches[i] = new RegExp('^' + tokens[i].pattern + '$')
-    }
-  }
-
-  return function (obj) {
-    var path = ''
-    var data = obj || {}
-
-    for (var i = 0; i < tokens.length; i++) {
-      var token = tokens[i]
-
-      if (typeof token === 'string') {
-        path += token
-
-        continue
-      }
-
-      var value = data[token.name]
-      var segment
-
-      if (value == null) {
-        if (token.optional) {
-          continue
-        } else {
-          throw new TypeError('Expected "' + token.name + '" to be defined')
-        }
-      }
-
-      if (isarray(value)) {
-        if (!token.repeat) {
-          throw new TypeError('Expected "' + token.name + '" to not repeat, but received "' + value + '"')
-        }
-
-        if (value.length === 0) {
-          if (token.optional) {
-            continue
-          } else {
-            throw new TypeError('Expected "' + token.name + '" to not be empty')
-          }
-        }
-
-        for (var j = 0; j < value.length; j++) {
-          segment = encodeURIComponent(value[j])
-
-          if (!matches[i].test(segment)) {
-            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
-          }
-
-          path += (j === 0 ? token.prefix : token.delimiter) + segment
-        }
-
-        continue
-      }
-
-      segment = encodeURIComponent(value)
-
-      if (!matches[i].test(segment)) {
-        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
-      }
-
-      path += token.prefix + segment
-    }
-
-    return path
-  }
-}
-
-/**
- * Escape a regular expression string.
- *
- * @param  {String} str
- * @return {String}
- */
-function escapeString (str) {
-  return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1')
-}
-
-/**
- * Escape the capturing group by escaping special characters and meaning.
- *
- * @param  {String} group
- * @return {String}
- */
-function escapeGroup (group) {
-  return group.replace(/([=!:$\/()])/g, '\\$1')
-}
-
-/**
- * Attach the keys as a property of the regexp.
- *
- * @param  {RegExp} re
- * @param  {Array}  keys
- * @return {RegExp}
- */
-function attachKeys (re, keys) {
-  re.keys = keys
-  return re
-}
-
-/**
- * Get the flags for a regexp from the options.
- *
- * @param  {Object} options
- * @return {String}
- */
-function flags (options) {
-  return options.sensitive ? '' : 'i'
-}
-
-/**
- * Pull out keys from a regexp.
- *
- * @param  {RegExp} path
- * @param  {Array}  keys
- * @return {RegExp}
- */
-function regexpToRegexp (path, keys) {
-  // Use a negative lookahead to match only capturing groups.
-  var groups = path.source.match(/\((?!\?)/g)
-
-  if (groups) {
-    for (var i = 0; i < groups.length; i++) {
-      keys.push({
-        name: i,
-        prefix: null,
-        delimiter: null,
-        optional: false,
-        repeat: false,
-        pattern: null
-      })
-    }
-  }
-
-  return attachKeys(path, keys)
-}
-
-/**
- * Transform an array into a regexp.
- *
- * @param  {Array}  path
- * @param  {Array}  keys
- * @param  {Object} options
- * @return {RegExp}
- */
-function arrayToRegexp (path, keys, options) {
-  var parts = []
-
-  for (var i = 0; i < path.length; i++) {
-    parts.push(pathToRegexp(path[i], keys, options).source)
-  }
-
-  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
-
-  return attachKeys(regexp, keys)
-}
-
-/**
- * Create a path regexp from string input.
- *
- * @param  {String} path
- * @param  {Array}  keys
- * @param  {Object} options
- * @return {RegExp}
- */
-function stringToRegexp (path, keys, options) {
-  var tokens = parse(path)
-  var re = tokensToRegExp(tokens, options)
-
-  // Attach keys back to the regexp.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] !== 'string') {
-      keys.push(tokens[i])
-    }
-  }
-
-  return attachKeys(re, keys)
-}
-
-/**
- * Expose a function for taking tokens and returning a RegExp.
- *
- * @param  {Array}  tokens
- * @param  {Array}  keys
- * @param  {Object} options
- * @return {RegExp}
- */
-function tokensToRegExp (tokens, options) {
-  options = options || {}
-
-  var strict = options.strict
-  var end = options.end !== false
-  var route = ''
-  var lastToken = tokens[tokens.length - 1]
-  var endsWithSlash = typeof lastToken === 'string' && /\/$/.test(lastToken)
-
-  // Iterate over the tokens and create our regexp string.
-  for (var i = 0; i < tokens.length; i++) {
-    var token = tokens[i]
-
-    if (typeof token === 'string') {
-      route += escapeString(token)
-    } else {
-      var prefix = escapeString(token.prefix)
-      var capture = token.pattern
-
-      if (token.repeat) {
-        capture += '(?:' + prefix + capture + ')*'
-      }
-
-      if (token.optional) {
-        if (prefix) {
-          capture = '(?:' + prefix + '(' + capture + '))?'
-        } else {
-          capture = '(' + capture + ')?'
-        }
-      } else {
-        capture = prefix + '(' + capture + ')'
-      }
-
-      route += capture
-    }
-  }
-
-  // In non-strict mode we allow a slash at the end of match. If the path to
-  // match already ends with a slash, we remove it for consistency. The slash
-  // is valid at the end of a path match, not in the middle. This is important
-  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-  if (!strict) {
-    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?'
-  }
-
-  if (end) {
-    route += '$'
-  } else {
-    // In non-ending mode, we need the capturing groups to match as much as
-    // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithSlash ? '' : '(?=\\/|$)'
-  }
-
-  return new RegExp('^' + route, flags(options))
-}
-
-/**
- * Normalize the given path string, returning a regular expression.
- *
- * An empty array can be passed in for the keys, which will hold the
- * placeholder key descriptions. For example, using `/user/:id`, `keys` will
- * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
- *
- * @param  {(String|RegExp|Array)} path
- * @param  {Array}                 [keys]
- * @param  {Object}                [options]
- * @return {RegExp}
- */
-function pathToRegexp (path, keys, options) {
-  keys = keys || []
-
-  if (!isarray(keys)) {
-    options = keys
-    keys = []
-  } else if (!options) {
-    options = {}
-  }
-
-  if (path instanceof RegExp) {
-    return regexpToRegexp(path, keys, options)
-  }
-
-  if (isarray(path)) {
-    return arrayToRegexp(path, keys, options)
-  }
-
-  return stringToRegexp(path, keys, options)
-}
-
+/***/ }
+/******/ ])
+});
+;
+//# sourceMappingURL=navigo.js.map
 
 /***/ }),
 
@@ -10006,193 +9404,6 @@ if (undefined !== 'production') {
 }
 
 module.exports = emptyObject;
-
-/***/ }),
-
-/***/ 39:
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
 
 /***/ }),
 
@@ -12073,7 +11284,7 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 }
 
 module.exports = checkReactTypeSpec;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(39)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(47)))
 
 /***/ }),
 
@@ -12303,12 +11514,199 @@ module.exports = traverseAllChildren;
 
 /***/ }),
 
-/***/ 469:
+/***/ 467:
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(57);
 __webpack_require__(7);
 module.exports = __webpack_require__(25);
+
+
+/***/ }),
+
+/***/ 47:
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
 
 /***/ }),
@@ -13176,6 +12574,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 /***/ })
 /******/ ]);
+//# sourceMappingURL=polyfills.js.map
 //# sourceMappingURL=polyfills.js.map
 
 /***/ }),

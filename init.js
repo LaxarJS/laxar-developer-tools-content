@@ -1,5 +1,5 @@
 import 'polyfills';
-import { bootstrap } from 'laxar';
+import { create } from 'laxar';
 
 import * as reactAdapter from 'laxar-react-adapter';
 
@@ -11,8 +11,8 @@ const config = {
       query: {
          enabled: true
       },
-      pagejs: {
-         hashbang: true
+      navigo: {
+         useHash: true
       }
    },
    flow: {
@@ -27,8 +27,6 @@ const config = {
    }
 };
 
-bootstrap( document.querySelector( '[data-ax-page]' ), {
-   widgetAdapters: [ reactAdapter ],
-   configuration: config,
-   artifacts
-} );
+create( [ reactAdapter ], artifacts, config )
+   .flow( config.flow.name, document.querySelector( '[data-ax-page]' ) )
+   .bootstrap();
