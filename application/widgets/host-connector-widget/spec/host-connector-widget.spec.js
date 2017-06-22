@@ -16,9 +16,9 @@ describe( 'A host-connector-widget', () => {
    beforeEach( axMocks.setupForWidget() );
 
    beforeEach( () => {
-      // fake the AxDeveloperToolsWidget presence in the opener window:
+      // fake the laxarDeveloperToolsWidget and laxar tooling API presence in the opener window:
       window.opener = {
-         axDeveloperTools: {
+         laxarDeveloperToolsApi: {
             buffers: {
                events: [],
                log: []
@@ -26,7 +26,7 @@ describe( 'A host-connector-widget', () => {
          }
       };
 
-      fakeChannel = window.opener.axDeveloperTools;
+      fakeChannel = window.opener.laxarDeveloperToolsApi;
 
       axMocks.widget.configure( {
          events: {

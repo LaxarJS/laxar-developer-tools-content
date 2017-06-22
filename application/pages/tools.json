@@ -1,7 +1,7 @@
 {
    "layout": "tools",
    "areas": {
-      "activities": [
+      "axActivities": [
          {
             "widget": "host-connector-widget",
             "features": {
