@@ -72,7 +72,7 @@ export function create( context, eventBus ) {
 
    function tryPublishData() {
       try {
-         const channel = window.opener.axDeveloperTools;
+         const channel = window.opener.laxarDeveloperToolsApi;
          publishDataOrHandleException( channel, false );
       }
       catch( exception ) {
@@ -115,7 +115,7 @@ export function create( context, eventBus ) {
 
    function checkForData() {
       try {
-         const channel = window.opener.axDeveloperTools;
+         const channel = window.opener.laxarDeveloperToolsApi;
          checkForDataOrHandleException( channel, false );
       }
       catch( e ) {
@@ -131,6 +131,7 @@ export function create( context, eventBus ) {
       }
       else {
          const buffers = channel && channel.buffers;
+
          if( buffers ) {
             publishStream( 'events', buffers );
             publishStream( 'log', buffers );
