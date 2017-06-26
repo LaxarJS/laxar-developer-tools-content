@@ -9,7 +9,7 @@
 const path = require( 'path' );
 const WebpackJasmineHtmlRunnerPlugin = require( 'webpack-jasmine-html-runner-plugin' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
-const publicPath = '/var/dist/';
+const outputPath = 'var/dist/';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +19,7 @@ module.exports = ( env = {} ) =>
          entry: WebpackJasmineHtmlRunnerPlugin.entry( './application/widgets/*/spec/*.spec.js' ),
          output: {
             path: resolve( 'spec-output' ),
-            publicPath: '/spec-output/',
+            outputPath: '/spec-output/',
             filename: '[name].bundle.js'
          }
       } ) :
@@ -33,8 +33,8 @@ function config( env ) {
       entry: { 'init': './init.js' },
 
       output: {
-         path: path.resolve( __dirname, `./${publicPath}` ),
-         publicPath: publicPath.substr( 1 ),
+         path: path.resolve( __dirname, `./${outputPath}` ),
+         publicPath: outputPath,
 
          filename: env.production ? '[name].bundle.min.js' : '[name].bundle.js',
          chunkFilename: env.production ? '[name].bundle.min.js' : '[name].bundle.js'
@@ -86,7 +86,13 @@ function config( env ) {
             {  // ... and resolving CSS url()s with the css loader
                // (extract-loader extracts the CSS string from the JS module returned by the css-loader)
                test: /\.(css|s[ac]ss)$/,
-               loader: 'style-loader!css-loader'
+               loader: env.production ?
+                  ExtractTextPlugin.extract( {
+                     fallback: 'style-loader',
+                     use: 'css-loader',
+                     publicPath: ''
+                  } ) :
+                  'style-loader!css-loader?sourceMap!resolve-url-loader?sourceMap'
             },
             {  // load scss files by precompiling with the sass-loader
                test: /\/default.theme\/.*\.s[ac]ss$/,

@@ -32,6 +32,7 @@ function create( context, eventBus, reactRender ) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function displayLogMessage( message ) {
+      console.log( message );
       model.messages.unshift( {
          text: string.format( message.text, message.replacements ),
          level: message.level,
