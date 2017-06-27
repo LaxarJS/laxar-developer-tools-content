@@ -63,7 +63,7 @@
       "laxar": "2.0.0-rc.3",
       "laxar-uikit": "2.0.0-rc.1",
       "laxar-patterns": "2.0.0-rc.2",
-      "laxar-react-adapter": "2.0.0-alpha.1",
+      "laxar-react-adapter": "^2.0.0-rc.1",
       "lodash": "^3.10.0",
       "wireflow": "^0.7.0-alpha.1",
       "moment": "^2.17.1",

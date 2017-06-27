@@ -10965,46 +10965,7 @@ input[type="text"].ax-error {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/*# sourceMappingURL=theme.css.map */html, body {
-  height: 100%; }
-
-.tools-layout .app-toolbar {
-  height: 35px; }
-
-.tools-layout .nav {
-  height: 42px; }
-
-.tools-layout .app-tab {
-  height: calc( 100vh - 42px);
-  position: relative; }
-
-.tools-layout .app-tab-content {
-  border: 1px solid #ddd;
-  border-top: none;
-  padding: 20px;
-  margin-bottom: 20px; }
-.developer-toolbar-widget :active,
-.developer-toolbar-widget :focus {
-  outline: none !important; }
-
-.developer-toolbar-widget .fa-toggle-on {
-  color: #5cb85c; }
-
-.developer-toolbar-widget .developer-toolbar-icon {
-  background-repeat: no-repeat;
-  background: url(assets/title-icon.png);
-  background-size: contain;
-  border-left: 4px solid white;
-  border-top: 4px solid white;
-  border-right: 4px solid white;
-  width: 40px;
-  height: 36px; }
-
-.developer-toolbar-widget .developer-toolbar-hint {
-  height: 38px;
-  padding: 9px;
-  color: #737373; }
-@keyframes nbe-vertex-ping {
+/*# sourceMappingURL=theme.css.map */@keyframes nbe-vertex-ping {
    from {
       box-shadow: 0 1px 3px 0 #a0a0a0, 0px 0px 5px 3px #eeeeee, 0px 0px 0px 0px transparent;
    }
@@ -11786,6 +11747,62 @@ input[type="text"].ax-error {
    height: calc( 100% - 4px );
    position: relative;
 }
+.developer-toolbar-widget :active,
+.developer-toolbar-widget :focus {
+  outline: none !important; }
+
+.developer-toolbar-widget .fa-toggle-on {
+  color: #5cb85c; }
+
+.developer-toolbar-widget .developer-toolbar-icon {
+  background-repeat: no-repeat;
+  background: url(assets/title-icon.png);
+  background-size: contain;
+  border-left: 4px solid white;
+  border-top: 4px solid white;
+  border-right: 4px solid white;
+  width: 40px;
+  height: 36px; }
+
+.developer-toolbar-widget .developer-toolbar-hint {
+  height: 38px;
+  padding: 9px;
+  color: #737373; }
+.log-display-widget .ax-button-wrapper {
+  padding: 8px 8px; }
+
+.log-display-widget .affix {
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid #CCC;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1); }
+
+.log-display-widget .ax-affix-area {
+  text-align: right; }
+
+.log-display-widget h4 {
+  padding-left: 8px;
+  margin-top: 0; }
+
+.log-display-widget .table {
+  table-layout: fixed; }
+  .log-display-widget .table > thead > tr > th:nth-child(1) {
+    width: 100px; }
+  @media (min-width: 992px) {
+    .log-display-widget .table > thead > tr > th:nth-child(2) {
+      width: 380px; } }
+  @media (min-width: 1200px) {
+    .log-display-widget .table > thead > tr > th:nth-child(2) {
+      width: 580px; } }
+  .log-display-widget .table > thead > tr > th:nth-child(4) {
+    width: 180px; }
+  .log-display-widget .table > tbody:nth-of-type(even) td {
+    background-color: #eeeeee; }
+  .log-display-widget .table td {
+    word-wrap: break-word;
+    font-size: 12px; }
 .events-display-widget .ax-button-wrapper {
   padding: 8px 8px; }
 
@@ -12034,40 +12051,23 @@ input[type="text"].ax-error {
 
 .events-display-widget div.ax-event-settings-col > div.pull-right > button {
   margin: 0 2px; }
-.log-display-widget .ax-button-wrapper {
-  padding: 8px 8px; }
+html, body {
+  height: 100%; }
 
-.log-display-widget .affix {
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid #CCC;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1); }
+.tools-layout .app-toolbar {
+  height: 35px; }
 
-.log-display-widget .ax-affix-area {
-  text-align: right; }
+.tools-layout .nav {
+  height: 42px; }
 
-.log-display-widget h4 {
-  padding-left: 8px;
-  margin-top: 0; }
+.tools-layout .app-tab {
+  height: calc( 100vh - 42px);
+  position: relative; }
 
-.log-display-widget .table {
-  table-layout: fixed; }
-  .log-display-widget .table > thead > tr > th:nth-child(1) {
-    width: 100px; }
-  @media (min-width: 992px) {
-    .log-display-widget .table > thead > tr > th:nth-child(2) {
-      width: 380px; } }
-  @media (min-width: 1200px) {
-    .log-display-widget .table > thead > tr > th:nth-child(2) {
-      width: 580px; } }
-  .log-display-widget .table > thead > tr > th:nth-child(4) {
-    width: 180px; }
-  .log-display-widget .table > tbody:nth-of-type(even) td {
-    background-color: #eeeeee; }
-  .log-display-widget .table td {
-    word-wrap: break-word;
-    font-size: 12px; }
+.tools-layout .app-tab-content {
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 20px;
+  margin-bottom: 20px; }
 
 /*# sourceMappingURL=init.bundle.css.map*/
