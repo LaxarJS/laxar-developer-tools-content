@@ -1,6 +1,6 @@
 {
    "name": "laxar-developer-tools-content",
-   "version": "0.1.0-pre",
+   "version": "0.1.0-rc.0",
    "repository": {
       "type": "git",
       "url": "https://github.com/LaxarJS/laxar-developer-tools-content.git"

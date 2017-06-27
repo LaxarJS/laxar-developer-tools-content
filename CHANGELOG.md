@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v0.1.0-rc.0
+
 - [#7](https://github.com/LaxarJS/laxar-developer-tools-content/issues/7): Host-connector-widget uses `laxarDeveloperToolsApi` now. Improved documentation and webpack configuration.
 - [#2](https://github.com/LaxarJS/laxar-developer-tools-content/issues/2): Fixed the identification of ports from JSON schemas that use `patternProperties`
 - [#5](https://github.com/LaxarJS/laxar-developer-tools-content/issues/5): Adapt to latest changes in LaxarJS
