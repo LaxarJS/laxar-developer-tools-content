@@ -9,7 +9,7 @@
 const path = require( 'path' );
 const WebpackJasmineHtmlRunnerPlugin = require( 'webpack-jasmine-html-runner-plugin' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
-const outputPath = 'var/dist/';
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,22 +26,23 @@ module.exports = ( env = {} ) =>
       config( env );
 
 function config( env ) {
+   const outputPath = 'var/dist/';
 
    return {
       devtool: '#source-map',
-
       entry: { 'init': './init.js' },
 
       output: {
          path: path.resolve( __dirname, `./${outputPath}` ),
          publicPath: outputPath,
 
-         filename: env.production ? '[name].bundle.min.js' : '[name].bundle.js',
-         chunkFilename: env.production ? '[name].bundle.min.js' : '[name].bundle.js'
+         filename: '[name].bundle.js',
+         chunkFilename: '[name].bundle.js'
       },
 
-      plugins: env.production ? [ new ExtractTextPlugin( { filename: '[name].bundle.css' } ) ] :
-         [ new WebpackJasmineHtmlRunnerPlugin() ],
+      plugins:
+         [ new ExtractTextPlugin( { filename: '[name].bundle.css' } ) ]
+            .concat( env.production ? [] : [ new WebpackJasmineHtmlRunnerPlugin() ] ),
 
       resolve: {
          descriptionFiles: [ 'package.json' ],
@@ -71,6 +72,11 @@ function config( env ) {
                exclude: resolve( 'node_modules' ),
                loader: 'laxar-mocks/spec-loader'
             },
+            {
+               test: /.jsx$/,
+               exclude: resolve( 'node_modules' ),
+               loader: 'babel-loader'
+            },
             {  // load styles, images and fonts with the file-loader
                // (out-of-bundle in var/build/assets/)
                test: /\.(gif|jpe?g|png|ttf|woff2?|svg|eot|otf)(\?.*)?$/,
@@ -86,18 +92,17 @@ function config( env ) {
             {  // ... and resolving CSS url()s with the css loader
                // (extract-loader extracts the CSS string from the JS module returned by the css-loader)
                test: /\.(css|s[ac]ss)$/,
-               loader: env.production ?
-                  ExtractTextPlugin.extract( {
-                     fallback: 'style-loader',
-                     use: 'css-loader',
-                     publicPath: ''
-                  } ) :
-                  'style-loader!css-loader?sourceMap!resolve-url-loader?sourceMap'
+               loader: ExtractTextPlugin.extract( {
+                  fallback: 'style-loader',
+                  use: env.production ? 'css-loader' : 'css-loader?sourceMap',
+                  publicPath: ''
+               } )
             },
             {  // load scss files by precompiling with the sass-loader
                test: /\/default.theme\/.*\.s[ac]ss$/,
                loader: 'sass-loader',
                options: {
+                  sourceMap: true,
                   includePaths: [
                      'laxar-uikit/themes/default.theme/scss',
                      'laxar-uikit/scss',
@@ -123,11 +128,6 @@ function config( env ) {
                   loader: 'exports-loader',
                   options: 'axDeveloperToolsToggleWidgetOutline'
                } ]
-            },
-            {
-               test: /.jsx$/,
-               exclude: resolve( 'node_modules' ),
-               loader: 'babel-loader'
             }
          ]
       }

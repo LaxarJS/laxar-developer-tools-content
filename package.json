@@ -13,7 +13,7 @@
       "browser-spec-run": "webpack-dev-server --env.browserSpec",
       "eslint": "eslint --ext=.js, application/widgets *.js",
       "karma": "node karma.config.js",
-      "dist": "webpack -p --env.production",
+      "dist": "webpack --env.production",
       "prepublish": "webpack --progress",
       "start": "webpack --watch",
       "test": "npm run karma && npm run eslint",

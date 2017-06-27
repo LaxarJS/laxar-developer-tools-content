@@ -4,7 +4,6 @@ This is an application using the LaxarJS developer tooling API.
 The laxar-developer-tools-widget and the laxar-developer-tools-extension embed this application.
 
 
-
 ## Content
 
 * [Appearance](#appearance)
@@ -23,6 +22,7 @@ The laxar-developer-tools-widget and the laxar-developer-tools-extension embed t
 The events tab displays the latest publish/subscribe events of the currently running application, including subscribe/unsubscribe calls, as well as publication and delivery of events.
 Events may be filtered by name, pattern, or source/target.
 
+
 ### Page tab
 
 ![The page inspector of the LaxarJS developer tools](docs/page.png)
@@ -36,12 +36,10 @@ The log tab lists log messages that were created using the `laxar.log` API.
 You can also use the browser console to inspect these messages without opening the developer tools.
 
 
-
-
 ### Enabling Page Inspection
 
 In the page tab, area nesting (blue connections) will work out of the box.
-The standard [LaxarJS patterns](//github.com/LaxarJS/laxar-patterns/blob/master/docs/index.md#families-of-laxarjs-patterns) *resource*, *action* and *flag* are also supported, but additional markup needs to be added to your *widget.json* files for visualization to work:
+The standard [LaxarJS patterns](http://laxarjs.org/docs/laxar-patterns-v2-latest) *resource*, *action* and *flag* are also supported, but additional markup needs to be added to your *widget.json* files for visualization to work:
 
 * Configurable topics must use `"format": "topic"` in their JSON schema (with the exception of flag-receivers, which should use `"format": "flag-topic"` to support negated flags). For validation, this is recommended anyway.
 
@@ -114,4 +112,4 @@ Finally, a widget/activty that processes a flag `visibility.toggleOn` would use 
 
 The page inspector simply ignores configuration values that cannot be unambiguously assigned to a specific pattern and role.
 
-[Compositions](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/writing_compositions.md) are supported as well, just make sure to add "`format`' and "`role`"
+[Compositions](http://laxarjs.org/docs/laxar-v2-latest/manuals/writing_compositions) are supported as well, just make sure to add "`format`' and "`role`"
