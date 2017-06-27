@@ -1,3 +1,8 @@
+/**
+ * Copyright 2017 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
 /* eslint-env node */
 
 module.exports = function( config ) {
@@ -26,9 +31,7 @@ if( require.main === module ) {
 function karmaConfig() {
 
    const browsers = [
-      'PhantomJS',
-      'Firefox',
-      process.env.TRAVIS ? 'ChromeTravisCi' : 'Chrome'
+      'PhantomJS'
    ];
 
    return {
@@ -72,9 +75,8 @@ function karmaConfigForWidget( specPath ) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function webpackConfig() {
-   const config = Object.assign( {}, require('./webpack.config' ) );
+   const config = require('./webpack.config' )();
    delete config.entry;
-   config.plugins = config.basePlugins;
    config.devtool = 'inline-source-map';
    return config;
 }

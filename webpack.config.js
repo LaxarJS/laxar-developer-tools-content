@@ -19,7 +19,7 @@ module.exports = ( env = {} ) =>
          entry: WebpackJasmineHtmlRunnerPlugin.entry( './application/widgets/*/spec/*.spec.js' ),
          output: {
             path: resolve( 'spec-output' ),
-            outputPath: '/spec-output/',
+            publicPath: '/spec-output/',
             filename: '[name].bundle.js'
          }
       } ) :
