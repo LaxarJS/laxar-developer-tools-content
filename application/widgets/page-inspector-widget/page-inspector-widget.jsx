@@ -27,7 +27,6 @@ const injections = [ 'axContext', 'axEventBus', 'axReactRender' ];
 function create( context, eventBus, reactRender ) {
 
    let visible = false;
-   let domAvailable = false;
    let viewModel = null;
    let viewModelCalculation = null;
 
@@ -53,7 +52,7 @@ function create( context, eventBus, reactRender ) {
    eventBus.subscribe( `didChangeAreaVisibility.${context.widget.area}`, event => {
       if( !visible && event.visible ) {
          visible = true;
-         render();
+         reactRender();
       }
    } );
 
@@ -116,7 +115,7 @@ function create( context, eventBus, reactRender ) {
          clearTimeout( viewModelCalculation );
          viewModelCalculation = null;
          if( visible ) {
-            render();
+            reactRender();
          }
       }
 
@@ -131,7 +130,7 @@ function create( context, eventBus, reactRender ) {
                compositionDisplay: withFlatCompositions ? 'FLAT' : 'COMPACT',
                activeComposition
             } );
-            const dispatcher = new Dispatcher( render );
+            const dispatcher = new Dispatcher( reactRender );
             new HistoryStore( dispatcher );
             const graphStore = new GraphStore( dispatcher, pageGraph, pageTypes );
             const layoutStore = new LayoutStore( dispatcher, graphStore );
@@ -145,7 +144,7 @@ function create( context, eventBus, reactRender ) {
             } );
 
             viewModel = { graphStore, layoutStore, settingsStore, selectionStore, dispatcher };
-            render();
+            reactRender();
          }, 20 );
       }
    }
@@ -153,12 +152,12 @@ function create( context, eventBus, reactRender ) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function render() {
-      if( !visible || !domAvailable ) {
+      if( !visible ) {
          return;
       }
 
       if( !viewModel ) {
-         reactRender(
+         return (
             <div className='page-inspector-placeholder'>
               <i className='fa fa-cog fa-spin' />
             </div>
@@ -178,7 +177,7 @@ function create( context, eventBus, reactRender ) {
       replaceFilter( selectionStore.selection, graphStore.graph );
 
 
-      reactRender(
+      return (
          <div className='page-inspector-row form-inline'>
             <div className='text-right'>
                <div className='pull-left'>{ renderBreadCrumbs() }</div>
@@ -227,10 +226,7 @@ function create( context, eventBus, reactRender ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return { onDomAvailable: () => {
-      domAvailable = true;
-      render();
-   } };
+   return render;
 }
 
 export default {

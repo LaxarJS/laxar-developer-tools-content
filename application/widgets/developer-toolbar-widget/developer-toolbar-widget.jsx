@@ -58,7 +58,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
             if( channel.text === 'reloadedPage' ) {
                model.gridOverlay = false;
                model.widgetOverlay = false;
-               render();
+               reactRender();
             }
          }
       } );
@@ -80,7 +80,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
             }
             else {
                model.toggleGridTitle = '';
-               render();
+               reactRender();
             }
          }
       }
@@ -90,7 +90,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       initialState: model.laxar,
       onChange( newState ) {
          model.laxar = newState;
-         render();
+         reactRender();
       }
    } );
 
@@ -99,7 +99,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       chrome.devtools.network.onNavigated.addListener( () => {
          model.gridOverlay = false;
          model.widgetOverlay = false;
-         render();
+         reactRender();
       } );
    }
 
@@ -110,7 +110,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       const newTab = TABS.filter( _ => { return _.name === newName; } )[ 0 ];
       if( !newTab ) { return; }
       model.activeTab = newTab;
-      render();
+      reactRender();
    } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       eventBus.publish( 'didTakeAction.navigation', {
          action: 'navigation'
       } );
-      render();
+      reactRender();
    } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
       if( !context.resources.grid ){ return; }
       toggleGrid();
       model.gridOverlay = !model.gridOverlay;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
    function onClickToggleWidgetOutline() {
       toggleWidgetOutline();
       model.widgetOverlay = !model.widgetOverlay;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +219,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
          return (
             <AxWidgetArea
                key={ tab.name }
-               areaName={ tab.name }
+               name={ tab.name }
                cssClassName="app-tab app-tab-page"
                axAreaHelper={ areaHelper }
                visible={ model.laxar && model.activeTab.name === tab.name }
@@ -263,7 +263,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
          </ul>
       );
 
-      reactRender(
+      return (
          <div>
             { optionButtons }
             { navTab }
@@ -274,9 +274,7 @@ function create( context, eventBus, reactRender, flowService, areaHelper, axVisi
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render
-   };
+   return render;
 }
 
 export default {

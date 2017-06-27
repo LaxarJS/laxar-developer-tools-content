@@ -4555,7 +4555,7 @@ module.exports = lodash;
 
 var _prodInvariant = __webpack_require__(3);
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var ReactDOMComponentFlags = __webpack_require__(215);
 
 var invariant = __webpack_require__(1);
@@ -10889,7 +10889,8 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9mbHV4L2xheW91dC9sYXlvdXQtbW9kZWwuanN4Il0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBRUEsTUFBTSxNQUFNLEdBQUcsZUFGRCxNQUFNLEVBRUU7QUFDcEIsUUFBSSxFQUFFLENBQUM7QUFDUCxPQUFHLEVBQUUsQ0FBQyxFQUNQLENBQUMsQ0FBQzs7O0FBRUgsTUFBTSxNQUFNLEdBQUcsZUFQRCxNQUFNLEVBT0U7QUFDcEIsU0FBSyxFQUFFLGVBUkEsR0FBRyxHQVFFO0FBQ1osWUFBUSxFQUFFLGVBVEgsR0FBRyxHQVNLLEVBQ2hCLENBQUMsQ0FBQzs7O0FBRUgsTUFBTSxVQUFVLEdBQUcsZUFaTCxNQUFNLEVBWU07QUFDeEIsU0FBSyxFQUFFLENBQUM7QUFDUixVQUFNLEVBQUUsQ0FBQyxFQUNWLENBQUMsQ0FBQzs7O0FBRUgsTUFBTSxZQUFZLEdBQUcsZUFqQlAsTUFBTSxFQWlCUTtBQUMxQixZQUFRLEVBQUUsZUFsQkgsR0FBRyxHQWtCSztBQUNmLFNBQUssRUFBRSxlQW5CQSxHQUFHLEdBbUJFLEVBQ2IsQ0FBQyxDQUFDOzs7QUFFSCxNQUFNLGtCQUFrQixHQUFHLGVBdEJiLE1BQU0sRUFzQmM7QUFDaEMsY0FBVSxFQUFFLElBQUk7QUFDaEIsV0FBTyxFQUFFLGVBeEJGLEdBQUcsR0F3Qkk7QUFDZCxZQUFRLEVBQUUsZUF6QkgsR0FBRyxHQXlCSyxFQUNoQjtBQUFFLHNCQUFvQixDQUFDLENBQUM7O0FBRXpCLE1BQU0sZ0JBQWdCLEdBQUcsZUE1QlgsTUFBTSxFQTRCWTtBQUM5QixjQUFVLEVBQUUsSUFBSSxFQUNqQjtBQUFFLG9CQUFrQixDQUFDLENBQUM7O0FBRXZCLE1BQU0sWUFBWSxHQUFHLGVBaENQLE1BQU0sRUFnQ1E7QUFDMUIsVUFBTSxFQUFFLElBQUk7QUFDWixRQUFJLEVBQUUsSUFBSTtBQUNWLGNBQVUsRUFBRSxJQUFJO0FBQ2hCLGVBQVcsRUFBRSxJQUFJLEVBQ2xCO0FBQUUsZ0JBQWMsQ0FBQyxDQUFDOztBQUVuQixXQUFTLFlBQVksQ0FBRSxjQUFjLEVBQUc7QUFDdEMsV0FBTyxZQUFZLENBQUM7QUFDbEIsV0FBSyxFQUFFLGVBekNGLEdBQUcsRUF5Q0ksY0FBYyxDQUFDLEtBQUssQ0FBRSxDQUFDLEdBQUcsQ0FBRSxnQkFBZ0IsQ0FBRTtBQUMxRCxjQUFRLEVBQUUsZUExQ0wsR0FBRyxFQTBDTyxjQUFjLENBQUMsUUFBUSxDQUFFLENBQUMsR0FBRyxDQUFFLGtCQUFrQixDQUFFLEVBQ25FLENBQUMsQ0FBQyxDQUNKOzs7O0FBRUQsV0FBUyxrQkFBa0IsQ0FBRSxvQkFBb0IsRUFBRztBQUNsRCxXQUFPLGtCQUFrQixDQUFDO0FBQ3hCLGdCQUFVLEVBQUUsVUFBVSxDQUFFLG9CQUFvQixDQUFDLFVBQVUsQ0FBRTtBQUN6RCxhQUFPLEVBQUUsZUFqREosR0FBRyxFQWlETSxvQkFBb0IsQ0FBQyxPQUFPLENBQUUsQ0FBQyxHQUFHLENBQUUsTUFBTSxDQUFFO0FBQzFELGNBQVEsRUFBRSxlQWxETCxHQUFHLEVBa0RPLG9CQUFvQixDQUFDLFFBQVEsQ0FBRSxDQUFDLEdBQUcsQ0FBRSxNQUFNLENBQUUsRUFDN0QsQ0FBQyxDQUFDLENBQ0o7Ozs7QUFFRCxXQUFTLGdCQUFnQixDQUFFLGtCQUFrQixFQUFHO0FBQzlDLFdBQU8sZ0JBQWdCLENBQUM7QUFDdEIsZ0JBQVUsRUFBRSxVQUFVLENBQUUsa0JBQWtCLENBQUMsVUFBVSxDQUFFLEVBQ3hELENBQUMsQ0FBQyxDQUNKOzs7O0FBRUQsV0FBUyxVQUFVLENBQUUsWUFBWSxFQUFHO0FBQ2xDLFdBQU8sVUFBVSxDQUFFLFlBQVksQ0FBRSxDQUFDLENBQ25DOzs7QUFFRCxXQUFTLE1BQU0sQ0FBRSxRQUFRLEVBQUc7QUFDMUIsV0FBTyxNQUFNLENBQUUsUUFBUSxDQUFFLENBQUMsQ0FDM0I7OztBQUVELFdBQVMsTUFBTSxDQUFFLFFBQVEsRUFBRztBQUMxQixXQUFPLE1BQU0sQ0FBQztBQUNaLFdBQUssRUFBRSxlQXRFRixHQUFHLEVBc0VJLFFBQVEsQ0FBQyxLQUFLLENBQUUsQ0FBQyxHQUFHLENBQUUsTUFBTSxDQUFFO0FBQzFDLGNBQVEsRUFBRSxlQXZFTCxHQUFHLEVBdUVPLFFBQVEsQ0FBQyxRQUFRLENBQUUsQ0FBQyxHQUFHLENBQUUsTUFBTSxDQUFFLEVBQ2pELENBQUMsQ0FBQyxDQUNKOzs7O0FBRWM7QUFDYixVQUFNLEVBQU4sTUFBTTtBQUNOLGNBQVUsRUFBVixVQUFVO0FBQ1YsVUFBTSxFQUFOLE1BQU07QUFDTixnQkFBWSxFQUFaLFlBQVk7QUFDWixzQkFBa0IsRUFBbEIsa0JBQWtCO0FBQ2xCLG9CQUFnQixFQUFoQixnQkFBZ0I7QUFDaEIsZ0JBQVksRUFBWixZQUFZO0FBQ1osV0FBTyxFQUFFO0FBQ1Asa0JBQVksRUFBWixZQUFZO0FBQ1osd0JBQWtCLEVBQWxCLGtCQUFrQjtBQUNsQixzQkFBZ0IsRUFBaEIsZ0JBQWdCO0FBQ2hCLGdCQUFVLEVBQVYsVUFBVTtBQUNWLFlBQU0sRUFBTixNQUFNO0FBQ04sWUFBTSxFQUFOLE1BQU0sRUFDUCxFQUNGIiwiZmlsZSI6ImxheW91dC1tb2RlbC5qcyIsInNvdXJjZVJvb3QiOiJzcmMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBNYXAsIFJlY29yZCB9IGZyb20gJ2ltbXV0YWJsZSc7XG5cbmNvbnN0IENvb3JkcyA9IFJlY29yZCh7XG4gIGxlZnQ6IDAsXG4gIHRvcDogMFxufSk7XG5cbmNvbnN0IExheW91dCA9IFJlY29yZCh7XG4gIGVkZ2VzOiBNYXAoKSxcbiAgdmVydGljZXM6IE1hcCgpXG59KTtcblxuY29uc3QgRGltZW5zaW9ucyA9IFJlY29yZCh7XG4gIHdpZHRoOiAwLFxuICBoZWlnaHQ6IDBcbn0pO1xuXG5jb25zdCBNZWFzdXJlbWVudHMgPSBSZWNvcmQoe1xuICB2ZXJ0aWNlczogTWFwKCksXG4gIGVkZ2VzOiBNYXAoKVxufSk7XG5cbmNvbnN0IFZlcnRleE1lYXN1cmVtZW50cyA9IFJlY29yZCh7XG4gIGRpbWVuc2lvbnM6IG51bGwsXG4gIGluYm91bmQ6IE1hcCgpLFxuICBvdXRib3VuZDogTWFwKClcbn0sICdWZXJ0ZXhNZWFzdXJlbWVudHMnKTtcblxuY29uc3QgRWRnZU1lYXN1cmVtZW50cyA9IFJlY29yZCh7XG4gIGRpbWVuc2lvbnM6IG51bGxcbn0sICdFZGdlTWVhc3VyZW1lbnRzJyk7XG5cbmNvbnN0IFBvcnREcmFnSW5mbyA9IFJlY29yZCh7XG4gIHZlcnRleDogbnVsbCxcbiAgcG9ydDogbnVsbCxcbiAgcG9ydENvb3JkczogbnVsbCxcbiAgbW91c2VDb29yZHM6IG51bGxcbn0sICdQb3J0RHJhZ0luZm8nKTtcblxuZnVuY3Rpb24gbWVhc3VyZW1lbnRzKCBqc01lYXN1cmVtZW50cyApIHtcbiAgcmV0dXJuIE1lYXN1cmVtZW50cyh7XG4gICAgZWRnZXM6IE1hcCgganNNZWFzdXJlbWVudHMuZWRnZXMgKS5tYXAoIGVkZ2VNZWFzdXJlbWVudHMgKSxcbiAgICB2ZXJ0aWNlczogTWFwKCBqc01lYXN1cmVtZW50cy52ZXJ0aWNlcyApLm1hcCggdmVydGV4TWVhc3VyZW1lbnRzIClcbiAgfSk7XG59XG5cbmZ1bmN0aW9uIHZlcnRleE1lYXN1cmVtZW50cygganNWZXJ0ZXhNZWFzdXJlbWVudHMgKSB7XG4gIHJldHVybiBWZXJ0ZXhNZWFzdXJlbWVudHMoe1xuICAgIGRpbWVuc2lvbnM6IGRpbWVuc2lvbnMoIGpzVmVydGV4TWVhc3VyZW1lbnRzLmRpbWVuc2lvbnMgKSxcbiAgICBpbmJvdW5kOiBNYXAoIGpzVmVydGV4TWVhc3VyZW1lbnRzLmluYm91bmQgKS5tYXAoIGNvb3JkcyApLFxuICAgIG91dGJvdW5kOiBNYXAoIGpzVmVydGV4TWVhc3VyZW1lbnRzLm91dGJvdW5kICkubWFwKCBjb29yZHMgKVxuICB9KTtcbn1cblxuZnVuY3Rpb24gZWRnZU1lYXN1cmVtZW50cygganNFZGdlTWVhc3VyZW1lbnRzICkge1xuICByZXR1cm4gRWRnZU1lYXN1cmVtZW50cyh7XG4gICAgZGltZW5zaW9uczogRGltZW5zaW9ucygganNFZGdlTWVhc3VyZW1lbnRzLmRpbWVuc2lvbnMgKVxuICB9KTtcbn1cblxuZnVuY3Rpb24gZGltZW5zaW9ucygganNEaW1lbnNpb25zICkge1xuICByZXR1cm4gRGltZW5zaW9ucygganNEaW1lbnNpb25zICk7XG59XG5cbmZ1bmN0aW9uIGNvb3JkcygganNDb29yZHMgKSB7XG4gIHJldHVybiBDb29yZHMoIGpzQ29vcmRzICk7XG59XG5cbmZ1bmN0aW9uIGxheW91dCgganNMYXlvdXQgKSB7XG4gIHJldHVybiBMYXlvdXQoe1xuICAgIGVkZ2VzOiBNYXAoIGpzTGF5b3V0LmVkZ2VzICkubWFwKCBjb29yZHMgKSxcbiAgICB2ZXJ0aWNlczogTWFwKCBqc0xheW91dC52ZXJ0aWNlcyApLm1hcCggY29vcmRzIClcbiAgfSk7XG59XG5cbmV4cG9ydCBkZWZhdWx0IHtcbiAgQ29vcmRzLFxuICBEaW1lbnNpb25zLFxuICBMYXlvdXQsXG4gIE1lYXN1cmVtZW50cyxcbiAgVmVydGV4TWVhc3VyZW1lbnRzLFxuICBFZGdlTWVhc3VyZW1lbnRzLFxuICBQb3J0RHJhZ0luZm8sXG4gIGNvbnZlcnQ6IHtcbiAgICBtZWFzdXJlbWVudHMsXG4gICAgdmVydGV4TWVhc3VyZW1lbnRzLFxuICAgIGVkZ2VNZWFzdXJlbWVudHMsXG4gICAgZGltZW5zaW9ucyxcbiAgICBjb29yZHMsXG4gICAgbGF5b3V0XG4gIH1cbn07XG4iXX0=
 
 /***/ }),
-/* 22 */
+/* 22 */,
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11104,7 +11105,7 @@ var DOMProperty = {
 module.exports = DOMProperty;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(9)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _immutable) {'use strict';var _slicedToArray = (function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i['return']) _i['return']();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError('Invalid attempt to destructure non-iterable instance');}};})();
@@ -11148,7 +11149,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsL21ldHJpY3MuanN4Il0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBRUEsTUFBTSxVQUFVLEdBQUcsSUFBSSxDQUFDOztBQUV4QixNQUFJLFFBQVEsR0FBRyxlQUpOLEdBQUcsR0FJUSxDQUFDO0FBQ3JCLE1BQUksU0FBUyxHQUFHLGVBTFAsR0FBRyxHQUtTLENBQUM7QUFDdEIsTUFBSSxPQUFPLENBQUM7O0FBRVosV0FBUyxLQUFLLENBQUUsS0FBSyxFQUFHO0FBQ3RCLFlBQVEsR0FBRyxRQUFRLENBQUMsR0FBRyxDQUFFLEtBQUssQ0FBQyxJQUFJLEVBQUUsQ0FBQyxRQUFRLENBQUMsR0FBRyxDQUFFLEtBQUssQ0FBQyxJQUFJLENBQUUsSUFBSSxDQUFDLENBQUEsR0FBSSxDQUFDLENBQUUsQ0FBQztBQUM3RSxhQUFTLEdBQUcsU0FBUyxDQUFDLEdBQUcsQ0FBRSxLQUFLLENBQUMsSUFBSSxFQUFFLENBQUMsU0FBUyxDQUFDLEdBQUcsQ0FBRSxLQUFLLENBQUMsSUFBSSxDQUFFLElBQUksQ0FBQyxDQUFBLEdBQUksS0FBSyxDQUFDLFFBQVEsQ0FBRSxDQUFDOzs7R0FHOUY7O0FBRUQsV0FBUyxLQUFLLENBQUUsTUFBTSxFQUFHO0FBQ3ZCLFdBQU8sSUFBSSxDQUFDLEtBQUssQ0FBRSxNQUFNLEdBQUcsSUFBSSxDQUFFLEdBQUcsSUFBSSxDQUFDLENBQzNDOzs7QUFFRCxXQUFTLE1BQU0sR0FBRztBQUNoQixRQUFNLEdBQUcsR0FBRyxTQUFOLEdBQUcsQ0FBRyxDQUFDLFVBQUksQ0FBQyxHQUFHLEdBQUcsR0FBRyxFQUFFLEdBQUcsR0FBRyxHQUFHLEdBQUcsQ0FBRSxFQUFFLEdBQUcsQ0FBQyxDQUFFLEVBQUEsQ0FBQztBQUNwRCxRQUFNLE9BQU8sR0FBRyxRQUFRLENBQUMsUUFBUSxFQUFFLENBQUMsR0FBRztBQUNyQyxjQUFDLElBQWdCLEVBQUUsQ0FBQyxFQUFLLDRCQUF4QixJQUFnQixTQUFkLFNBQVMsZ0JBQUUsQ0FBQztBQUNiLFVBQU0sQ0FBQyxHQUFHLFNBQVMsQ0FBQyxHQUFHLENBQUUsU0FBUyxDQUFFLENBQUM7QUFDckMsVUFBTSxPQUFPLEdBQUcsQ0FBQyxHQUFHLEdBQUcsR0FBRyxLQUFLLENBQUMsQ0FBQyxHQUFHLENBQUMsQ0FBQyxHQUFHLElBQUksR0FBRyxFQUFFLENBQUM7QUFDbkQsYUFBVSxHQUFHLENBQUMsQ0FBQyxDQUFDLFNBQUksQ0FBQyxXQUFNLE9BQU8sVUFBSyxTQUFTLENBQUcsQ0FDcEQsQ0FDRjs7QUFBQyxRQUFJLEVBQUUsQ0FBQyxJQUFJLENBQUUsS0FBSyxDQUFFLENBQUM7QUFDdkIsVUFBTSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUUsZUFBZSxHQUFHLFVBQVUsR0FBRyxPQUFPLEVBQUUsT0FBTyxDQUFFLENBQUM7O0FBRXZFLFVBQU0sQ0FBQyxZQUFZLENBQUUsT0FBTyxDQUFFLENBQUM7QUFDL0IsV0FBTyxHQUFHLElBQUksQ0FBQztBQUNmLFlBQVEsR0FBRyxlQWhDSixHQUFHLEdBZ0NNLENBQUM7QUFDakIsYUFBUyxHQUFHLGVBakNMLEdBQUcsR0FpQ08sQ0FBQyxDQUNuQjs7O0FBRWMsT0FBSyIsImZpbGUiOiJtZXRyaWNzLmpzIiwic291cmNlUm9vdCI6InNyYyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IE1hcCB9IGZyb20gJ2ltbXV0YWJsZSc7XG5cbmNvbnN0IGR1cmF0aW9uTXMgPSAxMDAwO1xuXG52YXIgY291bnRlcnMgPSBNYXAoKTtcbnZhciBkdXJhdGlvbnMgPSBNYXAoKTtcbnZhciB0aW1lb3V0O1xuXG5mdW5jdGlvbiBjb3VudCggZXZlbnQgKSB7XG4gIGNvdW50ZXJzID0gY291bnRlcnMuc2V0KCBldmVudC53aGF0LCAoY291bnRlcnMuZ2V0KCBldmVudC53aGF0ICkgfHwgMCkgKyAxICk7XG4gIGR1cmF0aW9ucyA9IGR1cmF0aW9ucy5zZXQoIGV2ZW50LndoYXQsIChkdXJhdGlvbnMuZ2V0KCBldmVudC53aGF0ICkgfHwgMCkgKyBldmVudC5kdXJhdGlvbiApO1xuICAvLyA6VE9ETzpcbiAgLy8gdGltZW91dCA9IHRpbWVvdXQgfHwgd2luZG93LnNldFRpbWVvdXQoIHJlcG9ydCwgZHVyYXRpb25NcyApO1xufVxuXG5mdW5jdGlvbiByb3VuZCggbnVtYmVyICkge1xuICByZXR1cm4gTWF0aC5yb3VuZCggbnVtYmVyICogMTAwMCApIC8gMTAwMDtcbn1cblxuZnVuY3Rpb24gcmVwb3J0KCkge1xuICBjb25zdCBwYWQgPSBuID0+IG4gPiA5OTkgPyAnJyA6ICcgJyArIHBhZCggMTAgKiBuICk7XG4gIGNvbnN0IG1lc3NhZ2UgPSBjb3VudGVycy5lbnRyeVNlcSgpLm1hcChcbiAgICAoWyBjb21wb25lbnQsIGMgXSwgXykgPT4ge1xuICAgICAgY29uc3QgZCA9IGR1cmF0aW9ucy5nZXQoIGNvbXBvbmVudCApO1xuICAgICAgY29uc3QgZm9ybWF0RCA9IGQgPyAnw5cnICsgcm91bmQoZCAvIGMpICsgJ21zJyA6ICcnO1xuICAgICAgcmV0dXJuIGAke3BhZChjKX0gJHtjfSB8ICR7Zm9ybWF0RH0gICR7Y29tcG9uZW50fWA7XG4gICAgfVxuICApLnRvSlMoKS5qb2luKCAnXFxuICcgKTtcbiAgd2luZG93LmNvbnNvbGUuaW5mbyggJ01ldHJpY3Mgb3ZlciAnICsgZHVyYXRpb25NcyArICdtcyBcXG4nLCBtZXNzYWdlICk7XG5cbiAgd2luZG93LmNsZWFyVGltZW91dCggdGltZW91dCApO1xuICB0aW1lb3V0ID0gbnVsbDtcbiAgY291bnRlcnMgPSBNYXAoKTtcbiAgZHVyYXRpb25zID0gTWFwKCk7XG59XG5cbmV4cG9ydCBkZWZhdWx0IGNvdW50O1xuIl19
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module) {/*
@@ -11184,7 +11185,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy91dGlsL3NoYWxsb3ctZXF1YWwuanN4Il0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFPd0IsZUFBWSxDQUFyQixTQUFTLFlBQVksQ0FBRSxJQUFJLEVBQUUsSUFBSSxFQUFHO0FBQ2hELFVBQUksSUFBSSxLQUFLLElBQUksRUFBRTtBQUNoQixnQkFBTyxJQUFJLENBQUMsQ0FDZDs7O0FBRUQsVUFBSSxHQUFHLENBQUM7OztBQUdSLFdBQUssR0FBRyxJQUFJLElBQUksRUFBRTtBQUNmLGFBQUksSUFBSSxDQUFDLGNBQWMsQ0FBQyxHQUFHLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsR0FBRyxDQUFDLElBQUksSUFBSSxDQUFDLEdBQUcsQ0FBQyxJQUFJLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQSxBQUFDLEVBQUU7QUFDcEYsbUJBQU8sS0FBSyxDQUFDLENBQ2YsQ0FDSDs7Ozs7QUFHRCxXQUFLLEdBQUcsSUFBSSxJQUFJLEVBQUU7QUFDZixhQUFJLElBQUksQ0FBQyxjQUFjLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsY0FBYyxDQUFDLEdBQUcsQ0FBQyxFQUFFO0FBQ3hELG1CQUFPLEtBQUssQ0FBQyxDQUNmLENBQ0g7Ozs7QUFFRCxhQUFPLElBQUksQ0FBQyxDQUNkIiwiZmlsZSI6InNoYWxsb3ctZXF1YWwuanMiLCJzb3VyY2VSb290Ijoic3JjIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIFNvdXJjZSBpcyBiYXNlZCBvbiBSZWFjdCB2MC4xMy4zIHNoYWxsb3dFcXVhbFxuICpcbiAqIENvcHlyaWdodCAyMDEzLTIwMTUsIEZhY2Vib29rLCBJbmMuXG4gKiBMaWNlbnNlZCB1bmRlciB0aGUgQlNELWxpY2Vuc2UgKGNvbnRhaW5lZCBpbiB0aGlzIGRpcmVjdG9yeSkuXG4gKi9cbi8qZXNsaW50IGNvbXBsZXhpdHk6MCwgY29tcHV0ZWQtcHJvcGVydHktc3BhY2luZzogMCAqL1xuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gc2hhbGxvd0VxdWFsKCBvYmpBLCBvYmpCICkge1xuICAgaWYgKG9iakEgPT09IG9iakIpIHtcbiAgICAgIHJldHVybiB0cnVlO1xuICAgfVxuXG4gICB2YXIga2V5O1xuXG4gICAvLyBUZXN0IGZvciBBJ3Mga2V5cyBkaWZmZXJlbnQgZnJvbSBCLlxuICAgZm9yIChrZXkgaW4gb2JqQSkge1xuICAgICAgaWYgKG9iakEuaGFzT3duUHJvcGVydHkoa2V5KSAmJiAoIW9iakIuaGFzT3duUHJvcGVydHkoa2V5KSB8fCBvYmpBW2tleV0gIT0gb2JqQltrZXldKSkge1xuICAgICAgICAgcmV0dXJuIGZhbHNlO1xuICAgICAgfVxuICAgfVxuXG4gICAvLyBUZXN0IGZvciBCJ3Mga2V5cyBtaXNzaW5nIGZyb20gQS5cbiAgIGZvciAoa2V5IGluIG9iakIpIHtcbiAgICAgIGlmIChvYmpCLmhhc093blByb3BlcnR5KGtleSkgJiYgIW9iakEuaGFzT3duUHJvcGVydHkoa2V5KSkge1xuICAgICAgICAgcmV0dXJuIGZhbHNlO1xuICAgICAgfVxuICAgfVxuXG4gICByZXR1cm4gdHJ1ZTtcbn1cbiJdfQ==
 
 /***/ }),
-/* 25 */,
 /* 26 */
 /***/ (function(module, exports) {
 
@@ -12850,7 +12850,7 @@ module.exports = exports["default"];
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(true)
-		module.exports = factory(__webpack_require__(25));
+		module.exports = factory(__webpack_require__(22));
 	else if(typeof define === 'function' && define.amd)
 		define("laxar-patterns", ["laxar"], factory);
 	else if(typeof exports === 'object')
@@ -19510,326 +19510,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(true)
-		module.exports = factory(__webpack_require__(31), __webpack_require__(7));
-	else if(typeof define === 'function' && define.amd)
-		define("laxar-react-adapter", ["react-dom", "react"], factory);
-	else if(typeof exports === 'object')
-		exports["laxar-react-adapter"] = factory(require("react-dom"), require("react"));
-	else
-		root["laxar-react-adapter"] = factory(root["react-dom"], root["react"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
-/******/ 			return installedModules[moduleId].exports;
-/******/
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AxWidgetArea; });
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * Copyright 2017 aixigo AG
- * Released under the MIT license.
- * http://www.laxarjs.org
- */
-
-
-/**
- * This react component renders a laxar widget area.
- *
- *
- * areaName {String}: the name of the widget area
- *
- * axAreaHelper {Object}: this component requires the axAreaHelper and expects it as an attribute
- *
- * axVisibility {String}: this component requires the axVisibility and expects it as an attribute
- *
- * cssClassName {String}: a string with css class names which will redirect to Reacts className attribute
- *
- * visible {Boolean}: true if the widget area should be visible
- */
-
-var AxWidgetArea = function (_React$Component) {
-   _inherits(AxWidgetArea, _React$Component);
-
-   function AxWidgetArea(props) {
-      _classCallCheck(this, AxWidgetArea);
-
-      var _this = _possibleConstructorReturn(this, (AxWidgetArea.__proto__ || Object.getPrototypeOf(AxWidgetArea)).call(this, props));
-
-      _this.props = props;
-      _this.register = _this.register.bind(_this);
-      return _this;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   _createClass(AxWidgetArea, [{
-      key: 'register',
-      value: function register(div) {
-         if (div === null) {
-            return;
-         }
-         this.props.axAreaHelper.register(this.props.areaName, div);
-      }
-
-      ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   }, {
-      key: 'render',
-      value: function render() {
-         var divStyle = {};
-
-         if (this.props.visible) {
-            this.props.axVisibility.updateAreaVisibility(_defineProperty({}, this.props.areaName, true));
-         } else {
-            divStyle = { display: 'none' };
-            this.props.axVisibility.updateAreaVisibility(_defineProperty({}, this.props.areaName, false));
-         }
-
-         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', { style: divStyle,
-            className: this.props.cssClassName || '',
-            ref: this.register
-         });
-      }
-   }]);
-
-   return AxWidgetArea;
-}(__WEBPACK_IMPORTED_MODULE_0_react___default.a.Component);
-
-AxWidgetArea.propTypes = {
-   areaName: __WEBPACK_IMPORTED_MODULE_0_react___default.a.PropTypes.string.isRequired,
-   axAreaHelper: __WEBPACK_IMPORTED_MODULE_0_react___default.a.PropTypes.object.isRequired,
-   axVisibility: __WEBPACK_IMPORTED_MODULE_0_react___default.a.PropTypes.object.isRequired,
-   cssClassName: __WEBPACK_IMPORTED_MODULE_0_react___default.a.PropTypes.string,
-   visible: __WEBPACK_IMPORTED_MODULE_0_react___default.a.PropTypes.bool.isRequired
-};
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react_dom__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react_dom__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_components_widget_area__ = __webpack_require__(0);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "AxWidgetArea", function() { return __WEBPACK_IMPORTED_MODULE_1__lib_components_widget_area__["a"]; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "technology", function() { return technology; });
-/* harmony export (immutable) */ __webpack_exports__["bootstrap"] = bootstrap;
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-/**
- * Copyright 2017 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-/**
- * Implements the LaxarJS adapter API for the integration technology "react":
- * https://github.com/LaxarJS/laxar/blob/master/docs/manuals/adapters.md
- *
- * @module laxar-react-adapter
- */
-
-
-
-
-var noOp = function noOp() {};
-
-var technology = 'react';
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function bootstrap(_ref, _ref2) {
-   var widgets = _ref.widgets;
-   var adapterUtilities = _ref2.adapterUtilities;
-
-
-   var widgetModules = {};
-   var activitySet = {};
-   widgets.forEach(function (_ref3) {
-      var descriptor = _ref3.descriptor,
-          module = _ref3.module;
-
-      widgetModules[descriptor.name] = module;
-      if (descriptor.integration.type === 'activity') {
-         activitySet[descriptor.name] = true;
-      }
-   });
-
-   return {
-      create: create
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function create(_ref4) {
-      var widgetName = _ref4.widgetName,
-          anchorElement = _ref4.anchorElement,
-          services = _ref4.services,
-          provideServices = _ref4.provideServices;
-
-
-      var domAttached = false;
-      var onDomAvailable = null;
-      createController();
-      return {
-         domAttachTo: domAttachTo,
-         domDetach: domDetach
-      };
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function createController() {
-         // backwards compatibility with old-style AMD widgets:
-         var module = widgetModules[widgetName].default || widgetModules[widgetName];
-         if (!module) {
-            throw adapterUtilities.unknownWidget({ technology: technology, widgetName: widgetName });
-         }
-
-         var reactServices = {
-            axReactRender: function axReactRender(componentInstance) {
-               if (domAttached) {
-                  __WEBPACK_IMPORTED_MODULE_0_react_dom__["render"](componentInstance, anchorElement);
-               }
-            }
-         };
-
-         var injectionsByName = {};
-         var injections = (module.injections || []).map(function (injection) {
-            var value = reactServices[injection] || services[injection];
-            if (value === undefined) {
-               throw adapterUtilities.unknownInjection({ technology: technology, injection: injection, widgetName: widgetName });
-            }
-            if (injection === 'axReactRender' && activitySet[widgetName]) {
-               throw adapterUtilities.activityAccessingDom({ technology: technology, injection: injection, widgetName: widgetName });
-            }
-            injectionsByName[injection] = value;
-            return value;
-         });
-         provideServices(injectionsByName);
-
-         var _ref5 = module.create.apply(module, _toConsumableArray(injections)) || {};
-
-         var _ref5$onDomAvailable = _ref5.onDomAvailable;
-         onDomAvailable = _ref5$onDomAvailable === undefined ? noOp : _ref5$onDomAvailable;
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domAttachTo(areaElement) {
-         domAttached = true;
-         areaElement.appendChild(anchorElement);
-         onDomAvailable();
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domDetach() {
-         domAttached = false;
-         var parent = anchorElement.parentNode;
-         if (parent) {
-            parent.removeChild(anchorElement);
-         }
-      }
-   }
-}
-
-/***/ })
-/******/ ]);
-});
+!function(e,t){ true?module.exports=t(__webpack_require__(31),__webpack_require__(22),__webpack_require__(7)):"function"==typeof define&&define.amd?define(["react-dom","laxar","react"],t):"object"==typeof exports?exports["laxar-react-adapter"]=t(require("react-dom"),require("laxar"),require("react")):e["laxar-react-adapter"]=t(e["react-dom"],e.laxar,e.react)}(this,function(e,t,r){return function(e){function t(n){if(r[n])return r[n].exports;var o=r[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,t),o.l=!0,o.exports}var r={};return t.m=e,t.c=r,t.i=function(e){return e},t.d=function(e,r,n){t.o(e,r)||Object.defineProperty(e,r,{configurable:!1,enumerable:!0,get:n})},t.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(r,"a",r),r},t.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},t.p="/dist",t(t.s=2)}([function(e,t,r){"use strict";function n(e,t,r){return t in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}function o(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function i(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function a(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}var c=r(4),u=r.n(c),s=r(3);r.n(s);r.d(t,"a",function(){return f});var l=function(){function e(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}return function(t,r,n){return r&&e(t.prototype,r),n&&e(t,n),t}}(),f=function(e){function t(e){o(this,t);var n=i(this,(t.__proto__||Object.getPrototypeOf(t)).call(this,e));return r.i(s.assert)(e.name).hasType(String).isNotNull(),r.i(s.assert)(e.axAreaHelper).hasType(Object).isNotNull(),r.i(s.assert)(e.visible).hasType(Boolean),n.register=function(t){null!==t&&e.axAreaHelper.register(e.name,t)},n}return a(t,e),l(t,[{key:"shouldComponentUpdate",value:function(e){return e.visible!==this.props.visible}},{key:"render",value:function(){var e=this.props,t=e.name,r=e.visible,o=e.axVisibility;return o?o.updateAreaVisibility(n({},t,r)):!1===r&&s.assert.codeIsUnreachable("AxWidgetArea requires `axVisibility` prop for visible=false"),u.a.createElement("div",{style:!1===r?{display:"none"}:null,className:this.props.className||null,ref:this.register})}}]),t}(u.a.Component)},function(t,r){t.exports=e},function(e,t,r){"use strict";function n(e){if(Array.isArray(e)){for(var t=0,r=Array(e.length);t<e.length;t++)r[t]=e[t];return r}return Array.from(e)}function o(e,t){function r(e){function t(){if(b){var e=v();i.render(e,p)}}function r(e){b=!0,e.appendChild(p),t()}function o(){b=!1;var e=p.parentNode;e&&e.removeChild(p)}var f=e.widgetName,p=e.anchorElement,d=e.services,y=e.provideServices,b=!1,v=c;return function(){var e=s[f].default||s[f];if(!e)throw a.unknownWidget({technology:u,widgetName:f});var r={axReactRender:t},o={},i=(e.injections||[]).map(function(e){var t=r[e]||d[e];if(void 0===t)throw a.unknownInjection({technology:u,injection:e,widgetName:f});if("axReactRender"===e&&l[f])throw a.activityAccessingDom({technology:u,injection:e,widgetName:f});return o[e]=t,t});y(o),v=e.create.apply(e,n(i))||v}(),{domAttachTo:r,domDetach:o}}var o=e.widgets,a=t.adapterUtilities,s={},l={};return o.forEach(function(e){var t=e.descriptor,r=e.module;s[t.name]=r,"activity"===t.integration.type&&(l[t.name]=!0)}),{create:r}}Object.defineProperty(t,"__esModule",{value:!0});var i=r(1),a=(r.n(i),r(0));r.d(t,"AxWidgetArea",function(){return a.a}),r.d(t,"technology",function(){return u}),t.bootstrap=o;var c=function(){},u="react"},function(e,r){e.exports=t},function(e,t){e.exports=r}])});
 //# sourceMappingURL=laxar-react-adapter.js.map
 
 /***/ }),
@@ -44276,7 +43957,7 @@ module.exports = PooledClass.addPoolingTo(CallbackQueue);
 
 
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var ReactDOMComponentTree = __webpack_require__(6);
 var ReactInstrumentation = __webpack_require__(13);
 
@@ -45013,7 +44694,7 @@ module.exports = ReactInputSelection;
 var _prodInvariant = __webpack_require__(3);
 
 var DOMLazyTree = __webpack_require__(32);
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var React = __webpack_require__(34);
 var ReactBrowserEventEmitter = __webpack_require__(49);
 var ReactCurrentOwner = __webpack_require__(17);
@@ -46671,7 +46352,7 @@ module.exports = function(module) {
 /* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(24), __webpack_require__(23), __webpack_require__(18), __webpack_require__(452)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilMetrics, _fluxGraphGraphModel, _link) {'use strict';var _slicedToArray = (function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i['return']) _i['return']();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError('Invalid attempt to destructure non-iterable instance');}};})();var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _Link = _interopRequireDefault(_link);var _ref = { $$typeof: _typeofReactElement, type: 'g', key: null, ref: null, props: {}, _owner: null };
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(25), __webpack_require__(24), __webpack_require__(18), __webpack_require__(452)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilMetrics, _fluxGraphGraphModel, _link) {'use strict';var _slicedToArray = (function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i['return']) _i['return']();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError('Invalid attempt to destructure non-iterable instance');}};})();var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _Link = _interopRequireDefault(_link);var _ref = { $$typeof: _typeofReactElement, type: 'g', key: null, ref: null, props: {}, _owner: null };
 
 
 
@@ -47453,7 +47134,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
             if (channel.text === 'reloadedPage') {
                model.gridOverlay = false;
                model.widgetOverlay = false;
-               render();
+               reactRender();
             }
          }
       });
@@ -47475,7 +47156,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
          } else
          {
             model.toggleGridTitle = '';
-            render();
+            reactRender();
          }
       } });
 
@@ -47485,7 +47166,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
       initialState: model.laxar,
       onChange: function onChange(newState) {
          model.laxar = newState;
-         render();
+         reactRender();
       } });
 
 
@@ -47494,7 +47175,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
       chrome.devtools.network.onNavigated.addListener(function () {
          model.gridOverlay = false;
          model.widgetOverlay = false;
-         render();
+         reactRender();
       });
    }
 
@@ -47505,7 +47186,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
       var newTab = TABS.filter(function (_) {return _.name === newName;})[0];
       if (!newTab) {return;}
       model.activeTab = newTab;
-      render();
+      reactRender();
    });
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47523,7 +47204,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
       eventBus.publish('didTakeAction.navigation', {
          action: 'navigation' });
 
-      render();
+      reactRender();
    });
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47532,7 +47213,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
       if (!context.resources.grid) {return;}
       toggleGrid();
       model.gridOverlay = !model.gridOverlay;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47540,7 +47221,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
    function onClickToggleWidgetOutline() {
       toggleWidgetOutline();
       model.widgetOverlay = !model.widgetOverlay;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47614,7 +47295,7 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
          return (
             _react2.default.createElement(_laxarReactAdapter.AxWidgetArea, {
                key: tab.name,
-               areaName: tab.name,
+               name: tab.name,
                cssClassName: 'app-tab app-tab-page',
                axAreaHelper: areaHelper,
                visible: model.laxar && model.activeTab.name === tab.name,
@@ -47658,20 +47339,18 @@ function create(context, eventBus, reactRender, flowService, areaHelper, axVisib
 
 
 
-      reactRender(
-      _react2.default.createElement('div', null,
-         optionButtons,
-         navTab,
-         widgetAreas));
+      return (
+         _react2.default.createElement('div', null,
+            optionButtons,
+            navTab,
+            widgetAreas));
 
 
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render };
-
+   return render;
 }exports.default =
 
 {
@@ -47781,7 +47460,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
    _laxarPatterns.resources.handlerFor(context).registerResourceFromFeature('filter', {
       onUpdateReplace: function onUpdateReplace() {
          runFilters();
-         render();
+         reactRender();
       },
       isOptional: true });
 
@@ -47795,7 +47474,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
             addEvent(event.data);
          }
          runFilters();
-         render();
+         reactRender();
       });
    }
 
@@ -47914,7 +47593,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
    function filterBySearch(event) {
       settings.namePattern = event.target.value;
       runFilters();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47929,7 +47608,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
          settings.visibleEventsLimit = event.target.value;
       }
       runFilters();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48017,7 +47696,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
       runFilters();
 
-      render();
+      reactRender();
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48045,7 +47724,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
       model.selectionEventInfo = null;
       runFilters();
       refreshProblemSummary();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48056,7 +47735,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
          model.visibleEventInfos.forEach(function (event) {
             event.selected = false;
          });
-         render();
+         reactRender();
          return;
       }
 
@@ -48069,7 +47748,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
          event.selected = inSelection(event, selectedEvent);
       });
 
-      render();
+      reactRender();
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48663,40 +48342,40 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
    function render() {
 
-      reactRender(
-      _react2.default.createElement('div', null,
-         _react2.default.createElement(_AutoAffix2.default, {
-               affixClassName: 'ax-affix-area',
-               topClassName: 'ax-affix-on-top-area' },
-            _react2.default.createElement('div', null,
-               _react2.default.createElement(NumberOfEvents, { numberOfVisibleEvents: model.visibleEventInfos.length,
-                  numberOfEvents: model.eventInfos.length,
-                  clearFilters: clearFilters }),
+      return (
+         _react2.default.createElement('div', null,
+            _react2.default.createElement(_AutoAffix2.default, {
+                  affixClassName: 'ax-affix-area',
+                  topClassName: 'ax-affix-on-top-area' },
+               _react2.default.createElement('div', null,
+                  _react2.default.createElement(NumberOfEvents, { numberOfVisibleEvents: model.visibleEventInfos.length,
+                     numberOfEvents: model.eventInfos.length,
+                     clearFilters: clearFilters }),
 
-               _react2.default.createElement('div', { className: 'ax-button-wrapper form-inline' },
-                  _react2.default.createElement(FiltersAndLimitForm, { name: settings.namePattern,
-                     filterBySearch: filterBySearch,
-                     limit: settings.visibleEventsLimit,
-                     limitEvents: limitEvents }),
+                  _react2.default.createElement('div', { className: 'ax-button-wrapper form-inline' },
+                     _react2.default.createElement(FiltersAndLimitForm, { name: settings.namePattern,
+                        filterBySearch: filterBySearch,
+                        limit: settings.visibleEventsLimit,
+                        limitEvents: limitEvents }),
 
-                  _react2.default.createElement(SelectFiltersButton, { patterns: model.patterns,
-                     settings: model.settings,
-                     onSettingsChanged: onSettingsChanged }),
+                     _react2.default.createElement(SelectFiltersButton, { patterns: model.patterns,
+                        settings: model.settings,
+                        onSettingsChanged: onSettingsChanged }),
 
-                  _react2.default.createElement(DiscardEventsButton, { eventInfosLength: model.eventInfos.length,
-                     onDiscard: discardEvents })))),
-
-
+                     _react2.default.createElement(DiscardEventsButton, { eventInfosLength: model.eventInfos.length,
+                        onDiscard: discardEvents })))),
 
 
-         model.problemSummary.hasProblems &&
-         _react2.default.createElement(ProblemListTable, { problemSummary: model.problemSummary,
-            eventInfos: model.eventInfos }),
 
-         _react2.default.createElement(EventDisplayElement, { visibleEventInfosLength: model.visibleEventInfos.length,
-            events: model.visibleEventInfos,
-            onSelection: handleSelection,
-            selectionEventInfo: model.selectionEventInfo })));
+
+            model.problemSummary.hasProblems &&
+            _react2.default.createElement(ProblemListTable, { problemSummary: model.problemSummary,
+               eventInfos: model.eventInfos }),
+
+            _react2.default.createElement(EventDisplayElement, { visibleEventInfosLength: model.visibleEventInfos.length,
+               events: model.visibleEventInfos,
+               onSelection: handleSelection,
+               selectionEventInfo: model.selectionEventInfo })));
 
 
 
@@ -48704,9 +48383,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render };
-
+   return render;
 }exports.default =
 
 {
@@ -48725,7 +48402,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 
 
-var _laxar = __webpack_require__(25);var ax = _interopRequireWildcard(_laxar);
+var _laxar = __webpack_require__(22);var ax = _interopRequireWildcard(_laxar);
 var _laxarPatterns = __webpack_require__(46);var patterns = _interopRequireWildcard(_laxarPatterns);function _interopRequireWildcard(obj) {if (obj && obj.__esModule) {return obj;} else {var newObj = {};if (obj != null) {for (var key in obj) {if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key];}}newObj.default = obj;return newObj;}} /**
                                                                                                                                                                                                                                                                                                                                                                         * Copyright 2017 aixigo AG
                                                                                                                                                                                                                                                                                                                                                                         * Released under the MIT license.
@@ -49195,7 +48872,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 
 var _react = __webpack_require__(7);var _react2 = _interopRequireDefault(_react);
-var _laxar = __webpack_require__(25);
+var _laxar = __webpack_require__(22);
 var _moment = __webpack_require__(0);var _moment2 = _interopRequireDefault(_moment);
 var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefault(_AutoAffix);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
                                                                                                                                                                                                              * Copyright 2017 aixigo AG
@@ -49215,7 +48892,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
          {
             displayLogMessage(event.data);
          }
-         render();
+         reactRender();
       });
    }
 
@@ -49238,7 +48915,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
    function discard() {
       model.messages.length = 0;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49256,40 +48933,40 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
 
 
-      reactRender(
-      _react2.default.createElement('div', null,
-         _react2.default.createElement(_AutoAffix2.default, null,
-            _react2.default.createElement('div', { className: 'ax-affix-area' },
-               _react2.default.createElement('div', { className: 'ax-button-wrapper' },
-                  _react2.default.createElement('button', {
-                        type: 'button',
-                        className: (
-                        !model.messages.length ? 'ax-disabled ' : '') + 'btn btn-primary btn-sm',
-                        onClick: discard }, 'Clear')))),
+      return (
+         _react2.default.createElement('div', null,
+            _react2.default.createElement(_AutoAffix2.default, null,
+               _react2.default.createElement('div', { className: 'ax-affix-area' },
+                  _react2.default.createElement('div', { className: 'ax-button-wrapper' },
+                     _react2.default.createElement('button', {
+                           type: 'button',
+                           className: (
+                           !model.messages.length ? 'ax-disabled ' : '') + 'btn btn-primary btn-sm',
+                           onClick: discard }, 'Clear')))),
 
 
 
 
 
-         !model.messages.length &&
-         _react2.default.createElement('div', { className: 'text-large' },
-            _react2.default.createElement('h4', { className: 'text-primary' }, 'No Log Messages'),
-            _react2.default.createElement('p', null, _react2.default.createElement('i', { className: 'fa fa-clock-o' }), ' Waiting for messages from host application...')),
+            !model.messages.length &&
+            _react2.default.createElement('div', { className: 'text-large' },
+               _react2.default.createElement('h4', { className: 'text-primary' }, 'No Log Messages'),
+               _react2.default.createElement('p', null, _react2.default.createElement('i', { className: 'fa fa-clock-o' }), ' Waiting for messages from host application...')),
 
 
 
-         !!model.messages.length &&
-         _react2.default.createElement('table', { className: 'table table-striped table-hover' },
-            _react2.default.createElement('thead', null,
-               _react2.default.createElement('tr', null,
-                  _react2.default.createElement('th', null, 'Level'),
-                  _react2.default.createElement('th', null, 'Message'),
-                  _react2.default.createElement('th', null, 'Location'),
-                  _react2.default.createElement('th', null, 'Time'))),
+            !!model.messages.length &&
+            _react2.default.createElement('table', { className: 'table table-striped table-hover' },
+               _react2.default.createElement('thead', null,
+                  _react2.default.createElement('tr', null,
+                     _react2.default.createElement('th', null, 'Level'),
+                     _react2.default.createElement('th', null, 'Message'),
+                     _react2.default.createElement('th', null, 'Location'),
+                     _react2.default.createElement('th', null, 'Time'))),
 
 
-            _react2.default.createElement('tbody', null,
-               messages))));
+               _react2.default.createElement('tbody', null,
+                  messages))));
 
 
 
@@ -49300,9 +48977,7 @@ var _AutoAffix = __webpack_require__(233);var _AutoAffix2 = _interopRequireDefau
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render };
-
+   return render;
 }exports.default =
 
 {
@@ -49778,7 +49453,7 @@ compositionStack = compositionStack;exports.
 
 
 
-filterFromSelection = filterFromSelection;var _wireflow = __webpack_require__(248);var _wireflow2 = _interopRequireDefault(_wireflow);var _laxar = __webpack_require__(25);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var TYPE_CONTAINER = 'CONTAINER';var layoutModel = _wireflow2.default.layout.model,graphModel = _wireflow2.default.graph.model;var edgeTypes = { RESOURCE: { hidden: false, label: 'Resources' }, FLAG: { label: 'Flags', hidden: false }, ACTION: { label: 'Actions', hidden: false }, CONTAINER: { hidden: false, label: 'Container', owningPort: 'outbound' } };var ROOT_ID = exports.ROOT_ID = '.'; /**
+filterFromSelection = filterFromSelection;var _wireflow = __webpack_require__(248);var _wireflow2 = _interopRequireDefault(_wireflow);var _laxar = __webpack_require__(22);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}var TYPE_CONTAINER = 'CONTAINER';var layoutModel = _wireflow2.default.layout.model,graphModel = _wireflow2.default.graph.model;var edgeTypes = { RESOURCE: { hidden: false, label: 'Resources' }, FLAG: { label: 'Flags', hidden: false }, ACTION: { label: 'Actions', hidden: false }, CONTAINER: { hidden: false, label: 'Container', owningPort: 'outbound' } };var ROOT_ID = exports.ROOT_ID = '.'; /**
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Create a wireflow graph from a given page/widget information model.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @param {Object} pageInfo
@@ -49849,7 +49524,6 @@ var injections = ['axContext', 'axEventBus', 'axReactRender'];
 function create(context, eventBus, reactRender) {
 
    var visible = false;
-   var domAvailable = false;
    var viewModel = null;
    var viewModelCalculation = null;
 
@@ -49875,7 +49549,7 @@ function create(context, eventBus, reactRender) {
    eventBus.subscribe('didChangeAreaVisibility.' + context.widget.area, function (event) {
       if (!visible && event.visible) {
          visible = true;
-         render();
+         reactRender();
       }
    });
 
@@ -49938,7 +49612,7 @@ function create(context, eventBus, reactRender) {
          clearTimeout(viewModelCalculation);
          viewModelCalculation = null;
          if (visible) {
-            render();
+            reactRender();
          }
       }
 
@@ -49953,7 +49627,7 @@ function create(context, eventBus, reactRender) {
                compositionDisplay: withFlatCompositions ? 'FLAT' : 'COMPACT',
                activeComposition: activeComposition });
 
-            var dispatcher = new Dispatcher(render);
+            var dispatcher = new Dispatcher(reactRender);
             new HistoryStore(dispatcher);
             var graphStore = new GraphStore(dispatcher, pageGraph, pageTypes);
             var layoutStore = new LayoutStore(dispatcher, graphStore);
@@ -49967,7 +49641,7 @@ function create(context, eventBus, reactRender) {
             });
 
             viewModel = { graphStore: graphStore, layoutStore: layoutStore, settingsStore: settingsStore, selectionStore: selectionStore, dispatcher: dispatcher };
-            render();
+            reactRender();
          }, 20);
       }
    }
@@ -49975,14 +49649,14 @@ function create(context, eventBus, reactRender) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function render() {
-      if (!visible || !domAvailable) {
+      if (!visible) {
          return;
       }
 
       if (!viewModel) {
-         reactRender(
-         _react2.default.createElement('div', { className: 'page-inspector-placeholder' },
-            _react2.default.createElement('i', { className: 'fa fa-cog fa-spin' })));
+         return (
+            _react2.default.createElement('div', { className: 'page-inspector-placeholder' },
+               _react2.default.createElement('i', { className: 'fa fa-cog fa-spin' })));
 
 
          initializeViewModel();
@@ -50000,34 +49674,34 @@ function create(context, eventBus, reactRender) {
       replaceFilter(selectionStore.selection, graphStore.graph);
 
 
-      reactRender(
-      _react2.default.createElement('div', { className: 'page-inspector-row form-inline' },
-         _react2.default.createElement('div', { className: 'text-right' },
-            _react2.default.createElement('div', { className: 'pull-left' }, renderBreadCrumbs()),
-            _react2.default.createElement('button', { type: 'button', className: 'btn btn-link ',
-                  title: 'Include widgets without any links to relevant topics?',
-                  onClick: toggleIrrelevantWidgets },
-               _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withIrrelevantWidgets ? 'on' : 'off') }), ' ',
-               _react2.default.createElement('span', null, 'Isolated Widgets')),
-            _react2.default.createElement('button', { type: 'button', className: 'btn btn-link',
-                  title: 'Include area-nesting relationships?',
-                  onClick: toggleContainers },
-               _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withContainers ? 'on' : 'off') }), ' ',
-               _react2.default.createElement('span', null, 'Containers')),
-            _react2.default.createElement('button', { type: 'button', className: 'btn btn-link',
-                  title: 'Flatten compositions into their runtime contents?',
-                  onClick: toggleCompositions },
-               _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withFlatCompositions ? 'on' : 'off') }), ' ',
-               _react2.default.createElement('span', null, 'Flatten Compositions'))),
+      return (
+         _react2.default.createElement('div', { className: 'page-inspector-row form-inline' },
+            _react2.default.createElement('div', { className: 'text-right' },
+               _react2.default.createElement('div', { className: 'pull-left' }, renderBreadCrumbs()),
+               _react2.default.createElement('button', { type: 'button', className: 'btn btn-link ',
+                     title: 'Include widgets without any links to relevant topics?',
+                     onClick: toggleIrrelevantWidgets },
+                  _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withIrrelevantWidgets ? 'on' : 'off') }), ' ',
+                  _react2.default.createElement('span', null, 'Isolated Widgets')),
+               _react2.default.createElement('button', { type: 'button', className: 'btn btn-link',
+                     title: 'Include area-nesting relationships?',
+                     onClick: toggleContainers },
+                  _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withContainers ? 'on' : 'off') }), ' ',
+                  _react2.default.createElement('span', null, 'Containers')),
+               _react2.default.createElement('button', { type: 'button', className: 'btn btn-link',
+                     title: 'Flatten compositions into their runtime contents?',
+                     onClick: toggleCompositions },
+                  _react2.default.createElement('i', { className: 'fa fa-toggle-' + (withFlatCompositions ? 'on' : 'off') }), ' ',
+                  _react2.default.createElement('span', null, 'Flatten Compositions'))),
 
-         _react2.default.createElement(Graph, { className: 'nbe-theme-fusebox-app',
-            types: graphStore.types,
-            model: graphStore.graph,
-            layout: layoutStore.layout,
-            measurements: layoutStore.measurements,
-            settings: settingsStore.settings,
-            selection: selectionStore.selection,
-            eventHandler: dispatcher.dispatch })));
+            _react2.default.createElement(Graph, { className: 'nbe-theme-fusebox-app',
+               types: graphStore.types,
+               model: graphStore.graph,
+               layout: layoutStore.layout,
+               measurements: layoutStore.measurements,
+               settings: settingsStore.settings,
+               selection: selectionStore.selection,
+               eventHandler: dispatcher.dispatch })));
 
 
 
@@ -50049,10 +49723,7 @@ function create(context, eventBus, reactRender) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return { onDomAvailable: function onDomAvailable() {
-         domAvailable = true;
-         render();
-      } };
+   return render;
 }exports.default =
 
 {
@@ -50066,7 +49737,7 @@ function create(context, eventBus, reactRender) {
 
 "use strict";
 __webpack_require__(57);
-var _laxar = __webpack_require__(25);
+var _laxar = __webpack_require__(22);
 
 var _laxarReactAdapter = __webpack_require__(83);var reactAdapter = _interopRequireWildcard(_laxarReactAdapter);
 
@@ -56904,7 +56575,7 @@ module.exports = FallbackCompositionState;
 
 
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 
 var MUST_USE_PROPERTY = DOMProperty.injection.MUST_USE_PROPERTY;
 var HAS_BOOLEAN_VALUE = DOMProperty.injection.HAS_BOOLEAN_VALUE;
@@ -58348,7 +58019,7 @@ var AutoFocusUtils = __webpack_require__(357);
 var CSSPropertyOperations = __webpack_require__(359);
 var DOMLazyTree = __webpack_require__(32);
 var DOMNamespaces = __webpack_require__(63);
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var DOMPropertyOperations = __webpack_require__(214);
 var EventPluginHub = __webpack_require__(39);
 var EventPluginRegistry = __webpack_require__(48);
@@ -59794,7 +59465,7 @@ module.exports = ReactDOMInput;
 
 
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var ReactComponentTreeHook = __webpack_require__(11);
 
 var warning = __webpack_require__(2);
@@ -60760,7 +60431,7 @@ module.exports = {
 
 
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var EventPluginRegistry = __webpack_require__(48);
 var ReactComponentTreeHook = __webpack_require__(11);
 
@@ -61669,7 +61340,7 @@ module.exports = ReactHostOperationHistoryHook;
 
 
 
-var DOMProperty = __webpack_require__(22);
+var DOMProperty = __webpack_require__(23);
 var EventPluginHub = __webpack_require__(39);
 var EventPluginUtils = __webpack_require__(64);
 var ReactComponentEnvironment = __webpack_require__(67);
@@ -65491,8 +65162,8 @@ if(content.locals) module.exports = content.locals;
 if(false) {
 	// When the styles change, update the <style> tags
 	if(!content.locals) {
-		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./developer-toolbar-widget.scss", function() {
-			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./developer-toolbar-widget.scss");
+		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./developer-toolbar-widget.scss", function() {
+			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./developer-toolbar-widget.scss");
 			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 			update(newContent);
 		});
@@ -65517,8 +65188,8 @@ if(content.locals) module.exports = content.locals;
 if(false) {
 	// When the styles change, update the <style> tags
 	if(!content.locals) {
-		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./events-display-widget.scss", function() {
-			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./events-display-widget.scss");
+		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./events-display-widget.scss", function() {
+			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./events-display-widget.scss");
 			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 			update(newContent);
 		});
@@ -65543,8 +65214,8 @@ if(content.locals) module.exports = content.locals;
 if(false) {
 	// When the styles change, update the <style> tags
 	if(!content.locals) {
-		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./log-display-widget.scss", function() {
-			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/ax-developer-tools-widget/content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./log-display-widget.scss");
+		module.hot.accept("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./log-display-widget.scss", function() {
+			var newContent = require("!!../../../../../node_modules/css-loader/index.js!../../../../../node_modules/sass-loader/index.js?{\"includePaths\":[\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/themes/default.theme/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/bootstrap-sass/assets/stylesheets\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/scss\",\"/Users/jpommerening/Developer/github.com/laxar-developer-tools-content/node_modules/laxar-uikit/themes/default.theme/scss\"]}!./log-display-widget.scss");
 			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 			update(newContent);
 		});
@@ -65557,7 +65228,7 @@ if(false) {
 /* 448 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(24), __webpack_require__(23), __webpack_require__(20), __webpack_require__(21), __webpack_require__(30), __webpack_require__(54)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxHistoryHistoryActions, _fluxLayoutLayoutModel, _fluxLayoutLayoutActions, _fluxSelectionSelectionActions) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _count = _interopRequireDefault(_utilMetrics);
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(25), __webpack_require__(24), __webpack_require__(20), __webpack_require__(21), __webpack_require__(30), __webpack_require__(54)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxHistoryHistoryActions, _fluxLayoutLayoutModel, _fluxLayoutLayoutActions, _fluxSelectionSelectionActions) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _count = _interopRequireDefault(_utilMetrics);
 
 
 
@@ -65728,7 +65399,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 450 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(31), __webpack_require__(9), __webpack_require__(24), __webpack_require__(23), __webpack_require__(43), __webpack_require__(465), __webpack_require__(448), __webpack_require__(456), __webpack_require__(243), __webpack_require__(449), __webpack_require__(455), __webpack_require__(453), __webpack_require__(30), __webpack_require__(21), __webpack_require__(82), __webpack_require__(18), __webpack_require__(20), __webpack_require__(55), __webpack_require__(54)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _reactDom, _immutable, _utilShallowEqual, _utilMetrics, _utilDragdrop, _utilKeyboard, _edge, _vertex, _links, _ghostPort, _selectionBox, _minimap, _fluxLayoutLayoutActions, _fluxLayoutLayoutModel, _fluxSettingsSettingsModel, _fluxGraphGraphModel, _fluxHistoryHistoryActions, _fluxSettingsSettingsActions, _fluxSelectionSelectionActions) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _ReactDom = _interopRequireDefault(_reactDom);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _keyboard = _interopRequireDefault(_utilKeyboard);var _Edge = _interopRequireDefault(_edge);var _Vertex = _interopRequireDefault(_vertex);var _Links = _interopRequireDefault(_links);var _GhostPort = _interopRequireDefault(_ghostPort);var _SelectionBox = _interopRequireDefault(_selectionBox);var _Minimap = _interopRequireDefault(_minimap);var 
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(31), __webpack_require__(9), __webpack_require__(25), __webpack_require__(24), __webpack_require__(43), __webpack_require__(465), __webpack_require__(448), __webpack_require__(456), __webpack_require__(243), __webpack_require__(449), __webpack_require__(455), __webpack_require__(453), __webpack_require__(30), __webpack_require__(21), __webpack_require__(82), __webpack_require__(18), __webpack_require__(20), __webpack_require__(55), __webpack_require__(54)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _reactDom, _immutable, _utilShallowEqual, _utilMetrics, _utilDragdrop, _utilKeyboard, _edge, _vertex, _links, _ghostPort, _selectionBox, _minimap, _fluxLayoutLayoutActions, _fluxLayoutLayoutModel, _fluxSettingsSettingsModel, _fluxGraphGraphModel, _fluxHistoryHistoryActions, _fluxSettingsSettingsActions, _fluxSelectionSelectionActions) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _ReactDom = _interopRequireDefault(_reactDom);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _keyboard = _interopRequireDefault(_utilKeyboard);var _Edge = _interopRequireDefault(_edge);var _Vertex = _interopRequireDefault(_vertex);var _Links = _interopRequireDefault(_links);var _GhostPort = _interopRequireDefault(_ghostPort);var _SelectionBox = _interopRequireDefault(_selectionBox);var _Minimap = _interopRequireDefault(_minimap);var 
 
 
 
@@ -66052,7 +65723,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(24), __webpack_require__(23)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilMetrics) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(25), __webpack_require__(24)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilMetrics) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);
 
 
 
@@ -66086,7 +65757,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 452 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(23), __webpack_require__(247), __webpack_require__(24), __webpack_require__(56), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilMetrics, _utilPathing, _utilShallowEqual, _utilSettings, _fluxGraphGraphModel) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _count = _interopRequireDefault(_utilMetrics);var _pathing = _interopRequireDefault(_utilPathing);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _settings = _interopRequireDefault(_utilSettings);var 
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(24), __webpack_require__(247), __webpack_require__(25), __webpack_require__(56), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilMetrics, _utilPathing, _utilShallowEqual, _utilSettings, _fluxGraphGraphModel) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _count = _interopRequireDefault(_utilMetrics);var _pathing = _interopRequireDefault(_utilPathing);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _settings = _interopRequireDefault(_utilSettings);var 
 
 
 
@@ -66178,7 +65849,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 453 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(24), __webpack_require__(56), __webpack_require__(43), __webpack_require__(55), __webpack_require__(243)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilSettings, _utilDragdrop, _fluxSettingsSettingsActions, _links) {'use strict';var _slicedToArray = (function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i['return']) _i['return']();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError('Invalid attempt to destructure non-iterable instance');}};})();var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _Links = _interopRequireDefault(_links);var 
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(25), __webpack_require__(56), __webpack_require__(43), __webpack_require__(55), __webpack_require__(243)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilShallowEqual, _utilSettings, _utilDragdrop, _fluxSettingsSettingsActions, _links) {'use strict';var _slicedToArray = (function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i['return']) _i['return']();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError('Invalid attempt to destructure non-iterable instance');}};})();var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _Links = _interopRequireDefault(_links);var 
 
 
 
@@ -66389,7 +66060,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(24), __webpack_require__(23), __webpack_require__(30), __webpack_require__(21), __webpack_require__(36), __webpack_require__(20), __webpack_require__(18), __webpack_require__(82)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxLayoutLayoutActions, _fluxLayoutLayoutModel, _fluxGraphGraphActions, _fluxHistoryHistoryActions, _fluxGraphGraphModel, _fluxSettingsSettingsModel) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _layoutActions = _interopRequireDefault(_fluxLayoutLayoutActions);var _graphActions = _interopRequireDefault(_fluxGraphGraphActions);var 
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(25), __webpack_require__(24), __webpack_require__(30), __webpack_require__(21), __webpack_require__(36), __webpack_require__(20), __webpack_require__(18), __webpack_require__(82)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxLayoutLayoutActions, _fluxLayoutLayoutModel, _fluxGraphGraphActions, _fluxHistoryHistoryActions, _fluxGraphGraphModel, _fluxSettingsSettingsModel) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}var _React = _interopRequireDefault(_react);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _layoutActions = _interopRequireDefault(_fluxLayoutLayoutActions);var _graphActions = _interopRequireDefault(_fluxGraphGraphActions);var 
 
 
 
@@ -66553,7 +66224,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 456 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(24), __webpack_require__(23), __webpack_require__(20), __webpack_require__(18), __webpack_require__(36), __webpack_require__(21), __webpack_require__(30), __webpack_require__(54), __webpack_require__(454)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxHistoryHistoryActions, _fluxGraphGraphModel, _fluxGraphGraphActions, _fluxLayoutLayoutModel, _fluxLayoutLayoutActions, _fluxSelectionSelectionActions, _port) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _layoutActions = _interopRequireDefault(_fluxLayoutLayoutActions);var _Port = _interopRequireDefault(_port);var 
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(7), __webpack_require__(43), __webpack_require__(25), __webpack_require__(24), __webpack_require__(20), __webpack_require__(18), __webpack_require__(36), __webpack_require__(21), __webpack_require__(30), __webpack_require__(54), __webpack_require__(454)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _react, _utilDragdrop, _utilShallowEqual, _utilMetrics, _fluxHistoryHistoryActions, _fluxGraphGraphModel, _fluxGraphGraphActions, _fluxLayoutLayoutModel, _fluxLayoutLayoutActions, _fluxSelectionSelectionActions, _port) {'use strict';var _typeofReactElement = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 60103;function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _defaultProps(defaultProps, props) {if (defaultProps) {for (var propName in defaultProps) {if (typeof props[propName] === 'undefined') {props[propName] = defaultProps[propName];}}}return props;}var _React = _interopRequireDefault(_react);var _dragdrop = _interopRequireDefault(_utilDragdrop);var _shallowEqual = _interopRequireDefault(_utilShallowEqual);var _count = _interopRequireDefault(_utilMetrics);var _layoutActions = _interopRequireDefault(_fluxLayoutLayoutActions);var _Port = _interopRequireDefault(_port);var 
 
 
 
@@ -66682,7 +66353,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_
 /* 457 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(9), __webpack_require__(23)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _immutable, _utilMetrics) {'use strict';var _createClass = (function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ('value' in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};})();function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError('Cannot call a class as a function');}}var _count = _interopRequireDefault(_utilMetrics);
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, module, __webpack_require__(9), __webpack_require__(24)], __WEBPACK_AMD_DEFINE_RESULT__ = function (exports, module, _immutable, _utilMetrics) {'use strict';var _createClass = (function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ('value' in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};})();function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { 'default': obj };}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError('Cannot call a class as a function');}}var _count = _interopRequireDefault(_utilMetrics);
 
 
 

@@ -706,308 +706,19 @@ module.exports = warning;
 
 /***/ }),
 
-/***/ 238:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * 
- */
-
-
-
-// The Symbol used to tag the ReactElement type. If there is no native Symbol
-// nor polyfill, then a plain number is used for performance.
-
-var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 0xeac7;
-
-module.exports = REACT_ELEMENT_TYPE;
-
-/***/ }),
-
-/***/ 239:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2014-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- */
-
-/**
- * ReactElementValidator provides a wrapper around a element factory
- * which validates the props passed to the element. This is intended to be
- * used only in DEV and could be replaced by a static type checker for languages
- * that support it.
- */
-
-
-
-var ReactCurrentOwner = __webpack_require__(17);
-var ReactComponentTreeHook = __webpack_require__(11);
-var ReactElement = __webpack_require__(28);
-
-var checkReactTypeSpec = __webpack_require__(439);
-
-var canDefineProperty = __webpack_require__(80);
-var getIteratorFn = __webpack_require__(81);
-var warning = __webpack_require__(2);
-
-function getDeclarationErrorAddendum() {
-  if (ReactCurrentOwner.current) {
-    var name = ReactCurrentOwner.current.getName();
-    if (name) {
-      return ' Check the render method of `' + name + '`.';
-    }
-  }
-  return '';
-}
-
-/**
- * Warn if there's no key explicitly set on dynamic arrays of children or
- * object keys are not valid. This allows us to keep track of children between
- * updates.
- */
-var ownerHasKeyUseWarning = {};
-
-function getCurrentComponentErrorInfo(parentType) {
-  var info = getDeclarationErrorAddendum();
-
-  if (!info) {
-    var parentName = typeof parentType === 'string' ? parentType : parentType.displayName || parentType.name;
-    if (parentName) {
-      info = ' Check the top-level render call using <' + parentName + '>.';
-    }
-  }
-  return info;
-}
-
-/**
- * Warn if the element doesn't have an explicit key assigned to it.
- * This element is in an array. The array could grow and shrink or be
- * reordered. All children that haven't already been validated are required to
- * have a "key" property assigned to it. Error statuses are cached so a warning
- * will only be shown once.
- *
- * @internal
- * @param {ReactElement} element Element that requires a key.
- * @param {*} parentType element's parent's type.
- */
-function validateExplicitKey(element, parentType) {
-  if (!element._store || element._store.validated || element.key != null) {
-    return;
-  }
-  element._store.validated = true;
-
-  var memoizer = ownerHasKeyUseWarning.uniqueKey || (ownerHasKeyUseWarning.uniqueKey = {});
-
-  var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
-  if (memoizer[currentComponentErrorInfo]) {
-    return;
-  }
-  memoizer[currentComponentErrorInfo] = true;
-
-  // Usually the current owner is the offender, but if it accepts children as a
-  // property, it may be the creator of the child that's responsible for
-  // assigning it a key.
-  var childOwner = '';
-  if (element && element._owner && element._owner !== ReactCurrentOwner.current) {
-    // Give the component that originally created this child.
-    childOwner = ' It was passed a child from ' + element._owner.getName() + '.';
-  }
-
-  undefined !== 'production' ? warning(false, 'Each child in an array or iterator should have a unique "key" prop.' + '%s%s See https://fb.me/react-warning-keys for more information.%s', currentComponentErrorInfo, childOwner, ReactComponentTreeHook.getCurrentStackAddendum(element)) : void 0;
-}
-
-/**
- * Ensure that every element either is passed in a static location, in an
- * array with an explicit keys property defined, or in an object literal
- * with valid key property.
- *
- * @internal
- * @param {ReactNode} node Statically passed child of any type.
- * @param {*} parentType node's parent's type.
- */
-function validateChildKeys(node, parentType) {
-  if (typeof node !== 'object') {
-    return;
-  }
-  if (Array.isArray(node)) {
-    for (var i = 0; i < node.length; i++) {
-      var child = node[i];
-      if (ReactElement.isValidElement(child)) {
-        validateExplicitKey(child, parentType);
-      }
-    }
-  } else if (ReactElement.isValidElement(node)) {
-    // This element was passed in a valid location.
-    if (node._store) {
-      node._store.validated = true;
-    }
-  } else if (node) {
-    var iteratorFn = getIteratorFn(node);
-    // Entry iterators provide implicit keys.
-    if (iteratorFn) {
-      if (iteratorFn !== node.entries) {
-        var iterator = iteratorFn.call(node);
-        var step;
-        while (!(step = iterator.next()).done) {
-          if (ReactElement.isValidElement(step.value)) {
-            validateExplicitKey(step.value, parentType);
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- * Given an element, validate that its props follow the propTypes definition,
- * provided by the type.
- *
- * @param {ReactElement} element
- */
-function validatePropTypes(element) {
-  var componentClass = element.type;
-  if (typeof componentClass !== 'function') {
-    return;
-  }
-  var name = componentClass.displayName || componentClass.name;
-  if (componentClass.propTypes) {
-    checkReactTypeSpec(componentClass.propTypes, element.props, 'prop', name, element, null);
-  }
-  if (typeof componentClass.getDefaultProps === 'function') {
-    undefined !== 'production' ? warning(componentClass.getDefaultProps.isReactClassApproved, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;
-  }
-}
-
-var ReactElementValidator = {
-
-  createElement: function (type, props, children) {
-    var validType = typeof type === 'string' || typeof type === 'function';
-    // We warn in this case but don't throw. We expect the element creation to
-    // succeed and there will likely be errors in render.
-    if (!validType) {
-      if (typeof type !== 'function' && typeof type !== 'string') {
-        var info = '';
-        if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
-          info += ' You likely forgot to export your component from the file ' + 'it\'s defined in.';
-        }
-        info += getDeclarationErrorAddendum();
-        undefined !== 'production' ? warning(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', type == null ? type : typeof type, info) : void 0;
-      }
-    }
-
-    var element = ReactElement.createElement.apply(this, arguments);
-
-    // The result can be nullish if a mock or a custom function is used.
-    // TODO: Drop this when these are no longer allowed as the type argument.
-    if (element == null) {
-      return element;
-    }
-
-    // Skip key warning if the type isn't valid since our key validation logic
-    // doesn't expect a non-string/function type and can throw confusing errors.
-    // We don't want exception behavior to differ between dev and prod.
-    // (Rendering will throw with a helpful message and as soon as the type is
-    // fixed, the key warnings will appear.)
-    if (validType) {
-      for (var i = 2; i < arguments.length; i++) {
-        validateChildKeys(arguments[i], type);
-      }
-    }
-
-    validatePropTypes(element);
-
-    return element;
-  },
-
-  createFactory: function (type) {
-    var validatedFactory = ReactElementValidator.createElement.bind(null, type);
-    // Legacy hook TODO: Warn if this is accessed
-    validatedFactory.type = type;
-
-    if (undefined !== 'production') {
-      if (canDefineProperty) {
-        Object.defineProperty(validatedFactory, 'type', {
-          enumerable: false,
-          get: function () {
-            undefined !== 'production' ? warning(false, 'Factory.type is deprecated. Access the class directly ' + 'before passing it to createFactory.') : void 0;
-            Object.defineProperty(this, 'type', {
-              value: type
-            });
-            return type;
-          }
-        });
-      }
-    }
-
-    return validatedFactory;
-  },
-
-  cloneElement: function (element, props, children) {
-    var newElement = ReactElement.cloneElement.apply(this, arguments);
-    for (var i = 2; i < arguments.length; i++) {
-      validateChildKeys(arguments[i], newElement.type);
-    }
-    validatePropTypes(newElement);
-    return newElement;
-  }
-
-};
-
-module.exports = ReactElementValidator;
-
-/***/ }),
-
-/***/ 240:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * 
- */
-
-
-
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
-
-module.exports = ReactPropTypesSecret;
-
-/***/ }),
-
-/***/ 25:
+/***/ 22:
 /***/ (function(module, exports, __webpack_require__) {
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(true)
 		module.exports = factory(__webpack_require__(355));
 	else if(typeof define === 'function' && define.amd)
-		define("laxar", ["navigo"], factory);
+		define(["navigo"], factory);
 	else if(typeof exports === 'object')
 		exports["laxar"] = factory(require("navigo"));
 	else
 		root["laxar"] = factory(root["navigo"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_31__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_33__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1016,9 +727,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -1070,10 +781,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/dist";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 32);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1095,7 +806,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * invalid code paths.
  * When importing the module as `default` module, it is the {@link assert} function itself.
  *
- * When requiring `laxar`, it is available as `laxar.assert`.
+ * It can be imported as `assert` from 'laxar';
  *
  * @module assert
  */
@@ -1239,10 +950,9 @@ function functionName(func) {
  *
  * Example:
  * ```js
- * define( [ 'laxar' ], function( ax ) {
- *    ax.assert( ax.assert ).hasType( Function );
- *    ax.assert.state( typeof ax.assert.codeIsUnreachable === 'function' );
- * } );
+ * import { assert } from 'laxar';
+ * assert( assert ).hasType( Function );
+ * assert.state( typeof assert.codeIsUnreachable === 'function' );
  * ```
  *
  * @param {*} subject
@@ -1287,7 +997,7 @@ assert.state = function state(expression, optionalDetails) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* harmony default export */ __webpack_exports__["a"] = assert;
+/* harmony default export */ __webpack_exports__["a"] = (assert);
 var codeIsUnreachable = assert.codeIsUnreachable;
 var state = assert.state;
 
@@ -1314,7 +1024,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /**
  * Utilities for dealing with objects.
  *
- * When requiring `laxar`, it is available as `laxar.object`.
+ * It can be imported as `object` from 'laxar';
  *
  * @module object
  */
@@ -1328,6 +1038,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  *
  * Example:
  * ```js
+ * import { object } from 'laxar';
  * object.options( { validate: true }, {
  *    validate: false,
  *    highlight: true
@@ -1362,9 +1073,10 @@ function options(obj, defaults) {
  *
  * Example:
  * ```
+ * import { object } from 'laxar';
  * object.forEach( { name: Peter, age: 12 }, ( value, key ) => {
  *    console.log( `${key} = ${value}\n` );
- * });
+ * } );
  * // =>
  * // name = Peter
  * // age = 12
@@ -1407,6 +1119,7 @@ function forEach(object, iteratorFunction) {
  * Example:
  *
  * ```js
+ * import { object } from 'laxar';
  * object.path( { one: { two: 3 } }, 'one.two' ); // => 3
  * object.path( { one: { two: 3 } }, 'one.three' ); // => undefined
  * object.path( { one: { two: 3 } }, 'one.three', 42 ); // => 42
@@ -1462,6 +1175,7 @@ function path(obj, thePath) {
  * Example:
  *
  * ```js
+ * import { object } from 'laxar';
  * object.setPath( {}, 'name.first', 'Peter' ); // => { name: { first: 'Peter' } }
  * object.setPath( {}, 'pets.1', 'Hamster' ); // => { pets: [ null, 'Hamster' ] }
  * object.setPath( {}, '', 'Hamster' ); // => { '': 'Hamster' } }
@@ -1604,7 +1318,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /**
  * Utilities for dealing with strings.
  *
- * When requiring `laxar`, it is available as `laxar.string`.
+ * It can be imported as `string` from 'laxar';
  *
  * @module string
  */
@@ -1656,7 +1370,7 @@ var DEFAULT_FORMATTERS = Object.freeze({
 
 var DEFAULT_FORMATTER = createFormatter(DEFAULT_FORMATTERS);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Substitutes all unescaped placeholders in the given string for a given indexed or named value.
@@ -1665,57 +1379,62 @@ var DEFAULT_FORMATTER = createFormatter(DEFAULT_FORMATTERS);
  * replacement for a key exists, the placeholder will simply not be substituted.
  *
  * Some examples:
- * ```javascript
+ * ```js
+ * import { string } from 'laxar';
  * string.format( 'Hello [0], how do you like [1]?', [ 'Peter', 'Cheeseburgers' ] );
  * // => 'Hello Peter, how do you like Cheeseburgers?'
- * ```
- * ```javascript
+ *
  * string.format( 'Hello [name] and [partner], how do you like [0]?', [ 'Pizza' ], {
  *    name: 'Hans',
  *    partner: 'Roswita'
  * } );
  * // => 'Hello Hans and Roswita, how do you like Pizza?'
  * ```
- * If a pair of brackets should not be treated as a placeholder, the opening bracket can simply be escaped
- * by backslashes (thus to get an actual backslash in a JavaScript string literal, which is then treated as
- * an escape symbol, it needs to be written as double backslash):
- * ```javascript
+ *
+ * If a pair of brackets should not be treated as a placeholder, the opening bracket must be escaped by
+ * backslashes. To get an actual backslash in a JavaScript string literal, which is then treated as
+ * an escape symbol, it needs to be written as double backslash:
+ *
+ * ```js
+ * import { string } from 'laxar';
  * string.format( 'A [something] should eventually only have \\[x].', {
  *    something: 'checklist'
  * } );
  * // => 'A checklist should eventually only have [x].'
  * ```
+ *
  * A placeholder key can be any character string besides `[`, `]` and `:` to keep parsing simple and fast.
- * By using `:` as separator it is possible to provide a type specifier for string serialization or other
- * additional mapping functions for the value to insert. Type specifiers always begin with an `%` and end
- * with the specifier type. Builtin specifiers and their according formatter functions are defined
- * as {@link DEFAULT_FORMATTERS}.
+ * By using `:` as separator it is possible to provide a type specifier for string serialization or to add
+ * a custom mapping function. Type specifiers always begin with `%` and end with the specifier type.
+ * Builtin specifiers and their corresponding formatter functions are defined as {@link DEFAULT_FORMATTERS}.
  *
  * When no specifier is provided, by default `%s` is assumed.
  *
  * Example:
- * ```javascript
+ * ```js
+ * import { string } from 'laxar';
  * string.format( 'Hello [0:%s], you owe me [1:%.2f] euros.', [ 'Peter', 12.1243 ] );
  * // => 'Hello Peter, you owe me 12.12 euros.'
  * ```
  *
- * Mapping functions should instead consist of simple strings and may not begin with a `%` character. It is
- * advised to use the same naming rules as for simple JavaScript functions. Type specifiers and mapping
- * functions are applied in the order they appear within the placeholder.
- *
- * An example, where we assume that the mapping functions `flip` and `double` where defined by the user
- * when creating the `formatString` function using {@link #createFormatter()}:
- * ```javascript
- * formatString( 'Hello [0:%s:flip], you owe me [1:double:%.2f] euros.', [ 'Peter', 12 ] );
+ * Mapping function names should be composed from alphanumeric characters, like regular JavaScript
+ * identifiers. They can be registered using {@link #createFormatter()}:
+ * ```js
+ * import { string } from 'laxar';
+ * const format = string.createFormatter( null, {
+ *    double: x => 2*x,
+ *    flip: s => s.split( '' ).reverse().join( '' )
+ * } );
+ * format( 'Hello [0:%s:flip], you owe me [1:double:%.2f] euros.', [ 'Peter', 12 ] );
  * // => 'Hello reteP, you owe me 24.00 euros.'
  * ```
  *
- * Note that there currently exist no builtin mapping functions.
+ * Currently there are no builtin mapping functions.
  *
- * If a type specifier is used that doesn't exist, an exception is thrown. In contrast to that the use of
- * an unknown mapping function results in a no-op. This is on purpose to be able to use filter-like
- * functions that, in case they are defined for a formatter, transform a value as needed and in all other
- * cases simply are ignored and don't alter the value.
+ * If a type specifier is used that does not exist, an exception is thrown. In contrast to that the use of
+ * an unknown mapping function results in a no-op. This allows to use filter-like functions that transform
+ * marked values within a specific context (for example, performing anonymization during analytics logging),
+ * without modifying the value in other contexts (local debug loggign).
  *
  * @param {String} string
  *    the string to replace placeholders in
@@ -1731,7 +1450,7 @@ function format(string, optionalIndexedReplacements, optionalNamedReplacements) 
    return DEFAULT_FORMATTER(string, optionalIndexedReplacements, optionalNamedReplacements);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Creates a new format function having the same api as {@link #format()}. If the first argument is
@@ -1766,7 +1485,7 @@ function format(string, optionalIndexedReplacements, optionalNamedReplacements) 
  * instead of the placeholder if there are no more mapping function ids or type specifiers within the
  * placeholder string.
  *
- * ```javascript
+ * ```js
  * const format = string.createFormatter( null, {
  *    flip: function( value ) {
  *       return ( '' + s ).split( '' ).reverse().join( '' );
@@ -1883,12 +1602,12 @@ function createFormatter() {
       return defaultTypeFormatter(typeFormatters)(value);
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    return format;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function defaultTypeFormatter(typeFormatters) {
    if ('default' in typeFormatters) {
@@ -1903,2275 +1622,10 @@ function defaultTypeFormatter(typeFormatters) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_object__ = __webpack_require__(1);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/* harmony export (immutable) */ __webpack_exports__["b"] = findWidgetAreas;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-/**
- * The area helper manages widget areas, their DOM representation and their nesting structure.
- *
- * It tracks widget area visibility in order to compile widgets and to attach them to their areas when
- * these become visible.
- * It does not interact with the event bus directly, but is consulted by the visibility event manager to
- * determine area nesting for visibility events.
- */
-
-function create(page, log) {
-
-   var exports = {
-      isVisible: isVisible,
-      setVisibility: setVisibility,
-      areasInArea: areasInArea,
-      areasInWidget: areasInWidget,
-      register: register,
-      exists: exists,
-      attachWidgets: attachWidgets
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   // all initially visible widgets should be attached together, to reduce jitter and unnecessary DOM ops
-   var freeToAttach = false;
-
-   // keep the dom element for each area, to attach widgets to
-   var areaToElement = {};
-
-   // track widget adapters waiting for their area to become available so that they may attach to its DOM
-   var areaToWaitingAdapters = {};
-
-   // track the visibility status of all areas
-   var knownVisibilityState = {};
-
-   // the containing area name for each widget
-   var widgetIdToArea = {};
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgets, areaName) {
-      widgets.forEach(function (widget) {
-         widgetIdToArea[widget.id] = areaName;
-      });
-   });
-
-   // for each widget with children, and each widget area with nested areas, store a list of child names
-   var areasInAreaMap = {};
-   var areasInWidgetMap = {};
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgetEntries, areaName) {
-      var containerName = '';
-      if (areaName.indexOf('.') !== -1) {
-         var widgetId = areaName.split('.')[0];
-         areasInWidgetMap[widgetId] = areasInWidgetMap[widgetId] || [];
-         areasInWidgetMap[widgetId].push(areaName);
-         containerName = widgetIdToArea[widgetId];
-      }
-      areasInAreaMap[containerName] = areasInAreaMap[containerName] || [];
-      areasInAreaMap[containerName].push(areaName);
-   });
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function isVisible(areaName) {
-      return knownVisibilityState[areaName] || false;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function setVisibility(areaName, visible) {
-      if (visible && freeToAttach) {
-         attachWaitingAdapters(areaName);
-      }
-      knownVisibilityState[areaName] = visible;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function areasInArea(containerName) {
-      return areasInAreaMap[containerName];
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function areasInWidget(widgetId) {
-      return areasInWidgetMap[widgetId];
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Register a widget area
-    *
-    * @param {String} name
-    *    the area name as used in the page definition
-    * @param {HTMLElement} element
-    *    an HTML element representing the widget area
-    * @param {String} [localName]
-    *    the area name as used within the widget. Defaults to the qualified `name`
-    *
-    * @return {Function}
-    *    removes the according area from the registry again
-    */
-   function register(name, element, localName) {
-      if (name in areaToElement) {
-         throw new Error('The area "' + name + '" is defined twice.');
-      }
-
-      if (!element.hasAttribute('data-ax-widget-area') && !element.hasAttribute('ax-widget-area')) {
-         element.setAttribute('data-ax-widget-area', localName || name);
-      }
-      areaToElement[name] = element;
-      if (freeToAttach && isVisible(name)) {
-         attachWaitingAdapters(name);
-      }
-
-      return function () {
-         delete areaToElement[name];
-      };
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function exists(name) {
-      return name in areaToElement;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function attachWidgets(widgetAdapters) {
-      freeToAttach = true;
-      widgetAdapters.forEach(function (adapterRef) {
-         var areaName = widgetIdToArea[adapterRef.id];
-         areaToWaitingAdapters[areaName] = areaToWaitingAdapters[areaName] || [];
-         areaToWaitingAdapters[areaName].push(adapterRef);
-      });
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgets, areaName) {
-         if (isVisible(areaName)) {
-            attachWaitingAdapters(areaName);
-         }
-      });
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   // eslint-disable-next-line valid-jsdoc
-   /** @private */
-   function attachWaitingAdapters(areaName) {
-      var waitingAdapters = areaToWaitingAdapters[areaName];
-      if (!waitingAdapters || !waitingAdapters.length) {
-         return;
-      }
-
-      var element = areaToElement[areaName];
-      if (!element) {
-         return;
-      }
-
-      // Only to have the context for error logging
-      var currentAdapterRef = null;
-      // Make sure that all assets are available before proceeding, so that DOM update happens en bloc.
-      Promise.all(waitingAdapters.map(function (adapterRef) {
-         return adapterRef.templatePromise;
-      })).then(function (htmlTemplates) {
-         waitingAdapters.forEach(function (adapterRef, i) {
-            currentAdapterRef = adapterRef;
-            adapterRef.adapter.domAttachTo(element, htmlTemplates[i]);
-         });
-      }).catch(function (err) {
-         log.error('An error occured while attaching some widgets to the DOM:');
-         log.error('  - Widget ID: ' + currentAdapterRef.id);
-         log.error('  - Widget Area: ' + areaName);
-         log.error('  - Original error: [0]', err);
-      });
-
-      delete areaToWaitingAdapters[areaName];
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   return exports;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function findWidgetAreas(rootElement) {
-   var areas = {};
-   Array.from(rootElement.querySelectorAll('[ax-widget-area],[data-ax-widget-area]')).forEach(function (elem) {
-      var name = elem.getAttribute('ax-widget-area') || elem.getAttribute('data-ax-widget-area');
-
-      areas[name] = elem;
-   });
-   return areas;
-}
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
-/* unused harmony export levels */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return BLACKBOX; });
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/* unused harmony export createConsoleChannel */
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-/**
- * Module providing the Logger factory.
- *
- * To use the Log service in a widget, request the {@link widget_services#axLog axLog} injection.
- *
- * @module log
- */
-
-
-
-/**
- * Log levels that are available by default, sorted by increasing severity:
- *
- * - TRACE (level 100)
- * - DEBUG (level 200)
- * - INFO (level 300)
- * - WARN (level 400)
- * - ERROR (level 500)
- * - FATAL (level 600)
- *
- * @type {Object}
- * @name levels
- */
-var levels = {
-   TRACE: 100,
-   DEBUG: 200,
-   INFO: 300,
-   WARN: 400,
-   ERROR: 500,
-   FATAL: 600
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Pass this as an additional replacement parameter to a log-method, in order to blackbox your logging call.
- * Blackboxed callers are ignored when logging the source information (file, line).
- *
- * @type {Object}
- * @name BLACKBOX
- */
-var BLACKBOX = {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function create(configuration, optionalBrowser) {
-   var startChannels = optionalBrowser ? [createConsoleChannel(optionalBrowser)] : [];
-   return new Logger(configuration, startChannels);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// eslint-disable-next-line valid-jsdoc
-/**
- * A flexible logger.
- *
- * It is recommended to prefer this logger over `console.log` and friends, at least for any log messages that
- * might make their way into production code. For once, this logger is safe to use across browsers and allows
- * to attach additional channels for routing messages to (i.e. to send them to a server process for
- * persistence). If a browser console is available, messages will be logged to that console using the builtin
- * console channel.
- * For testing, a silent mock for this logger is used, making it simple to test the logging behavior of
- * widgets and activities, while avoiding noisy log messages in the test runner output.
- *
- * All messages produced
- *
- * @constructor
- * @private
- */
-function Logger(configuration) {
-   var _this = this;
-
-   var channels = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-   this.levels = Object.assign({}, levels, configuration.get('logging.levels'));
-
-   this.queueSize_ = 100;
-   this.channels_ = channels;
-   this.counter_ = 0;
-   this.messageQueue_ = [];
-   this.threshold_ = 0;
-   this.tags_ = {};
-
-   this.levelToName_ = function (levels) {
-      var result = {};
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["forEach"])(levels, function (level, levelName) {
-         _this[levelName.toLowerCase()] = function () {
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-               args[_key] = arguments[_key];
-            }
-
-            _this.log.apply(_this, [level].concat(args, [BLACKBOX]));
-         };
-         result[level] = levelName;
-      });
-      return result;
-   }(this.levels);
-
-   this.setLogThreshold(configuration.ensure('logging.threshold'));
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message. A message may contain placeholders in the form `[#]` where `#` resembles the index
- * within the list of `replacements`. `replacements` are incrementally counted starting at `0`. If the
- * log level is below the configured log threshold, the message is simply discarded.
- *
- * It is recommended not to use this method directly, but instead one of the short cut methods for the
- * according log level.
- *
- * @param {Number} level
- *    the level for this message
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.log = function (level, message) {
-   for (var _len2 = arguments.length, replacements = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-      replacements[_key2 - 2] = arguments[_key2];
-   }
-
-   if (level < this.threshold_) {
-      return;
-   }
-
-   var blackboxDepth = 0;
-   while (replacements[replacements.length - 1] === BLACKBOX) {
-      ++blackboxDepth;
-      replacements.pop();
-   }
-
-   var messageObject = {
-      id: this.counter_++,
-      level: this.levelToName_[level],
-      text: message,
-      replacements: replacements,
-      time: new Date(),
-      tags: this.gatherTags(),
-      sourceInfo: gatherSourceInformation(blackboxDepth + 1) // add 1 depth to exclude this function
-   };
-
-   this.channels_.forEach(function (channel) {
-      channel(messageObject);
-   });
-
-   if (this.messageQueue_.length === this.queueSize_) {
-      this.messageQueue_.shift();
-   }
-   this.messageQueue_.push(messageObject);
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `TRACE`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.trace = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `DEBUG`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.debug = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `INFO`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.info = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `WARN`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.warn = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `ERROR`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.error = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Logs a message in log level `FATAL`. See {@link Logger#log} for further information.
- *
- * *Important note*: This method is only available, if no custom log levels were defined via
- * configuration or custom log levels include this method as well.
- *
- * @param {String} message
- *    the message to log
- * @param {...*} replacements
- *    objects that should replace placeholders within the message
- */
-Logger.prototype.fatal = function () {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Adds a new channel to forward log messages to. A channel is called synchronously for every log message
- * and can do whatever necessary to handle the message according to its task. Note that blocking or
- * performance critical actions within a channel should always take place asynchronously to prevent from
- * blocking the application. Ideally a web worker is used for heavier background tasks.
- *
- * Each message is an object having the following properties:
- * - `id`: the unique, ascending id of the log message
- * - `level`: the log level of the message in string representation
- * - `text`: the actual message that was logged
- * - `replacements`: the raw list of replacements passed along the message
- * - `time`: JavaScript Date instance when the message was logged
- * - `tags`: A map of all log tags currently set for the logger
- * - `sourceInfo`: if supported, a map containing `file`, `line` and `char` where the logging took place
- *
- * @param {Function} channel
- *    the log channel to add
- */
-Logger.prototype.addLogChannel = function (channel) {
-   this.channels_.push(channel);
-   this.messageQueue_.forEach(function (entry) {
-      channel(entry);
-   });
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Removes a log channel and thus stops sending further messages to it.
- *
- * @param {Function} channel
- *    the log channel to remove
- */
-Logger.prototype.removeLogChannel = function (channel) {
-   var channelIndex = this.channels_.indexOf(channel);
-   if (channelIndex > -1) {
-      this.channels_.splice(channelIndex, 1);
-   }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Adds a value for a log tag. If a tag is already known, the value is appended to the existing one using a
- * `;` as separator. Note that no formatting of the value takes place and a non-string value will just have
- * its appropriate `toString` method called.
- *
- * Log tags can be used to mark a set of log messages with a value giving further information on the
- * current logging context. For example laxar sets a tag `'INST'` with a unique-like identifier for the
- * current browser client. If then for example log messages are persisted on a server, messages belonging
- * to the same client can be accumulated.
- *
- * @param {String} tag
- *    the id of the tag to add a value for
- * @param {String} value
- *    the value to add
- */
-Logger.prototype.addTag = function (tag, value) {
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
-
-   if (!this.tags_[tag]) {
-      this.tags_[tag] = [value];
-   } else {
-      this.tags_[tag].push(value);
-   }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Sets a value for a log tag. If a tag is already known, the value is overwritten by the given one. Note
- * that no formatting of the value takes place and a non-string value will just have its appropriate
- * `toString` method called. For further information on log tags, see {@link Logger#addTag}.
- *
- * @param {String} tag
- *    the id of the tag to set a value for
- * @param {String} value
- *    the value to set
- */
-Logger.prototype.setTag = function (tag, value) {
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
-
-   this.tags_[tag] = [value];
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Removes a log tag. For further information on log tags, see {@link Logger#addTag}.
- *
- * @param {String} tag
- *    the id of the tag to set a value for
- */
-Logger.prototype.removeTag = function (tag) {
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
-
-   delete this.tags_[tag];
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Returns a map of all tags. If there are multiple values for the same tag, their values are concatenated
- * using a `;` as separator. For further information on log tags, see {@link Logger#addTag}.
- *
- * @return {Object}
- *    a mapping from tag to its value(s)
- */
-Logger.prototype.gatherTags = function () {
-   var tags = {};
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["forEach"])(this.tags_, function (values, tag) {
-      tags[tag] = values.join(';');
-   });
-   return tags;
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Sets the threshold for log messages. Log messages with a lower level will be discarded upon logging.
- *
- * @param {String|Number} threshold
- *    the numeric or the string value of the log level to use as threshold
- */
-Logger.prototype.setLogThreshold = function (threshold) {
-   if (typeof threshold === 'string') {
-      __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].state(threshold.toUpperCase() in this.levels, 'Unsupported log threshold "' + threshold + '".');
-      this.threshold_ = this.levels[threshold.toUpperCase()];
-   } else {
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(threshold).hasType(Number);
-      this.threshold_ = threshold;
-   }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var EMPTY_CALL_INFORMATION = { file: '?', line: -1, char: -1 };
-
-function gatherSourceInformation(blackboxDepth) {
-   var e = new Error();
-
-   if (!e.stack) {
-      try {
-         // IE >= 10 only generates a stack if the error object is really thrown
-         throw new Error();
-      } catch (err) {
-         e = err;
-      }
-      if (!e.stack) {
-         return EMPTY_CALL_INFORMATION;
-      }
-   }
-
-   var rows = e.stack.split(/[\n]/);
-   var interpret = void 0;
-   if (rows[0] === 'Error') {
-      rows.shift();
-      interpret = chromeStackInterpreter;
-   } else if (rows[0].indexOf('@') !== -1) {
-      interpret = firefoxStackInterpreter;
-   } else {
-      return EMPTY_CALL_INFORMATION;
-   }
-
-   var row = rows[blackboxDepth + 1]; // add 1 depth to exclude this function
-   return row ? interpret(row) : EMPTY_CALL_INFORMATION;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var CHROME_AND_IE_STACK_MATCHER = /\(?([^( ]+):(\d+):(\d+)\)?$/;
-
-function chromeStackInterpreter(row) {
-   var match = CHROME_AND_IE_STACK_MATCHER.exec(row);
-   return {
-      file: match ? match[1] : '?',
-      line: match ? match[2] : -1,
-      char: match ? match[3] : -1
-   };
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var FIREFOX_STACK_MATCHER = /@(.+):(\d+)$/;
-
-function firefoxStackInterpreter(row) {
-   var match = FIREFOX_STACK_MATCHER.exec(row);
-   return {
-      file: match ? match[1] : '?',
-      line: match ? match[2] : -1,
-      char: -1
-   };
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function createConsoleChannel(browser) {
-
-   return function log(messageObject) {
-      var browserConsole = browser.console();
-      if (!browserConsole) {
-         return;
-      }
-
-      var level = messageObject.level,
-          text = messageObject.text,
-          replacements = messageObject.replacements,
-          _messageObject$source = messageObject.sourceInfo,
-          file = _messageObject$source.file,
-          line = _messageObject$source.line;
-
-
-      var logMethod = level.toLowerCase();
-      if (!(logMethod in browserConsole) || logMethod === 'trace') {
-         // In console objects trace doesn't define a valid log level but is used to print stack traces. We
-         // thus need to change it something different.
-         logMethod = 'log';
-      }
-
-      if (!(logMethod in browserConsole)) {
-         return;
-      }
-
-      var callArgs = [level + ': '].concat(mergeTextAndReplacements(text, replacements)).concat(['(@ ' + file + ':' + line + ')']);
-
-      browserConsole[logMethod].apply(browserConsole, _toConsumableArray(callArgs));
-   };
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function mergeTextAndReplacements(text, replacements) {
-   var parts = [];
-   var pos = 0;
-   var buffer = '';
-
-   while (pos < text.length) {
-      var character = text.charAt(pos);
-
-      switch (character) {
-         case '\\':
-            {
-               ++pos;
-               if (pos === text.length) {
-                  throw new Error('Unterminated string: "' + text + '"');
-               }
-
-               buffer += text.charAt(pos);
-               break;
-            }
-         case '[':
-            {
-               parts.push(buffer);
-               buffer = '';
-
-               var end = text.indexOf(']', pos);
-               if (end === -1) {
-                  throw new Error('Unterminated replacement at character ' + pos + ': "' + text + '"');
-               }
-
-               var replacementIndex = parseInt(text.substring(pos + 1, end), 10);
-
-               parts.push(replacements[replacementIndex]);
-               pos = end;
-
-               break;
-            }
-         default:
-            {
-               buffer += character;
-               break;
-            }
-      }
-
-      ++pos;
-   }
-
-   if (buffer.length > 0) {
-      parts.push(buffer);
-   }
-
-   return parts;
-}
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_object__ = __webpack_require__(1);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return FLAT; });
-/* unused harmony export COMPACT */
-/* harmony export (immutable) */ __webpack_exports__["b"] = createProvider;
-/* harmony export (immutable) */ __webpack_exports__["a"] = createCollector;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-/** Use to access the flattened page model, where compositions have been expanded. */
-var FLAT = 'FLAT';
-/** Use to access the compact page/composition model, where compositions have not been expanded. */
-var COMPACT = 'COMPACT';
-
-function createProvider(collector) {
-
-   return {
-
-      /** Start collecting page/composition data. */
-      enable: function enable() {
-         collector.enable();
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      /** Stop collecting page/composition data and clean up. */
-      disable: function disable() {
-         collector.disable();
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      /**
-       * Access the current page information.
-       * Everything is returned as a copy, sothis object cannot be used to modify the host application.
-       *
-       * @return {Object}
-       *   the current page information, with the following properties:
-       *    - `pageDefinitions` {Object}
-       *       both the original as well as the expanded/flattened page model for each available page
-       *    - `compositionDefinitions` {Object}
-       *       both the original as well as the expanded/flattened composition model for each composition of
-       *       any available page
-       *    - `widgetDescriptors` {Object}
-       *       the widget descriptor for each widget that was referenced
-       *    - `pageReference` {String}
-       *       the reference for the current page, to lookup page/composition definitions
-       */
-      current: function current() {
-         return collector.current();
-      },
-
-
-      /**
-       * Add a listener function to be notified whenever the page information changes.
-       * As a side-effect, this also automatically enables collecting page/composition data.
-       * Each listener will be delivered its own copy of the page information.
-       *
-       * @param {Function} _
-       *    The listener to add. Will be called with the current page information whenever that changes.
-       */
-      addListener: function addListener(_) {
-         collector.addListener(_);
-      },
-
-
-      /**
-       * Remove a page information listener function.
-       *
-       * @param {Function} _
-       *    The listener to remove
-       */
-      removeListener: function removeListener(_) {
-         collector.removeListener(_);
-      }
-   };
-}
-
-function createCollector(configuration, log) {
-
-   var enabled = configuration.get('tooling.enabled');
-
-   var listeners = [];
-
-   var currentPageInfo = {
-      pageReference: null,
-      pageDefinitions: {},
-      compositionDefinitions: {},
-      widgetDescriptors: {}
-   };
-
-   return {
-
-      // eslint-disable-next-line valid-jsdoc
-      /** Collect a widget descriptor. */
-      collectWidgetDescriptor: function collectWidgetDescriptor(ref, descriptor) {
-         if (!enabled) {
-            return;
-         }
-         currentPageInfo.widgetDescriptors[ref] = descriptor;
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      // eslint-disable-next-line valid-jsdoc
-      /**
-       * Collect a page definition.
-       * The page is deep-copied right away, and may safely be modified by the caller.
-       */
-      collectPageDefinition: function collectPageDefinition(ref, page, type) {
-         if (!enabled) {
-            return;
-         }
-         var definitions = currentPageInfo.pageDefinitions;
-         definitions[ref] = definitions[ref] || {
-            FLAT: null,
-            COMPACT: null
-         };
-         definitions[ref][type] = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["deepClone"])(page);
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      // eslint-disable-next-line valid-jsdoc
-      /**
-       * Collect a composition definition.
-       * The composition is deep-copied right away, and may safely be modified by the caller.
-       */
-      collectCompositionDefinition: function collectCompositionDefinition(pageRef, compositionInstanceId, composition, type) {
-         if (!enabled) {
-            return;
-         }
-         var definitions = currentPageInfo.compositionDefinitions;
-         var definitionsByInstance = definitions[pageRef] = definitions[pageRef] || {};
-         definitionsByInstance[compositionInstanceId] = definitionsByInstance[compositionInstanceId] || {
-            FLAT: null,
-            COMPACT: null
-         };
-         definitionsByInstance[compositionInstanceId][type] = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["deepClone"])(composition);
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      // eslint-disable-next-line valid-jsdoc
-      /**
-       * Collect information about the current page, and inform all listeners.
-       * Each listener will receive its own copy of the page information.
-       */
-      collectCurrentPage: function collectCurrentPage(ref) {
-         if (!enabled) {
-            return;
-         }
-         currentPageInfo.pageReference = ref;
-         listeners.forEach(function (listener) {
-            listener(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["deepClone"])(currentPageInfo));
-         });
-         cleanup();
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      enable: function enable() {
-         enabled = true;
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      disable: function disable() {
-         enabled = false;
-         currentPageInfo.pageReference = null;
-         currentPageInfo.widgetDescriptors = {};
-         cleanup();
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      addListener: function addListener(listener) {
-         enabled = true;
-         listeners.push(listener);
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      removeListener: function removeListener(listener) {
-         listeners = listeners.filter(function (_) {
-            return _ !== listener;
-         });
-      },
-
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      current: function current() {
-         if (!enabled) {
-            log.warn('laxar page tooling: trying to access data, but collecting it was never enabled');
-         }
-         return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["deepClone"])(currentPageInfo);
-      }
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function cleanup() {
-      var currentRef = currentPageInfo.pageReference;
-      ['pageDefinitions', 'compositionDefinitions'].forEach(function (collection) {
-         Object.keys(currentPageInfo[collection]).filter(function (ref) {
-            return ref !== currentRef;
-         }).forEach(function (ref) {
-            delete currentPageInfo[collection][ref];
-         });
-      });
-   }
-}
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "technology", function() { return technology; });
-/* harmony export (immutable) */ __webpack_exports__["bootstrap"] = bootstrap;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-/**
- * Module for the plain widget adapter factory.
- * In LaxarJS _plain_ widgets are defined as widgets without dependency to a specific view library or
- * framwork, and instead would be implemented using simple DOM access and manipulation.
- *
- * A developer will never call any of the API of this module.
- * The documentation solely exists as a blueprint for custom widget adapters and to explain certain concepts.
- *
- * @module plain_adapter
- */
-
-var technology = 'plain';
-
-var noOp = function noOp() {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Initializes the adapter module and returns a factory for plain widgets.
- * Note that the plain adapter doesn't need all the provided arguments, but they are listed here for
- * documentation purposes.
- *
- * @param {Object} artifacts
- *    the artifacts available to this adapter factory
- * @param {Object} artifacts.widgets
- *    all widgets, that are implemented in the adapter's technology
- * @param {Object} artifacts.controls
- *    all controls, that are implemented in the adapter's technology
- * @param {Object} services
- *    a selection of services adapter implementations may need to fulfill their task
- * @param {AdapterUtilities} services.adapterUtilities
- *    common utilities, that may be useful to a widget adapter
- * @param {ArtifactProvider} services.artifactProvider
- *    the artifact provider instance
- * @param {Configuration} services.configuration
- *    access to the application configuration
- * @param {EventBus} services.globalEventBus
- *    the global event bus.
- *    Note that an adapter should not sent any events by itself.
- *    It may instead be necessary that the adapter makes the event bus globally available to its widgets (for
- *    example like the AngularJS 1.x adapter), or that it registers an inspector
- * @param {Heartbeat} services.heartbeat
- *    the heartbeat instance.
- *    Depending on the underlying view technology (like AngularJS 1.x) it may be important to get notified
- *    when to re-render the user interface.
- *    For that reason an adapter can register a callback at the heartbeat, that gets called after all events
- *    of the current cycle were processed
- * @param {Log} services.log
- *    the global log instance
- * @param {StorageFactory} services.storage
- *    the global storage factory api
- * @param {Tooling} services.tooling
- *    access to the tooling api
- * @param {HTMLElement} anchorElement
- *    the DOM node the laxar application is bootstrapped on.
- *    An adapter should never try to access DOM nodes that are not the `anchorElement` or any of its children,
- *    since they are not under control of this LaxarJS application.
- *
- * @return {PlainAdapterFactory}
- *    the factory for plain widget adapters
- */
-function bootstrap(artifacts, _ref) {
-   var artifactProvider = _ref.artifactProvider,
-       adapterUtilities = _ref.adapterUtilities;
-
-
-   /**
-    * A factory for plain widget adapters.
-    *
-    * @constructor
-    * @name PlainAdapterFactory
-    */
-   return {
-      create: create
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Creates a new adapter instance for the given widget environment.
-    *
-    * @param {Object} environment
-    *    the environment for the widget to create and manage
-    * @param {HTMLElement} environment.anchorElement
-    *    the DOM node that the widget's DOM fragment should be inserted into
-    * @param {String} environment.name
-    *    the name of the widget to load, exactly as specified by the widget descriptor
-    * @param {widget_services} environment.services
-    *    the services for this widget instance
-    * @param {Function} environment.provideServices
-    *    a function that the adapter must call with a map of all to-be-injected services, just before
-    *    creating the controller
-    *
-    * @return {Object}
-    *    the adapter instance
-    *
-    * @memberof PlainAdapterFactory
-    */
-   function create(_ref2) {
-      var widgetName = _ref2.widgetName,
-          anchorElement = _ref2.anchorElement,
-          services = _ref2.services,
-          provideServices = _ref2.provideServices;
-
-
-      var onDomAvailable = null;
-      var domAttached = false;
-
-      var provider = artifactProvider.forWidget(widgetName);
-
-      return Promise.all([provider.descriptor(), provider.module()]).then(createController, function () {
-         return adapterUtilities.unknownWidget({ technology: technology, widgetName: widgetName });
-      }).then(function () {
-         return {
-            domAttachTo: domAttachTo,
-            domDetach: domDetach
-         };
-      });
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function createController(_ref3) {
-         var _ref4 = _slicedToArray(_ref3, 2),
-             descriptor = _ref4[0],
-             module = _ref4[1];
-
-         services.axWithDom = function (callback) {
-            if (domAttached) {
-               callback(anchorElement);
-            }
-         };
-         var injections = (module.injections || []).map(function (injection) {
-            if (!(injection in services)) {
-               throw adapterUtilities.unknownInjection({ technology: technology, injection: injection, widgetName: widgetName });
-            }
-            if (injection === 'axWithDom' && descriptor.integration.type === 'activity') {
-               throw adapterUtilities.activityAccessingDom({ technology: technology, injection: injection, widgetName: widgetName });
-            }
-            return services[injection];
-         });
-
-         provideServices(services);
-
-         var _ref5 = module.create.apply(module, _toConsumableArray(injections)) || {};
-
-         var _ref5$onDomAvailable = _ref5.onDomAvailable;
-         onDomAvailable = _ref5$onDomAvailable === undefined ? noOp : _ref5$onDomAvailable;
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domAttachTo(areaElement, htmlTemplate) {
-         if (htmlTemplate === null) {
-            return;
-         }
-         anchorElement.innerHTML = htmlTemplate;
-         areaElement.appendChild(anchorElement);
-         domAttached = true;
-         onDomAvailable(anchorElement);
-      }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function domDetach() {
-         var parent = anchorElement.parentNode;
-         if (parent) {
-            parent.removeChild(anchorElement);
-         }
-         domAttached = false;
-      }
-   }
-}
-
-/***/ }),
-/* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__configuration__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__browser__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__log__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__adapter_utilities__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__artifact_provider__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__storage__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__timer__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__flow_controller__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__flow_service__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__heartbeat__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__navigo_router__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__page_service__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__locale_event_manager__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__widget_services__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__tooling_tooling__ = __webpack_require__(30);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function create(configurationSource, assets) {
-
-   var configurationDefaults = {
-      baseHref: undefined,
-      eventBusTimeoutMs: 120 * 1000,
-      router: {
-         query: {
-            enabled: false
-         }
-         // 'navigo' is not configured here:
-         // any deviation from the Navigo library defaults must be set by the application
-      },
-      flow: {
-         entryPoint: {
-            target: 'default',
-            parameters: {}
-         }
-      },
-      i18n: {
-         fallback: 'en',
-         strict: false,
-         locales: {
-            'default': 'en'
-         }
-      },
-      logging: {
-         levels: {},
-         threshold: 'INFO'
-      },
-      name: 'unnamed',
-      theme: 'default',
-      storagePrefix: undefined,
-      tooling: {
-         enabled: false
-      }
-   };
-
-   var adapterUtilities = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__adapter_utilities__["a" /* create */])();
-
-   var configuration = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__configuration__["a" /* create */])(configurationSource, configurationDefaults);
-
-   var browser = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__browser__["a" /* create */])();
-   var log = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__log__["a" /* create */])(configuration, browser);
-   var collectors = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__tooling_tooling__["a" /* createCollectors */])(configuration, log);
-
-   var storage = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_11__storage__["a" /* create */])(configuration, browser);
-   var timer = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__timer__["a" /* create */])(log, storage);
-
-   var artifactProvider = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__artifact_provider__["a" /* create */])(assets, browser, configuration, log);
-
-   var heartbeat = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_15__heartbeat__["a" /* create */])();
-
-   // MSIE Bug we have to wrap setTimeout to pass assertion
-   var timeoutFn = function timeoutFn(f, t) {
-      return setTimeout(f, t);
-   };
-   var globalEventBus = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__["a" /* create */])(configuration, log, heartbeat.onNext, timeoutFn);
-
-   var layoutLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__["a" /* create */])(artifactProvider);
-   var pageLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__["a" /* create */])(artifactProvider, collectors.pages);
-   var controlLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__["a" /* create */])(artifactProvider);
-   var widgetServices = {
-      forWidget: function forWidget() {
-         __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].codeIsUnreachable('Using widget services before they are available');
-      }
-   };
-   var widgetLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__["a" /* create */])(log, artifactProvider, controlLoader, collectors.pages, function () {
-      var _widgetServices;
-
-      return (_widgetServices = widgetServices).forWidget.apply(_widgetServices, arguments);
-   });
-
-   var localeManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_18__locale_event_manager__["a" /* create */])(globalEventBus, configuration);
-   var visibilityManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__["a" /* create */])(globalEventBus);
-   var pageService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_17__page_service__["a" /* create */])(globalEventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, collectors.pages, log);
-
-   var router = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_16__navigo_router__["a" /* create */])(browser, configuration);
-
-   var flowController = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__flow_controller__["a" /* create */])(artifactProvider, configuration, globalEventBus, log, pageService, router, timer);
-   var flowService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_14__flow_service__["a" /* create */])(flowController);
-
-   var toolingProviders = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__tooling_tooling__["b" /* createProviders */])(collectors);
-
-   widgetServices = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_20__widget_services__["a" /* create */])(artifactProvider, configuration, controlLoader, globalEventBus, flowService, log, heartbeat, pageService, storage, toolingProviders);
-
-   return {
-      adapterUtilities: adapterUtilities,
-      artifactProvider: artifactProvider,
-      configuration: configuration,
-      flowController: flowController,
-      flowService: flowService,
-      globalEventBus: globalEventBus,
-      heartbeat: heartbeat,
-      layoutLoader: layoutLoader,
-      log: log,
-      pageService: pageService,
-      storage: storage,
-      timer: timer,
-      toolingProviders: toolingProviders,
-      widgetLoader: widgetLoader
-   };
-}
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_string__ = __webpack_require__(2);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-/**
- * The control loader helps to load control assets and implementations.
- *
- * @module control_loader
- */
-
-
-function create(artifactProvider) {
-
-   var notDeclaredMessage = 'Tried to load control reference [0] without declaration in widget.json.\nDetails: [1]';
-   var errorInfoLink = 'https://github.com/LaxarJS/laxar/blob/master/docs/manuals/providing_controls.md#compatibility';
-
-   var aliases = {};
-   var modules = {};
-
-   /**
-    * @constructor
-    * @name ControlLoader
-    */
-   return {
-      load: load,
-      provide: provide
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Provides the implementation module of the given control, for manual instantiation by a widget.
-    *
-    * Because the method must return synchronously, it may only be called for controls that have been
-    * loaded before (using {@link #load()})!
-    * For controls that are correctly listed in the `controls` section of the `widget.json`, this is ensured
-    * by the widget loader.
-    *
-    * @param {String} controlRef
-    *   a valid control reference as used in the `widget.json`
-    *
-    * @return {*}
-    *   the module for the requested control reference
-    *
-    * @memberof ControlLoader
-    */
-   function provide(controlRef) {
-      var module = modules[aliases[controlRef]];
-      if (!module) {
-         var message = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_string__["format"])('axControls: ' + notDeclaredMessage, [controlRef, errorInfoLink]);
-         throw new Error(message);
-      }
-      return module;
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Fetches the descriptor for a given control reference, and saves it as a side-effect.
-    * This is part of the internal API used by the widget loader.
-    *
-    * This process must be completed before the descriptor or the module for a control can be provided.
-    * For this reason, `load` is called by the widget-loader, using information from the `widget.json` file.
-    *
-    * @param {String} controlRef
-    *   a valid control reference as used in the `widget.json`
-    *
-    * @return {Promise}
-    *   a promise for the (fetched or synthesized) control descriptor
-    *
-    * @memberof ControlLoader
-    */
-   function load(controlRef) {
-      var _artifactProvider$for = artifactProvider.forControl(controlRef),
-          descriptor = _artifactProvider$for.descriptor,
-          module = _artifactProvider$for.module;
-
-      return Promise.all([descriptor(), module()]).then(function (_ref) {
-         var _ref2 = _slicedToArray(_ref, 2),
-             descriptor = _ref2[0],
-             module = _ref2[1];
-
-         var name = descriptor.name;
-
-         aliases[controlRef] = name;
-         modules[name] = module;
-         return descriptor;
-      });
-   }
-}
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-function create(artifactProvider) {
-   return {
-      load: function load(layoutRef) {
-         var _artifactProvider$for = artifactProvider.forLayout(layoutRef),
-             descriptor = _artifactProvider$for.descriptor,
-             assetForTheme = _artifactProvider$for.assetForTheme;
-
-         return descriptor().then(function (_ref) {
-            var name = _ref.name,
-                templateSource = _ref.templateSource;
-            return Promise.all([Promise.resolve(name), assetForTheme(templateSource || name + ".html")]);
-         }).then(function (_ref2) {
-            var _ref3 = _slicedToArray(_ref2, 2),
-                name = _ref3[0],
-                html = _ref3[1];
-
-            return { name: name, html: html, className: name + "-layout" };
-         });
-      }
-   };
-}
-
-/***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__tooling_pages__ = __webpack_require__(5);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Creates and returns a new page loader instance.
- *
- * @param {ArtifactProvider} artifactProvider
- *    an ArtifactProvider to load application assets
- * @param {PagesCollector} pagesCollector
- *    a tooling collector to consume page and composition information
- *
- * @return {PageLoader}
- *    a page loader instance
- *
- * @private
- */
-function create(artifactProvider, pagesCollector) {
-  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(artifactProvider).isNotNull();
-  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(pagesCollector).isNotNull();
-
-  return { load: load };
-
-  /**
-   * Loads a pre-assembled page definition. References to compositions, widgets and layouts have been
-   * resolved at build-time. Schema-validation for the page itself and for the contained feature
-   * configurations has also already been performed.
-   *
-   * @param {String} pageRef
-   *    the page to load. Usually a path relative to the page base path, with the `.json` suffix omitted
-   *
-   * @return {Promise}
-   *    the result promise
-   *
-   * @private
-   */
-  function load(pageRef) {
-    var _artifactProvider$for = artifactProvider.forPage(pageRef),
-        definition = _artifactProvider$for.definition;
-
-    return definition().then(function (pageDefinition) {
-      pagesCollector.collectPageDefinition(pageRef, pageDefinition, __WEBPACK_IMPORTED_MODULE_1__tooling_pages__["c" /* FLAT */]);
-      return pageDefinition;
-    });
-  }
-}
-
-/***/ }),
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_string__ = __webpack_require__(2);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-
-var TYPE_WIDGET = 'widget';
-var TYPE_ACTIVITY = 'activity';
-
-var ID_SEPARATOR = '-';
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var noOp = function noOp() {};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Create a generic widget loader that can load widgets and activities implemented in various technologies
- * by using appropriate adapters.
- *
- * @param {Log} log
- *    log instance to use for technology compatibility warnings
- * @param {ArtifactProvider} artifactProvider
- *    an artifact provider for looking up widget descriptors and assets
- * @param {ControlLoader} controlLoader
- *    helps loading controls and their assets
- * @param {PagesCollector} pagesCollector
- *    used for inspection tools
- * @param {Function} servicesForWidget
- *    a factory method to create widget-specific services
- *
- * @return {WidgetLoader}
- *    a new widget loader
- */
-function create(log, artifactProvider, controlLoader, pagesCollector, servicesForWidget) {
-
-   var widgetAdapters = {};
-
-   /**
-    * @name WidgetLoader
-    * @constructor
-    */
-   return {
-      load: load,
-
-      /**
-       * Register support for integration technologies.
-       *
-       * @param {Object} adapters
-       *    a map of widget adapters by technology to be registered with this loader
-       *
-       * @memberof WidgetLoader
-       */
-      registerWidgetAdapters: function registerWidgetAdapters(adapters) {
-         Object.assign(widgetAdapters, adapters);
-      }
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Load a widget using an appropriate adapter
-    *
-    * First, get the given widget's descriptor to validate and instantiate the widget features.
-    * Then, instantiate a widget adapter matching the widget's technology. Using the adapter, create the
-    * widget controller. The adapter is returned and can be used to attach the widget to the DOM, or to
-    * destroy it.
-    *
-    * @param {Object} widgetConfiguration
-    *    a widget instance configuration (as used in page definitions) to instantiate the widget from
-    * @param {Object} [optionalOptions]
-    *    map of additonal options
-    * @param {Function} [optionalOptions.whenServicesAvailable]
-    *    a callback that will be invoked just before the controller is set up. It receives an object of named,
-    *    widget-specific injections as arguments allowing clients and tools such as laxar-mocks to tap into
-    *   the provided services
-    *
-    * @return {Promise} a promise for a widget adapter, with an already instantiated controller
-    *
-    * @memberof WidgetLoader
-    */
-   function load(widgetConfiguration) {
-      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-          _ref$whenServicesAvai = _ref.whenServicesAvailable,
-          whenServicesAvailable = _ref$whenServicesAvai === undefined ? noOp : _ref$whenServicesAvai;
-
-      var widgetArtifactProvider = artifactProvider.forWidget(widgetConfiguration.widget);
-
-      return widgetArtifactProvider.descriptor().then(function (descriptor) {
-         // The control-descriptors must be loaded prior to controller creation.
-         // This allows the widget controller to synchronously instantiate controls.
-         return Promise.all((descriptor.controls || []).map(controlLoader.load)).then(function (controlDescriptors) {
-            controlDescriptors.forEach(checkTechnologyCompatibility(descriptor));
-            return descriptor;
-         });
-      }).then(function (descriptor) {
-
-         pagesCollector.collectWidgetDescriptor(widgetConfiguration.widget, descriptor);
-
-         var _descriptor$integrati = descriptor.integration,
-             type = _descriptor$integrati.type,
-             technology = _descriptor$integrati.technology;
-
-         var widgetName = descriptor.name;
-         if (type !== TYPE_WIDGET && type !== TYPE_ACTIVITY) {
-            throwError(widgetConfiguration, 'Unknown integration type "' + type + '"');
-         }
-
-         var features = widgetConfiguration.features || {};
-         var anchorElement = document.createElement('DIV');
-         anchorElement.className = widgetName;
-         anchorElement.id = 'ax' + ID_SEPARATOR + widgetConfiguration.id;
-
-         var adapterFactory = widgetAdapters[technology];
-         var _adapterFactory$servi = adapterFactory.serviceDecorators,
-             serviceDecorators = _adapterFactory$servi === undefined ? function () {
-            return {};
-         } : _adapterFactory$servi;
-
-         var _servicesForWidget = servicesForWidget(descriptor, widgetConfiguration, features, serviceDecorators(descriptor, widgetConfiguration)),
-             services = _servicesForWidget.services,
-             releaseServices = _servicesForWidget.releaseServices;
-
-         var environment = {
-            anchorElement: anchorElement,
-            services: services,
-            widgetName: widgetName,
-            provideServices: whenServicesAvailable
-         };
-
-         return Promise.resolve(adapterFactory.create(environment)).then(function (adapter) {
-            return Object.assign({ destroy: noOp }, adapter);
-         }).then(function (adapter) {
-            return {
-               id: widgetConfiguration.id,
-               adapter: adapter,
-               destroy: function destroy() {
-                  releaseServices();
-                  adapter.destroy();
-               },
-
-               templatePromise: loadAssets(descriptor, widgetArtifactProvider)
-            };
-         });
-      }, function (err) {
-         var message = 'Could not load widget "' + widgetConfiguration.widget + '": ' + err.message;
-         log.error(message);
-         throw err;
-      });
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * Locates and loads the widget HTML template for this widget (if any) as well as any CSS stylesheets
-    * used by this widget or its controls.
-    *
-    * @param {Object} widgetDescriptor
-    *    a descriptor identifying the widget to load assets for
-    * @param {ArtifactProvider} artifactProviderForWidget
-    *    the provider with which to lookup or fetch artifact HTML and CSS
-    *
-    * @return {Promise}
-    *    A promise that will be resolved with the contents of any HTML template for this widget, or with
-    *    `null` if there is no template (for example, if this is an activity).
-    *
-    * @private
-    */
-   function loadAssets(widgetDescriptor, _ref2) {
-      var assetForTheme = _ref2.assetForTheme;
-      var type = widgetDescriptor.integration.type,
-          name = widgetDescriptor.name;
-
-      return type === TYPE_ACTIVITY ? Promise.resolve(null) : assetForTheme(widgetDescriptor.templateSource || name + '.html');
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function checkTechnologyCompatibility(widgetDescriptor) {
-      var name = widgetDescriptor.name,
-          technology = widgetDescriptor.integration.technology;
-
-      return function (controlDescriptor) {
-         var controlTechnology = (controlDescriptor.integration || {}).technology;
-         if (controlTechnology === 'plain') {
-            // plain is always compatible
-            return;
-         }
-
-         if (technology !== controlTechnology) {
-            log.warn('Incompatible integration technologies: widget [0] ([1]) cannot use control [2] ([3])', name, technology, controlDescriptor.name, controlTechnology);
-         }
-      };
-   }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function throwError(widgetConfiguration, message) {
-   throw new Error(__WEBPACK_IMPORTED_MODULE_0__utilities_string__["format"]('Error loading widget "[widget]" (id: "[id]"): [0]', [message], widgetConfiguration));
-}
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-/**
- * Several factory methods for creating error objects that are useful for almost any adapter.
- *
- * @module adapter_utilities
- */
-
-/**
- * Creates an instance of the adapter utilities.
- *
- * @return {AdapterUtilities}
- *   a collection of methods to create error messages commonly generated by widget adapters
- *
- * @private
- */
-function create() {
-
-  /**
-   * Provides access to the configuration that was passed during application bootstrapping.
-   *
-   * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
-   * application bootstrapping configuration. The configuration values are passed to
-   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
-   * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
-   * file `init.js` under your project's root directory.
-   *
-   * @name AdapterUtilities
-   * @constructor
-   */
-  return {
-
-    /**
-     * Creates (but does not throw) an error indicating that an activity tried accessing the DOM.
-     *
-     * @param {Object} details
-     *    details for the error
-     * @param {String} details.technology
-     *    the complaining adapter's technology
-     * @param {String} details.widgetName
-     *    the canonical name of the activity causing the problem
-     *
-     * @return {Error}
-     *    the error, ready to throw
-     */
-    activityAccessingDom: function activityAccessingDom(_ref) {
-      var technology = _ref.technology,
-          widgetName = _ref.widgetName;
-
-      return new Error(technology + " adapter: Trying to access DOM in activity " + widgetName);
-    },
-
-
-    /**
-     * Creates (but does not throw) an error indicating that a widget requested an injection that cannot be
-     * provided by the adapter.
-     *
-     * @param {Object} details
-     *    details for the error
-     * @param {String} details.technology
-     *    the complaining adapter's technology
-     * @param {String} details.injection
-     *    the failing injection
-     * @param {String} details.widgetName
-     *    the canonical name of the widget causing the problem
-     *
-     * @return {Error}
-     *    the error, ready to throw
-     */
-    unknownInjection: function unknownInjection(_ref2) {
-      var technology = _ref2.technology,
-          injection = _ref2.injection,
-          widgetName = _ref2.widgetName;
-
-      return new Error(technology + " adapter: " + ("Trying to inject unknown service \"" + injection + " into widget \"" + widgetName + "\""));
-    },
-
-
-    /**
-     * Creates (but does not throw) an error indicating that a widget was not registered with the current
-     * adapter.
-     *
-     * @param {Object} details
-     *    details for the error
-     * @param {String} details.technology
-     *    the complaining adapter's technology
-     * @param {String} details.widgetName
-     *    the canonical name of the missing widget
-     *
-     * @return {Error}
-     *    the error, ready to throw
-     */
-    unknownWidget: function unknownWidget(_ref3) {
-      var technology = _ref3.technology,
-          widgetName = _ref3.widgetName;
-
-      return new Error(technology + " adapter: Unknown widget: " + widgetName);
-    }
-  };
-}
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-/**
-* Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-
-
-
-var NOT_FOUND = { content: null };
-
-function create(artifacts, browser, configuration, log) {
-
-   var baseHref = configuration.get('baseHref');
-
-   var resolve = baseHref ? function (_) {
-      return browser.resolve(_, baseHref);
-   } : function (_) {
-      return _;
-   };
-
-   var _ref = function (themeRef) {
-      var themeIndex = artifacts.aliases.themes[themeRef];
-      var theme = artifacts.themes[themeIndex];
-      if (!theme) {
-         log.error('The configured theme ' + themeRef + ' is not available.');
-         return ['default', 'default.theme'];
-      }
-      return [themeRef, theme.descriptor.name];
-   }(configuration.ensure('theme')),
-       _ref2 = _slicedToArray(_ref, 2),
-       themeRef = _ref2[0],
-       themeName = _ref2[1];
-
-   return {
-      forFlow: makeProvider('flows', ['descriptor'], ['definition']),
-      forTheme: makeProvider('themes', ['descriptor', 'assets']).bind(null, themeRef),
-      forPage: makeProvider('pages', ['descriptor'], ['definition']),
-      forLayout: makeProvider('layouts', ['descriptor', 'assets']),
-      forWidget: makeProvider('widgets', ['descriptor', 'assets', 'module']),
-      forControl: makeProvider('controls', ['descriptor', 'assets', 'module'])
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function makeProvider(bucket) {
-      var keys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-      var cloneKeys = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-      return function (ref) {
-         var api = {};
-         var index = artifacts.aliases[bucket][ref];
-         var artifactPromise = index === undefined ? Promise.reject(new Error('Artifact ' + ref + ' not found in ' + bucket)) : Promise.resolve(artifacts[bucket][index]);
-
-         ['definition', 'module', 'descriptor'].forEach(function (key) {
-            if (cloneKeys.includes(key)) {
-               api[key] = function () {
-                  return artifactPromise.then(function (_) {
-                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["deepClone"])(_[key]);
-                  });
-               };
-            } else if (keys.includes(key)) {
-               api[key] = function () {
-                  return artifactPromise.then(function (_) {
-                     return _[key];
-                  });
-               };
-            }
-         });
-
-         if (keys.includes('assets')) {
-            (function () {
-               var lookup = function lookup(name) {
-                  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
-                  return function (_ref3) {
-                     var _ref3$assets = _ref3.assets,
-                         assets = _ref3$assets === undefined ? {} : _ref3$assets;
-
-                     return assets[name] || NOT_FOUND;
-                  };
-               };
-
-               var lookupForTheme = function lookupForTheme(name) {
-                  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
-                  return function (_ref4) {
-                     var _ref4$assets = _ref4.assets,
-                         assets = _ref4$assets === undefined ? {} : _ref4$assets;
-
-                     var themedAssets = assets[themeName];
-                     if (themedAssets && themedAssets[name]) {
-                        return themedAssets[name];
-                     }
-                     var defaultAssets = assets['default.theme'];
-                     if (defaultAssets && defaultAssets[name]) {
-                        return defaultAssets[name];
-                     }
-                     return NOT_FOUND;
-                  };
-               };
-
-               var provide = function provide(_ref5) {
-                  var url = _ref5.url,
-                      content = _ref5.content;
-
-                  if (content == null && url) {
-                     return browser.fetch(resolve(url)).then(function (_) {
-                        return _.text();
-                     });
-                  }
-                  return content || null;
-               };
-
-               var provideUrl = function provideUrl(_ref6) {
-                  var url = _ref6.url;
-                  return url ? resolve(url) : null;
-               };
-
-               api.asset = function (name) {
-                  return artifactPromise.then(lookup(name)).then(provide);
-               };
-
-               api.assetUrl = function (name) {
-                  return artifactPromise.then(lookup(name)).then(provideUrl);
-               };
-
-               api.assetForTheme = function (name) {
-                  return artifactPromise.then(lookupForTheme(name)).then(provide);
-               };
-
-               api.assetUrlForTheme = function (name) {
-                  return artifactPromise.then(lookupForTheme(name)).then(provideUrl);
-               };
-            })();
-         }
-
-         return api;
-      };
-   }
-}
-
-/***/ }),
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-/**
- * Module providing the Browser factory.
- *
- * Provides abstractions for browser APIs used internally by LaxarJS, which might need a different
- * implementation in a server-side environment, or for testing.
- * This service is internal to LaxarJS and not available to widgets and activities.
- *
- * @module browser
- */
-
-/**
- * Create a browser abstraction environment.
- *
- * @return {Browser}
- *    a fresh browser instance
- *
- * @private
- */
-function create() {
-
-   // for the MSIE `resolve`-workaround, cache the temporary HTML document
-   var resolveDoc = void 0;
-   var resolveDocBase = void 0;
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   /**
-    * A brower mostly abstracts over the location-related DOM window APIs, and provides a console wrapper.
-    * Since it is internal to LaxarJS, only relevant APIs are included.
-    *
-    * @name Browser
-    * @constructor
-    */
-   return {
-      /**
-      * Calculates an absolute URL from a (relative) URL, and an optional base URL.
-      *
-      * If no base URL is given, the `document.baseURI` is used instead. The given base URL may also be
-      * relative, in which case it is resolved against the `document.baseURI` before resolving the first URL.
-      *
-      * For browser environments that do not support the `new URL( url, baseUrl )` constructor for resolving
-      * URLs or that do not support `document.baseURI`, fallback mechanisms are used.
-      *
-      * @param {String} url
-      *    the URL to resolve
-      * @param {String} baseUrl
-      *    the base to resolve from
-      *
-      * @return {String}
-      *    an absolute URL based on the given URL
-      *
-      * @type {Function}
-      * @memberof Browser
-      */
-      resolve: selectResolver(),
-
-      /**
-       * Provides easily mocked access to `window.location`
-       *
-       * @return {Location}
-       *    the current (window's) DOM location
-       *
-       * @type {Function}
-       * @memberof Browser
-       */
-      location: function location() {
-         return window.location;
-      },
-
-      /**
-       * Provides easily mocked access to `window.fetch` or a suitable polyfill:
-       *
-       * @param {String|Request} input
-       *    the URL to fetch or the request to perform
-       * @param {Object} [init]
-       *    additional options, described here in more detail:
-       *    https://developer.mozilla.org/en-US/docs/Web/API/Globalfetch/fetch#Parameters
-       *
-       * @return {Promise<Response>}
-       *    the resulting promise
-       *
-       * @type {Function}
-       * @memberof Browser
-       */
-      fetch: function fetch(input, init) {
-         return window.fetch(input, init);
-      },
-
-      /**
-       * Provides easily mocked access to `window.console`:
-       *
-       * @return {Console}
-       *    the browser console promise
-       *
-       * @type {Function}
-       * @memberof Browser
-       */
-      console: function console() {
-         return window.console;
-      }
-   };
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   // perform the exception-based feature-detect only once (for performance, and to be nice to debugger users)
-   function selectResolver() {
-      try {
-         var href = window.location.href;
-
-         return new URL('', href).href === href ? resolveUsingUrl : resolveUsingLink;
-      } catch (e) {
-         return resolveUsingLink;
-      }
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   // Resolve using the DOM URL API (Chrome, Firefox, Safari, MS Edge)
-   function resolveUsingUrl(url, baseUrl) {
-      var absoluteBaseUrl = baseUrl ? abs(baseUrl) : document.baseURI || abs('.');
-      return new URL(url, absoluteBaseUrl).href;
-
-      function abs(url) {
-         return new URL(url, document.baseURI || resolveUsingLink('.'));
-      }
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   // Resolve using the a-tag fallback (MSIE)
-   function resolveUsingLink(url, baseUrl) {
-      var absoluteBaseUrl = abs(baseUrl);
-      if (!resolveDoc) {
-         resolveDoc = document.implementation.createHTMLDocument('');
-         resolveDocBase = resolveDoc.createElement('base');
-         resolveDoc.head.appendChild(resolveDocBase);
-      }
-      resolveDocBase.href = absoluteBaseUrl;
-      return abs(url, resolveDoc);
-
-      function abs(url) {
-         var baseDocument = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
-
-         var a = baseDocument.createElement('a');
-         // MSIE does not process empty URLs correctly (http://stackoverflow.com/a/7966835)
-         a.href = url || '#';
-         return url ? a.href : a.href.slice(0, -1);
-      }
-   }
-}
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
-/**
- * Copyright 2016 aixigo AG
- * Released under the MIT license.
- * http://laxarjs.org/license
- */
-/**
- * Module providing the Configuration factory.
- *
- * To use the Configuration in a widget, request the {@link widget_services#axConfiguration axConfiguration}
- * injection. In compatibility mode with LaxarJS v1.x, it is also available under `laxar.configuration`.
- *
- * @module configuration
- */
-
-
-
-function create(source, defaults) {
-
-  /**
-   * Provides access to the configuration that was passed during application bootstrapping.
-   *
-   * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
-   * application bootstrapping configuration. The configuration values are passed to
-   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
-   * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
-   * file `init.js` under your project's root directory.
-   *
-   * @name Configuration
-   * @constructor
-   */
-  return { get: get, ensure: ensure };
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Returns the configured value for the specified attribute path or `undefined` in case it wasn't
-   * configured. If a default value was passed as second argument this is returned instead of `undefined`.
-   *
-   * Services should use this to get configuration values for which there are universal fallback behaviors.
-   *
-   * Examples:
-   * ```js
-   * // ... inject `axConfiguration` as parameter `config` ...
-   * config.get( 'logging.threshold' ); // -> 'INFO'
-   * config.get( 'iDontExist' ); // -> undefined
-   * config.get( 'iDontExist', 42 ); // -> 42
-   * ```
-   *
-   * @param {String} key
-   *    a path (using `.` as separator) to the property in the configuration object
-   * @param {*} [optionalDefault]
-   *    the value to return if no value was set for `key`
-   *
-   * @return {*}
-   *    either the configured value, `undefined` or `optionalDefault`
-   *
-   * @memberof Configuration
-   */
-  function get(key, optionalDefault) {
-    var value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(source, key);
-    return value !== undefined ? value : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(defaults, key, optionalDefault);
-  }
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Retrieves a configuration value by key, failing if it is `undefined` or `null`.
-   *
-   * Services should use this to get configuration values for which no universal default or fallback exists.
-   *
-   * Examples:
-   * ```js
-   * // ... inject `axConfiguration` as parameter `config` ...
-   * config.ensure( 'logging.threshold' ); // -> 'INFO'
-   * config.ensure( 'iDontExist' ); // -> throws
-   * ```
-   *
-   * @param {String} key
-   *    a path (using `.` as separator) to the property in the configuration object
-   *
-   * @return {*}
-   *    the configured value (if `undefined` or `null`, an exception is thrown instead)
-   *
-   * @memberof Configuration
-   */
-  function ensure(key) {
-    var value = get(key);
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(value).isNotNull('Configuration is missing mandatory entry: ' + key);
-    return value;
-  }
-}
-
-/***/ }),
-/* 16 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
-/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/* harmony export (immutable) */ __webpack_exports__["a"] = createLogErrorHandler;
+/* harmony export (immutable) */ __webpack_exports__["b"] = create;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
@@ -4208,21 +1662,17 @@ var REQUEST_MATCHER = /^([^.])([^.]*)Request(\..+)?$/;
  * @param {Object} configuration
  *    configuration for the event bus instance.
  *    The key `eventBusTimeoutMs` is used to determine the will/did timeout.
- * @param {Object} log
- *    a logger instance for error reporting
  * @param {Function} nextTick
  *    a next tick function like `process.nextTick`, `setImmediate` or AngularJS' `$timeout`
  * @param {Function} timeoutFunction
  *    a timeout function like `window.setTimeout` or AngularJS' `$timeout`
  * @param {Function} [errorHandler]
- *    a custom handler for thrown exceptions. By default exceptions are logged using the global logger.
+ *    a custom handler for thrown exceptions.
  *
  * @constructor
  * @private
  */
-function EventBus(configuration, log, nextTick, timeoutFunction) {
-   var errorHandler = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : createLogErrorHandler(log);
-
+function EventBus(configuration, nextTick, timeoutFunction, errorHandler) {
    this.nextTick_ = function (f) {
       return nextTick(f);
    };
@@ -4239,7 +1689,6 @@ function EventBus(configuration, log, nextTick, timeoutFunction) {
    this.waitingPromiseResolves_ = [];
    this.currentCycle_ = -1;
    this.inspectors_ = [];
-   this.log_ = log;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4796,32 +2245,2766 @@ function createLogErrorHandler(log) {
  * @param {Object} configuration
  *    configuration for the event bus instance.
  *    The key `eventBusTimeoutMs` is used to determine the will/did timeout.
- * @param {Object} log
- *    a logger to use for error reporting
  * @param {Function} nextTick
  *    a next tick function like `process.nextTick` or AngularJS' `$timeout`
  * @param {Function} timeoutFunction
  *    a timeout function like `window.setTimeout` or AngularJS' `$timeout`
  * @param {Function} [errorHandler]
- *    a custom handler for thrown exceptions. By default exceptions are logged using the global logger.
+ *    a custom handler for thrown exceptions.
  *
  * @return {EventBus}
  *    an event bus instance
  *
  * @private
  */
-function create(configuration, log, nextTick, timeoutFunction, errorHandler) {
+function create(configuration, nextTick, timeoutFunction, errorHandler) {
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(configuration.ensure).hasType(Function).isNotNull();
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(log.error).hasType(Function).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(nextTick).hasType(Function).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(timeoutFunction).hasType(Function).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(errorHandler).hasType(Function);
 
-   return new EventBus(configuration, log, nextTick, timeoutFunction, errorHandler);
+   return new EventBus(configuration, nextTick, timeoutFunction, errorHandler);
+}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_object__ = __webpack_require__(1);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/* harmony export (immutable) */ __webpack_exports__["b"] = findWidgetAreas;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+/**
+ * The area helper manages widget areas, their DOM representation and their nesting structure.
+ *
+ * It tracks widget area visibility in order to compile widgets and to attach them to their areas when
+ * these become visible.
+ * It does not interact with the event bus directly, but is consulted by the visibility event manager to
+ * determine area nesting for visibility events.
+ */
+
+function create(page, log) {
+
+   var exports = {
+      isVisible: isVisible,
+      setVisibility: setVisibility,
+      areasInArea: areasInArea,
+      areasInWidget: areasInWidget,
+      register: register,
+      exists: exists,
+      attachWidgets: attachWidgets
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   // all initially visible widgets should be attached together, to reduce jitter and unnecessary DOM ops
+   var freeToAttach = false;
+
+   // keep the dom element for each area, to attach widgets to
+   var areaToElement = {};
+
+   // track widget adapters waiting for their area to become available so that they may attach to its DOM
+   var areaToWaitingAdapters = {};
+
+   // track the visibility status of all areas
+   var knownVisibilityState = {};
+
+   // the containing area name for each widget
+   var widgetIdToArea = {};
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgets, areaName) {
+      widgets.forEach(function (widget) {
+         widgetIdToArea[widget.id] = areaName;
+      });
+   });
+
+   // for each widget with children, and each widget area with nested areas, store a list of child names
+   var areasInAreaMap = {};
+   var areasInWidgetMap = {};
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgetEntries, areaName) {
+      var containerName = '';
+      if (areaName.indexOf('.') !== -1) {
+         var widgetId = areaName.split('.')[0];
+         areasInWidgetMap[widgetId] = areasInWidgetMap[widgetId] || [];
+         areasInWidgetMap[widgetId].push(areaName);
+         containerName = widgetIdToArea[widgetId];
+      }
+      areasInAreaMap[containerName] = areasInAreaMap[containerName] || [];
+      areasInAreaMap[containerName].push(areaName);
+   });
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function isVisible(areaName) {
+      return knownVisibilityState[areaName] || false;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function setVisibility(areaName, visible) {
+      if (visible && freeToAttach) {
+         attachWaitingAdapters(areaName);
+      }
+      knownVisibilityState[areaName] = visible;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function areasInArea(containerName) {
+      return areasInAreaMap[containerName];
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function areasInWidget(widgetId) {
+      return areasInWidgetMap[widgetId];
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Register a widget area
+    *
+    * @param {String} name
+    *    the area name as used in the page definition
+    * @param {HTMLElement} element
+    *    an HTML element representing the widget area
+    * @param {String} [localName]
+    *    the area name as used within the widget. Defaults to the qualified `name`
+    *
+    * @return {Function}
+    *    removes the according area from the registry again
+    */
+   function register(name, element, localName) {
+      if (name in areaToElement) {
+         throw new Error('The area "' + name + '" is defined twice.');
+      }
+
+      if (!element.hasAttribute('data-ax-widget-area') && !element.hasAttribute('ax-widget-area')) {
+         element.setAttribute('data-ax-widget-area', localName || name);
+      }
+      areaToElement[name] = element;
+      if (freeToAttach && isVisible(name)) {
+         attachWaitingAdapters(name);
+      }
+
+      return function () {
+         delete areaToElement[name];
+      };
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function exists(name) {
+      return name in areaToElement;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function attachWidgets(widgetAdapters) {
+      freeToAttach = true;
+      widgetAdapters.forEach(function (adapterRef) {
+         var areaName = widgetIdToArea[adapterRef.id];
+         areaToWaitingAdapters[areaName] = areaToWaitingAdapters[areaName] || [];
+         areaToWaitingAdapters[areaName].push(adapterRef);
+      });
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["forEach"])(page.areas, function (widgets, areaName) {
+         if (isVisible(areaName)) {
+            attachWaitingAdapters(areaName);
+         }
+      });
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   // eslint-disable-next-line valid-jsdoc
+   /** @private */
+   function attachWaitingAdapters(areaName) {
+      var waitingAdapters = areaToWaitingAdapters[areaName];
+      if (!waitingAdapters || !waitingAdapters.length) {
+         return;
+      }
+
+      var element = areaToElement[areaName];
+      if (!element) {
+         return;
+      }
+
+      // Only to have the context for error logging
+      var currentAdapterRef = null;
+      // Make sure that all assets are available before proceeding, so that DOM update happens en bloc.
+      Promise.all(waitingAdapters.map(function (adapterRef) {
+         return adapterRef.templatePromise;
+      })).then(function (htmlTemplates) {
+         waitingAdapters.forEach(function (adapterRef, i) {
+            currentAdapterRef = adapterRef;
+            adapterRef.adapter.domAttachTo(element, htmlTemplates[i]);
+         });
+      }).catch(function (err) {
+         log.error('An error occured while attaching some widgets to the DOM:');
+         log.error('  - Widget ID: ' + currentAdapterRef.id);
+         log.error('  - Widget Area: ' + areaName);
+         log.error('  - Original error: [0]', err);
+      });
+
+      delete areaToWaitingAdapters[areaName];
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   return exports;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function findWidgetAreas(rootElement) {
+   var areas = {};
+   Array.from(rootElement.querySelectorAll('[ax-widget-area],[data-ax-widget-area]')).forEach(function (elem) {
+      var name = elem.getAttribute('ax-widget-area') || elem.getAttribute('data-ax-widget-area');
+
+      areas[name] = elem;
+   });
+   return areas;
+}
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
+/* unused harmony export levels */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return BLACKBOX; });
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/* unused harmony export createConsoleChannel */
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * Module providing the Logger factory.
+ *
+ * To use the Log service in a widget, request the {@link widget_services#axLog axLog} injection.
+ *
+ * @module log
+ */
+
+
+
+/**
+ * Log levels that are available by default, sorted by increasing severity:
+ *
+ * - TRACE (level 100)
+ * - DEBUG (level 200)
+ * - INFO (level 300)
+ * - WARN (level 400)
+ * - ERROR (level 500)
+ * - FATAL (level 600)
+ *
+ * @type {Object}
+ * @name levels
+ */
+var levels = {
+   TRACE: 100,
+   DEBUG: 200,
+   INFO: 300,
+   WARN: 400,
+   ERROR: 500,
+   FATAL: 600
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Pass this as an additional replacement parameter to a log-method, in order to blackbox your logging call.
+ * Blackboxed callers are ignored when logging the source information (file, line).
+ *
+ * @type {Object}
+ * @name BLACKBOX
+ */
+var BLACKBOX = {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function create(configuration, optionalBrowser) {
+   var startChannels = optionalBrowser ? [createConsoleChannel(optionalBrowser)] : [];
+   return new Logger(configuration, startChannels);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// eslint-disable-next-line valid-jsdoc
+/**
+ * A flexible logger.
+ *
+ * It is recommended to prefer this logger over `console.log` and friends, at least for any log messages that
+ * might make their way into production code. For once, this logger is safe to use across browsers and allows
+ * to attach additional channels for routing messages to (i.e. to send them to a server process for
+ * persistence). If a browser console is available, messages will be logged to that console using the builtin
+ * console channel.
+ * For testing, a silent mock for this logger is used, making it simple to test the logging behavior of
+ * widgets and activities, while avoiding noisy log messages in the test runner output.
+ *
+ * All messages produced
+ *
+ * @constructor
+ * @private
+ */
+function Logger(configuration) {
+   var _this = this;
+
+   var channels = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+   this.levels = Object.assign({}, levels, configuration.get('logging.levels'));
+
+   this.queueSize_ = 100;
+   this.channels_ = channels;
+   this.counter_ = 0;
+   this.messageQueue_ = [];
+   this.threshold_ = 0;
+   this.tags_ = {};
+
+   this.levelToName_ = function (levels) {
+      var result = {};
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["forEach"])(levels, function (level, levelName) {
+         _this[levelName.toLowerCase()] = function () {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+               args[_key] = arguments[_key];
+            }
+
+            _this.log.apply(_this, [level].concat(args, [BLACKBOX]));
+         };
+         result[level] = levelName;
+      });
+      return result;
+   }(this.levels);
+
+   this.setLogThreshold(configuration.ensure('logging.threshold'));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message. A message may contain placeholders in the form `[#]` where `#` resembles the index
+ * within the list of `replacements`. `replacements` are incrementally counted starting at `0`. If the
+ * log level is below the configured log threshold, the message is simply discarded.
+ *
+ * It is recommended not to use this method directly, but instead one of the short cut methods for the
+ * according log level.
+ *
+ * @param {Number} level
+ *    the level for this message
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.log = function (level, message) {
+   for (var _len2 = arguments.length, replacements = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+      replacements[_key2 - 2] = arguments[_key2];
+   }
+
+   if (level < this.threshold_) {
+      return;
+   }
+
+   var blackboxDepth = 0;
+   while (replacements[replacements.length - 1] === BLACKBOX) {
+      ++blackboxDepth;
+      replacements.pop();
+   }
+
+   var messageObject = {
+      id: this.counter_++,
+      level: this.levelToName_[level],
+      text: message,
+      replacements: replacements,
+      time: new Date(),
+      tags: this.gatherTags(),
+      sourceInfo: gatherSourceInformation(blackboxDepth + 1) // add 1 depth to exclude this function
+   };
+
+   this.channels_.forEach(function (channel) {
+      channel(messageObject);
+   });
+
+   if (this.messageQueue_.length === this.queueSize_) {
+      this.messageQueue_.shift();
+   }
+   this.messageQueue_.push(messageObject);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `TRACE`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.trace = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `DEBUG`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.debug = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `INFO`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.info = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `WARN`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.warn = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `ERROR`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.error = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Logs a message in log level `FATAL`. See {@link Logger#log} for further information.
+ *
+ * *Important note*: This method is only available, if no custom log levels were defined via
+ * configuration or custom log levels include this method as well.
+ *
+ * @param {String} message
+ *    the message to log
+ * @param {...*} replacements
+ *    objects that should replace placeholders within the message
+ */
+Logger.prototype.fatal = function () {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Adds a new channel to forward log messages to. A channel is called synchronously for every log message
+ * and can do whatever necessary to handle the message according to its task. Note that blocking or
+ * performance critical actions within a channel should always take place asynchronously to prevent from
+ * blocking the application. Ideally a web worker is used for heavier background tasks.
+ *
+ * Each message is an object having the following properties:
+ * - `id`: the unique, ascending id of the log message
+ * - `level`: the log level of the message in string representation
+ * - `text`: the actual message that was logged
+ * - `replacements`: the raw list of replacements passed along the message
+ * - `time`: JavaScript Date instance when the message was logged
+ * - `tags`: A map of all log tags currently set for the logger
+ * - `sourceInfo`: if supported, a map containing `file`, `line` and `char` where the logging took place
+ *
+ * @param {Function} channel
+ *    the log channel to add
+ */
+Logger.prototype.addLogChannel = function (channel) {
+   this.channels_.push(channel);
+   this.messageQueue_.forEach(function (entry) {
+      channel(entry);
+   });
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Removes a log channel and thus stops sending further messages to it.
+ *
+ * @param {Function} channel
+ *    the log channel to remove
+ */
+Logger.prototype.removeLogChannel = function (channel) {
+   var channelIndex = this.channels_.indexOf(channel);
+   if (channelIndex > -1) {
+      this.channels_.splice(channelIndex, 1);
+   }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Adds a value for a log tag. If a tag is already known, the value is appended to the existing one using a
+ * `;` as separator. Note that no formatting of the value takes place and a non-string value will just have
+ * its appropriate `toString` method called.
+ *
+ * Log tags can be used to mark a set of log messages with a value giving further information on the
+ * current logging context. For example laxar sets a tag `'INST'` with a unique-like identifier for the
+ * current browser client. If then for example log messages are persisted on a server, messages belonging
+ * to the same client can be accumulated.
+ *
+ * @param {String} tag
+ *    the id of the tag to add a value for
+ * @param {String} value
+ *    the value to add
+ */
+Logger.prototype.addTag = function (tag, value) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
+
+   if (!this.tags_[tag]) {
+      this.tags_[tag] = [value];
+   } else {
+      this.tags_[tag].push(value);
+   }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Sets a value for a log tag. If a tag is already known, the value is overwritten by the given one. Note
+ * that no formatting of the value takes place and a non-string value will just have its appropriate
+ * `toString` method called. For further information on log tags, see {@link Logger#addTag}.
+ *
+ * @param {String} tag
+ *    the id of the tag to set a value for
+ * @param {String} value
+ *    the value to set
+ */
+Logger.prototype.setTag = function (tag, value) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
+
+   this.tags_[tag] = [value];
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Removes a log tag. For further information on log tags, see {@link Logger#addTag}.
+ *
+ * @param {String} tag
+ *    the id of the tag to set a value for
+ */
+Logger.prototype.removeTag = function (tag) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(tag).hasType(String).isNotNull();
+
+   delete this.tags_[tag];
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Returns a map of all tags. If there are multiple values for the same tag, their values are concatenated
+ * using a `;` as separator. For further information on log tags, see {@link Logger#addTag}.
+ *
+ * @return {Object}
+ *    a mapping from tag to its value(s)
+ */
+Logger.prototype.gatherTags = function () {
+   var tags = {};
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["forEach"])(this.tags_, function (values, tag) {
+      tags[tag] = values.join(';');
+   });
+   return tags;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Sets the threshold for log messages. Log messages with a lower level will be discarded upon logging.
+ *
+ * @param {String|Number} threshold
+ *    the numeric or the string value of the log level to use as threshold
+ */
+Logger.prototype.setLogThreshold = function (threshold) {
+   if (typeof threshold === 'string') {
+      __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].state(threshold.toUpperCase() in this.levels, 'Unsupported log threshold "' + threshold + '".');
+      this.threshold_ = this.levels[threshold.toUpperCase()];
+   } else {
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(threshold).hasType(Number);
+      this.threshold_ = threshold;
+   }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var EMPTY_CALL_INFORMATION = { file: '?', line: -1, char: -1 };
+
+function gatherSourceInformation(blackboxDepth) {
+   var e = new Error();
+
+   if (!e.stack) {
+      try {
+         // IE >= 10 only generates a stack if the error object is really thrown
+         throw new Error();
+      } catch (err) {
+         e = err;
+      }
+      if (!e.stack) {
+         return EMPTY_CALL_INFORMATION;
+      }
+   }
+
+   var rows = e.stack.split(/[\n]/);
+   var interpret = void 0;
+   if (rows[0] === 'Error') {
+      rows.shift();
+      interpret = chromeStackInterpreter;
+   } else if (rows[0].indexOf('@') !== -1) {
+      interpret = firefoxStackInterpreter;
+   } else {
+      return EMPTY_CALL_INFORMATION;
+   }
+
+   var row = rows[blackboxDepth + 1]; // add 1 depth to exclude this function
+   return row ? interpret(row) : EMPTY_CALL_INFORMATION;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var CHROME_AND_IE_STACK_MATCHER = /\(?([^( ]+):(\d+):(\d+)\)?$/;
+
+function chromeStackInterpreter(row) {
+   var match = CHROME_AND_IE_STACK_MATCHER.exec(row);
+   return {
+      file: match ? match[1] : '?',
+      line: match ? match[2] : -1,
+      char: match ? match[3] : -1
+   };
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var FIREFOX_STACK_MATCHER = /@(.+):(\d+)$/;
+
+function firefoxStackInterpreter(row) {
+   var match = FIREFOX_STACK_MATCHER.exec(row);
+   return {
+      file: match ? match[1] : '?',
+      line: match ? match[2] : -1,
+      char: -1
+   };
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function createConsoleChannel(browser) {
+
+   return function log(messageObject) {
+      var browserConsole = browser.console();
+      if (!browserConsole) {
+         return;
+      }
+
+      var level = messageObject.level,
+          text = messageObject.text,
+          replacements = messageObject.replacements,
+          _messageObject$source = messageObject.sourceInfo,
+          file = _messageObject$source.file,
+          line = _messageObject$source.line;
+
+
+      var logMethod = level.toLowerCase();
+      if (logMethod === 'fatal') {
+         // console.fatal does not exist
+         logMethod = 'error';
+      } else if (logMethod === 'trace' || !(logMethod in browserConsole)) {
+         // In console objects trace doesn't define a valid log level but is used to print stack traces. We
+         // thus need to change it something different.
+         logMethod = 'log';
+      }
+
+      if (!(logMethod in browserConsole)) {
+         return;
+      }
+
+      var _mergeTextAndReplacem = mergeTextAndReplacements(text, replacements),
+          _mergeTextAndReplacem2 = _toArray(_mergeTextAndReplacem),
+          message = _mergeTextAndReplacem2[0],
+          interpolations = _mergeTextAndReplacem2.slice(1);
+
+      browserConsole[logMethod].apply(browserConsole, [level + ': ' + message + ' (@ ' + file + ':' + line + ')'].concat(_toConsumableArray(interpolations)));
+   };
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var CONSOLE_COMPATIBLE_FORMAT_MATCHER = /^[%](\.\d+f|[dios])$/;
+
+function guessFormatSpecifier(object) {
+   if (typeof object === 'string') {
+      return '%s';
+   } else if (typeof object === 'number') {
+      return '%f';
+   }
+   return '%o';
+}
+
+function mergeTextAndReplacements(text, replacements) {
+   var parts = [];
+   var pos = 0;
+   var buffer = '';
+
+   while (pos < text.length) {
+      var character = text.charAt(pos);
+
+      switch (character) {
+         case '\\':
+            {
+               ++pos;
+               if (pos === text.length) {
+                  throw new Error('Unterminated string: "' + text + '"');
+               }
+
+               buffer += text.charAt(pos);
+               break;
+            }
+         case '%':
+            {
+               ++pos;
+               buffer += '\\%';
+               break;
+            }
+         case '[':
+            {
+               var end = text.indexOf(']', pos);
+               if (end === -1) {
+                  throw new Error('Unterminated replacement at character ' + pos + ': "' + text + '"');
+               }
+
+               var replacementString = text.substring(pos + 1, end);
+               var replacementIndex = parseInt(replacementString, 10);
+               var replacement = replacements[replacementIndex];
+
+               var formatSpecifier = replacementString.split(':').slice(1).filter(function (_) {
+                  return CONSOLE_COMPATIBLE_FORMAT_MATCHER.test(_);
+               }).pop();
+
+               buffer += formatSpecifier || guessFormatSpecifier(replacement);
+               parts.push(replacements[replacementIndex]);
+               pos = end;
+
+               break;
+            }
+         default:
+            {
+               buffer += character;
+               break;
+            }
+      }
+
+      ++pos;
+   }
+
+   parts.unshift(buffer);
+
+   return parts;
+}
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "technology", function() { return technology; });
+/* harmony export (immutable) */ __webpack_exports__["bootstrap"] = bootstrap;
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * Module for the plain widget adapter factory.
+ * In LaxarJS _plain_ widgets are defined as widgets without dependency to a specific view library or
+ * framwork, and instead would be implemented using simple DOM access and manipulation.
+ *
+ * A developer will never call any of the API of this module.
+ * The documentation solely exists as a blueprint for custom widget adapters and to explain certain concepts.
+ *
+ * @module plain_adapter
+ */
+
+var technology = 'plain';
+
+var noOp = function noOp() {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Initializes the adapter module and returns a factory for plain widgets.
+ * Note that the plain adapter doesn't need all the provided arguments, but they are listed here for
+ * documentation purposes.
+ *
+ * @param {Object} artifacts
+ *    the artifacts available to this adapter factory
+ * @param {Object} artifacts.widgets
+ *    all widgets, that are implemented in the adapter's technology
+ * @param {Object} artifacts.controls
+ *    all controls, that are implemented in the adapter's technology
+ * @param {Object} services
+ *    a selection of services adapter implementations may need to fulfill their task
+ * @param {AdapterUtilities} services.adapterUtilities
+ *    common utilities, that may be useful to a widget adapter
+ * @param {ArtifactProvider} services.artifactProvider
+ *    the artifact provider instance
+ * @param {Configuration} services.configuration
+ *    access to the application configuration
+ * @param {EventBus} services.globalEventBus
+ *    the global event bus.
+ *    Note that an adapter should not sent any events by itself.
+ *    It may instead be necessary that the adapter makes the event bus globally available to its widgets (for
+ *    example like the AngularJS 1.x adapter), or that it registers an inspector
+ * @param {Heartbeat} services.heartbeat
+ *    the heartbeat instance.
+ *    Depending on the underlying view technology (like AngularJS 1.x) it may be important to get notified
+ *    when to re-render the user interface.
+ *    For that reason an adapter can register a callback at the heartbeat, that gets called after all events
+ *    of the current cycle were processed
+ * @param {Log} services.log
+ *    the global log instance
+ * @param {StorageFactory} services.storage
+ *    the global storage factory api
+ * @param {Tooling} services.tooling
+ *    access to the tooling api
+ * @param {HTMLElement} anchorElement
+ *    the DOM node the laxar application is bootstrapped on.
+ *    An adapter should never try to access DOM nodes that are not the `anchorElement` or any of its children,
+ *    since they are not under control of this LaxarJS application.
+ *
+ * @return {PlainAdapterFactory}
+ *    the factory for plain widget adapters
+ */
+function bootstrap(artifacts, _ref) {
+   var artifactProvider = _ref.artifactProvider,
+       adapterUtilities = _ref.adapterUtilities;
+
+
+   /**
+    * A factory for plain widget adapters.
+    *
+    * @constructor
+    * @name PlainAdapterFactory
+    */
+   return {
+      create: create
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Creates a new adapter instance for the given widget environment.
+    *
+    * @param {Object} environment
+    *    the environment for the widget to create and manage
+    * @param {HTMLElement} environment.anchorElement
+    *    the DOM node that the widget's DOM fragment should be inserted into
+    * @param {String} environment.name
+    *    the name of the widget to load, exactly as specified by the widget descriptor
+    * @param {widget_services} environment.services
+    *    the services for this widget instance
+    * @param {Function} environment.provideServices
+    *    a function that the adapter must call with a map of all to-be-injected services, just before
+    *    creating the controller
+    *
+    * @return {Object}
+    *    the adapter instance
+    *
+    * @memberof PlainAdapterFactory
+    */
+   function create(_ref2) {
+      var widgetName = _ref2.widgetName,
+          anchorElement = _ref2.anchorElement,
+          services = _ref2.services,
+          provideServices = _ref2.provideServices;
+
+
+      var onDomAvailable = null;
+      var domAttached = false;
+
+      var provider = artifactProvider.forWidget(widgetName);
+
+      return Promise.all([provider.descriptor(), provider.module()]).then(createController, function () {
+         return adapterUtilities.unknownWidget({ technology: technology, widgetName: widgetName });
+      }).then(function () {
+         return {
+            domAttachTo: domAttachTo,
+            domDetach: domDetach
+         };
+      });
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function createController(_ref3) {
+         var _ref4 = _slicedToArray(_ref3, 2),
+             descriptor = _ref4[0],
+             module = _ref4[1];
+
+         services.axWithDom = function (callback) {
+            if (domAttached) {
+               callback(anchorElement);
+            }
+         };
+         var injections = (module.injections || []).map(function (injection) {
+            if (!(injection in services)) {
+               throw adapterUtilities.unknownInjection({ technology: technology, injection: injection, widgetName: widgetName });
+            }
+            if (injection === 'axWithDom' && descriptor.integration.type === 'activity') {
+               throw adapterUtilities.activityAccessingDom({ technology: technology, injection: injection, widgetName: widgetName });
+            }
+            return services[injection];
+         });
+
+         provideServices(services);
+
+         var _ref5 = module.create.apply(module, _toConsumableArray(injections)) || {};
+
+         var _ref5$onDomAvailable = _ref5.onDomAvailable;
+         onDomAvailable = _ref5$onDomAvailable === undefined ? noOp : _ref5$onDomAvailable;
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function domAttachTo(areaElement, htmlTemplate) {
+         if (htmlTemplate === null) {
+            return;
+         }
+         anchorElement.innerHTML = htmlTemplate;
+         areaElement.appendChild(anchorElement);
+         domAttached = true;
+         onDomAvailable(anchorElement);
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function domDetach() {
+         var parent = anchorElement.parentNode;
+         if (parent) {
+            parent.removeChild(anchorElement);
+         }
+         domAttached = false;
+      }
+   }
+}
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__configuration__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__browser__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__log__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__adapter_utilities__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__artifact_provider__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__storage__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__timer__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__flow_controller__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__flow_service__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__heartbeat__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__navigo_router__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__page_service__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__locale_event_manager__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__widget_services__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__tooling_tooling__ = __webpack_require__(32);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function create(configurationSource, assets, optionalDebugEventBus) {
+
+   var configurationDefaults = {
+      baseHref: undefined,
+      eventBusTimeoutMs: 120 * 1000,
+      router: {
+         query: {
+            enabled: false
+         }
+         // 'navigo' is not configured here:
+         // any deviation from the Navigo library defaults must be set by the application
+      },
+      flow: {
+         entryPoint: {
+            target: 'default',
+            parameters: {}
+         }
+      },
+      i18n: {
+         fallback: 'en',
+         strict: false,
+         locales: {
+            'default': 'en'
+         }
+      },
+      logging: {
+         levels: {},
+         threshold: 'INFO'
+      },
+      name: 'unnamed',
+      theme: 'default',
+      storagePrefix: undefined
+   };
+
+   var adapterUtilities = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__adapter_utilities__["a" /* create */])();
+
+   var configuration = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__configuration__["a" /* create */])(configurationSource, configurationDefaults);
+
+   var browser = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__browser__["a" /* create */])();
+   var log = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__log__["a" /* create */])(configuration, browser);
+
+   var storage = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_11__storage__["a" /* create */])(configuration, browser);
+   var timer = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_12__timer__["a" /* create */])(log, storage);
+
+   var artifactProvider = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__artifact_provider__["a" /* create */])(assets, browser, configuration, log);
+
+   var heartbeat = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_15__heartbeat__["a" /* create */])();
+
+   // MSIE Bug we have to wrap setTimeout to pass assertion
+   var timeoutFn = function timeoutFn(f, t) {
+      return setTimeout(f, t);
+   };
+   var debugEventBus = optionalDebugEventBus || {
+      publish: function publish() {},
+      subscribe: function subscribe() {}
+   };
+   var errorHandler = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__["a" /* createLogErrorHandler */])(log);
+   var globalEventBus = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__runtime_event_bus__["b" /* create */])(configuration, heartbeat.onNext, timeoutFn, errorHandler);
+
+   var layoutLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__loaders_layout_loader__["a" /* create */])(artifactProvider, debugEventBus);
+   var pageLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_9__loaders_page_loader__["a" /* create */])(artifactProvider, debugEventBus);
+   var controlLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__loaders_control_loader__["a" /* create */])(artifactProvider, debugEventBus);
+   var widgetServices = {
+      forWidget: function forWidget() {
+         __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].codeIsUnreachable('Using widget services before they are available');
+      }
+   };
+   var widgetLoader = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_10__loaders_widget_loader__["a" /* create */])(log, artifactProvider, debugEventBus, controlLoader, function () {
+      var _widgetServices;
+
+      return (_widgetServices = widgetServices).forWidget.apply(_widgetServices, arguments);
+   });
+
+   var localeManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_18__locale_event_manager__["a" /* create */])(globalEventBus, configuration);
+   var visibilityManager = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_19__visibility_event_manager__["a" /* create */])(globalEventBus);
+   var pageService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_17__page_service__["a" /* create */])(globalEventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, log, debugEventBus);
+
+   var router = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_16__navigo_router__["a" /* create */])(browser, configuration);
+
+   var flowController = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_13__flow_controller__["a" /* create */])(artifactProvider, configuration, globalEventBus, log, pageService, router, timer);
+   var flowService = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_14__flow_service__["a" /* create */])(flowController);
+
+   var tooling = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_21__tooling_tooling__["a" /* create */])(debugEventBus, log);
+
+   widgetServices = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_20__widget_services__["a" /* create */])(artifactProvider, configuration, controlLoader, debugEventBus, globalEventBus, flowService, log, heartbeat, pageService, storage, tooling);
+
+   return {
+      adapterUtilities: adapterUtilities,
+      artifactProvider: artifactProvider,
+      configuration: configuration,
+      flowController: flowController,
+      flowService: flowService,
+      debugEventBus: debugEventBus,
+      globalEventBus: globalEventBus,
+      heartbeat: heartbeat,
+      layoutLoader: layoutLoader,
+      log: log,
+      pageService: pageService,
+      storage: storage,
+      timer: timer,
+      tooling: tooling,
+      widgetLoader: widgetLoader
+   };
+}
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_object__ = __webpack_require__(1);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+
+/**
+ * This is used to create external tooling hooks (for the LaxarJS developer tools extension) if `.tooling()`
+ * was called on the bootstrapping instance.
+ */
+function create(_ref) {
+   var configuration = _ref.configuration,
+       eventBus = _ref.globalEventBus,
+       log = _ref.log,
+       tooling = _ref.tooling;
+
+   var CLEAR_BUFFER_DELAY_MS = 5000;
+   var lastAccess = null;
+   var clearBufferInterval = void 0;
+
+   tooling.pages.addListener(onPageChange);
+   var bufferSize = configuration.get('tooling.bufferSize', 2500);
+
+   var developerHooks = window.laxarDeveloperToolsApi = window.laxarDeveloperToolsApi || {};
+   developerHooks.buffers = { events: [], log: [] };
+   developerHooks.eventCounter = Date.now();
+   developerHooks.logCounter = Date.now();
+   developerHooks.pageInfo = tooling.pages.current();
+   developerHooks.pageInfoVersion = Date.now();
+   developerHooks.gridSettings = configuration.get('tooling.grid', null);
+
+   log.addLogChannel(logChannel);
+   var cleanupInspector = eventBus.addInspector(inspector);
+
+   window.addEventListener('beforeunload', function () {
+      log.removeLogChannel(logChannel);
+      cleanupInspector();
+   });
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function logChannel(messageObject) {
+      var timeStamp = Date.now();
+      var index = developerHooks.logCounter++;
+      var json = JSON.stringify(messageObject);
+      pushIntoStore('log', { index: index, json: json, timeStamp: timeStamp });
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function inspector(item) {
+      var timeStamp = Date.now();
+      var index = developerHooks.eventCounter++;
+      var json = JSON.stringify(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_object__["options"])({ time: timeStamp }, item));
+      pushIntoStore('events', { index: index, json: json, timeStamp: timeStamp });
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function onPageChange(pageInfo) {
+      developerHooks.pageInfo = pageInfo;
+      ++developerHooks.pageInfoVersion;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function clearBuffer() {
+      var currentLastAccess = readLastAccess();
+      if (currentLastAccess === lastAccess || currentLastAccess === null) {
+         return;
+      }
+      lastAccess = currentLastAccess;
+      var logItems = developerHooks.buffers.log;
+      while (logItems[0] && logItems[0].timeStamp < lastAccess) {
+         logItems.shift();
+      }
+      var eventItems = developerHooks.buffers.events;
+      while (eventItems[0] && eventItems[0].timeStamp < lastAccess) {
+         eventItems.shift();
+      }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function readLastAccess() {
+      return document.documentElement.hasAttribute('data-laxar-developer-tools-extension') ? document.documentElement.getAttribute('data-laxar-developer-tools-extension') : null;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function pushIntoStore(storeName, item) {
+      window.clearInterval(clearBufferInterval);
+      clearBuffer();
+      var buffer = developerHooks.buffers[storeName];
+      while (buffer.length >= bufferSize) {
+         buffer.shift();
+      }
+      buffer.push(item);
+      clearBufferInterval = window.setInterval(function () {
+         clearBuffer();
+      }, CLEAR_BUFFER_DELAY_MS);
+   }
+}
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_utilities_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_utilities_string__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_runtime_event_bus__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_tooling_external_api__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__lib_runtime_services__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__lib_runtime_plain_adapter__ = __webpack_require__(6);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "assert", function() { return __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a"]; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "object", function() { return __WEBPACK_IMPORTED_MODULE_1__lib_utilities_object__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "string", function() { return __WEBPACK_IMPORTED_MODULE_2__lib_utilities_string__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "plainAdapter", function() { return __WEBPACK_IMPORTED_MODULE_6__lib_runtime_plain_adapter__; });
+/* harmony export (immutable) */ __webpack_exports__["create"] = create;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instances", function() { return instances; });
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+/**
+ * The API entry point for boostrapping LaxarJS applications.
+ * Also, provides a couple of utilities to deal with assertions, objects and strings.
+ *
+ * @module laxar
+ */
+
+
+
+
+
+
+
+
+
+
+// Get a reference to the global object of the JS environment.
+// See http://stackoverflow.com/a/6930376 for details
+var global = void 0;
+try {
+   // eslint-disable-next-line no-new-func, no-eval
+   global = Function('return this')() || (1, eval)('this');
+} catch (_) {
+   // if it forbids eval, it's probably a browser
+   global = window;
+}
+
+var MESSAGE_ADAPTERS = 'laxar.create: `adapters` must be an array';
+var MESSAGE_ARTIFACTS = 'laxar.create: `artifacts` object must have at least: aliases, themes, widgets';
+var MESSAGE_CONFIGURATION = 'laxar.create: `configuration` must be an object';
+
+var TOPIC_SEGMENTS_MATCHER = /[^+a-z0-9]+/g;
+var TOPIC_SEGMENTS_REPLACER = function TOPIC_SEGMENTS_REPLACER() {
+   return '+';
+};
+
+/**
+ * Prepares a LaxarJS application instance from a list of adapters, a bundle of artifacts, and application
+ * configuration. The instance then allows to configure which DOM node should receive an application flow.
+ * Running this has no effect until `.bootstrap()` is called on the returned instance API.
+ *
+ * @param {Array} adapters
+ *    widget adapters to use in this bootstrapping instance
+ * @param {Object} artifacts
+ *    an artifact listing for the application, generated by the utilized built tool (e.g. webpack)
+ * @param {Object} configuration
+ *    application-wide LaxarJS configuration. See http://laxarjs.org/docs/laxar-latest/manuals/configuration/
+ *    for further information on available properties
+ *
+ * @return {BootstrappingInstance}
+ *    a handle on the bootstrapping instance, to load and bootstrap a flow
+ *
+ * @memberof laxar
+ */
+function create(adapters, artifacts, configuration) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(adapters).hasType(Array).isNotNull(MESSAGE_ADAPTERS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.aliases).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.themes).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.widgets).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(configuration).hasType(Object).isNotNull(MESSAGE_CONFIGURATION);
+
+   var bootstrappingSchedule = {
+      items: [],
+      testing: false,
+      tooling: null
+   };
+
+   var idCounter = 0;
+
+   /**
+    * Handle on a LaxarJS bootstrapping instance.
+    *
+    * @name BootstrappingInstance
+    * @constructor
+    */
+   var api = { flow: flow, page: page, tooling: tooling, testing: testing, bootstrap: bootstrap };
+   return api;
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Registers a flow to control routing for this application.
+    *
+    * @param {String} name
+    *    the name of the flow to load
+    * @param {HTMLElement} anchorElement
+    *    container element to determine where to put the flow
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function flow(name, anchorElement) {
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(anchorElement).isNotNull();
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(anchorElement.nodeType === Node.ELEMENT_NODE);
+      bootstrappingSchedule.items.push({ type: 'flow', name: name, anchorElement: anchorElement });
+      return api;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Registers a page to display without navigation control.
+    *
+    * @param {String} name
+    *    the name of the page to load
+    * @param {HTMLElement} anchorElement
+    *    container element to determine where to put the page
+    * @param {Object} [parameters]
+    *    page parameters to publish with didNavigate
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function page(name, anchorElement) {
+      var parameters = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(anchorElement).isNotNull();
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(anchorElement.nodeType === Node.ELEMENT_NODE);
+      bootstrappingSchedule.items.push({ type: 'page', name: name, anchorElement: anchorElement, parameters: parameters });
+      return api;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Registers a debug bundle for this application.
+    *
+    * @param {Function|Object} debugInfo
+    *    the debug-info bundle for the application, generated by the utilized built tool (e.g. webpack)
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function tooling(debugInfo) {
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(debugInfo).isNotNull();
+      bootstrappingSchedule.tooling = {
+         debugInfo: debugInfo
+      };
+      return api;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Declare that this instance is used for testing.
+    * This will cause .bootstrap not to fail if no flow was configured.
+    *
+    * @return {BootstrappingInstance}
+    *    the current bootstrapping instance (self), for chaining
+    *
+    * @memberof BootstrappingInstance
+    */
+   function testing() {
+      bootstrappingSchedule.testing = true;
+      return api;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Performs the actual application bootstrapping.
+    * This includes bootstrapping the application adapters and starting the router.
+    *
+    * @return {Promise}
+    *    a promise resolving when all items have been bootstrapped
+    *
+    * @memberof BootstrappingInstance
+    */
+   function bootstrap() {
+      var testing = bootstrappingSchedule.testing,
+          tooling = bootstrappingSchedule.tooling,
+          items = bootstrappingSchedule.items;
+
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(testing || items.length > 0, 'Nothing configured for bootstrap()');
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(items.length <= 1, 'Multiple bootstrapping items are not supported yet');
+
+      var debugEventBus = tooling && provideSharedDebugEventBus();
+      var services = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__lib_runtime_services__["a" /* create */])(configuration, artifacts, debugEventBus);
+      var adapterInstances = bootstrapAdapters(services, [__WEBPACK_IMPORTED_MODULE_6__lib_runtime_plain_adapter__].concat(_toConsumableArray(adapters)), artifacts);
+
+      var instanceName = services.configuration.ensure('name');
+      var instance = makeTopic(instanceName);
+
+      if (tooling) {
+         services.tooling.registerDebugInfo(tooling.debugInfo);
+         exportInstance(instanceName, services);
+         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__lib_tooling_external_api__["a" /* create */])(services);
+      }
+
+      services.widgetLoader.registerWidgetAdapters(adapterInstances);
+      announceInstance(services);
+
+      var log = services.log;
+
+      var promises = items.map(function (item) {
+         var type = item.type,
+             name = item.name,
+             _item$id = item.id,
+             id = _item$id === undefined ? generateId(name) : _item$id;
+
+         /**
+          * An object of strings which together identify a bootstrapping item.
+          *
+          * @name ItemMeta
+          * @constructor
+          */
+
+         var itemMeta = _defineProperty({
+            /**
+             * The (topic-formatted) name of the LaxarJS instance.
+             * @name instance
+             * @type {String}
+             * @memberof ItemMeta
+             */
+            instance: instance,
+            /**
+             * The (topic-formatted, ID-suffixed) name of the bootstrapping item.
+             * @name item
+             * @type {String}
+             * @memberof ItemMeta
+             */
+            item: id,
+            /**
+             * The type of the bootstrapping item.
+             * @name type
+             * @type {String}
+             * @memberof ItemMeta
+             */
+            type: type
+         }, type, name);
+
+         if (tooling) {
+            services.tooling.registerItem(itemMeta);
+         }
+
+         log.trace('laxar.bootstrap: bootstrapping ' + type + ' \'' + name + '\' (' + id + ')');
+
+         if (type === 'flow') {
+            var anchorElement = item.anchorElement;
+
+
+            return whenDocumentReady(function () {
+               log.trace('laxar.bootstrap: loading flow: ' + name);
+               services.pageService.createControllerFor(anchorElement, itemMeta);
+               services.flowController.loadFlow(name).then(function () {
+                  log.trace('laxar.bootstrap: flow loaded');
+               }, function (err) {
+                  log.fatal('laxar.bootstrap: failed to load flow.');
+                  log.fatal('Error [0].\nStack: [1]', err, err && err.stack);
+               });
+            });
+         }
+
+         if (type === 'page') {
+            var _anchorElement = item.anchorElement,
+                parameters = item.parameters;
+
+
+            return whenDocumentReady(function () {
+               var controller = services.pageService.createControllerFor(_anchorElement, itemMeta);
+               var eventBus = services.globalEventBus;
+               var event = {
+                  target: name,
+                  place: null,
+                  data: parameters
+               };
+
+               controller.setupPage(name).then(function () {
+                  return eventBus.publish('didNavigate.' + event.target, event, { sender: 'bootstrap' });
+               }).then(function () {
+                  log.trace('laxar.bootstrap: page loaded');
+               }, function (err) {
+                  log.fatal('laxar.bootstrap: failed to load page.');
+                  log.fatal('Error [0].\nStack: [1]', err, err && err.stack);
+               });
+            });
+         }
+
+         return __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(false);
+      });
+
+      return Promise.all(promises).then(function () {});
+   }
+
+   function generateId(name) {
+      return makeTopic(name) + '-id' + idCounter++;
+   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function makeTopic(string) {
+   return string.trim().toLowerCase().replace(TOPIC_SEGMENTS_MATCHER, TOPIC_SEGMENTS_REPLACER);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function whenDocumentReady(callback) {
+   return new Promise(function (resolve, reject) {
+      function ready() {
+         try {
+            resolve(callback());
+         } catch (err) {
+            reject(err);
+         }
+      }
+
+      if (document.readyState === 'complete') {
+         ready();
+      } else {
+         document.addEventListener('DOMContentLoaded', ready);
+      }
+   });
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function bootstrapAdapters(services, adapterModules, artifacts) {
+
+   var adapterServices = {
+      adapterUtilities: services.adapterUtilities,
+      artifactProvider: services.artifactProvider,
+      configuration: services.configuration,
+      flowService: services.flowService,
+      globalEventBus: services.globalEventBus,
+      debugEventBus: services.debugEventBus,
+      heartbeat: services.heartbeat,
+      log: services.log,
+      storage: services.storage,
+      tooling: services.tooling,
+      // TODO (https://github.com/LaxarJS/laxar/issues/363 and https://github.com/LaxarJS/laxar/issues/397)
+      // Fixing the latter issue broke laxar-mocks, since it could no longer access the widget loader.
+      // To temporarily fix this, we re-add the widget loader to the exposed services.
+      // Nevertheless on the medium /short term we want to be able to load single widgets into the page
+      // (the first issue above) and use the api that will be created for this in laxar-mocks.
+      widgetLoader: services.widgetLoader
+   };
+
+   var log = services.log;
+
+   var adapterModulesByTechnology = {};
+   var artifactsByTechnology = {};
+
+   adapterModules.forEach(function (module) {
+      adapterModulesByTechnology[module.technology] = module;
+      artifactsByTechnology[module.technology] = { widgets: [], controls: [] };
+   });
+
+   ['widgets', 'controls'].forEach(function (type) {
+      artifacts[type].forEach(function (artifact) {
+         var technology = artifact.descriptor.integration.technology;
+
+         if (!adapterModulesByTechnology[technology]) {
+            var name = artifact.descriptor.name;
+
+            log.fatal('Unknown integration technology: [0], required by "[1]"', technology, name);
+            return;
+         }
+         artifactsByTechnology[technology][type].push(artifact);
+      });
+   });
+
+   var adaptersByTechnology = {};
+   Object.keys(adapterModulesByTechnology).forEach(function (technology) {
+      var adapterModule = adapterModulesByTechnology[technology];
+      var artifacts = artifactsByTechnology[technology];
+      adaptersByTechnology[technology] = adapterModule.bootstrap(artifacts, adapterServices);
+   });
+   return adaptersByTechnology;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function announceInstance(services) {
+   var configuration = services.configuration,
+       log = services.log,
+       storage = services.storage;
+
+
+   var idGenerator = configuration.get('logging.instanceId', simpleId);
+   if (idGenerator === false) {
+      return;
+   }
+
+   var instanceIdStorageKey = 'axLogTags.INST';
+   var store = storage.getApplicationSessionStorage();
+   var instanceId = store.getItem(instanceIdStorageKey);
+   if (!instanceId) {
+      instanceId = idGenerator();
+      store.setItem(instanceIdStorageKey, instanceId);
+   }
+   log.addTag('INST', instanceId);
+
+   function simpleId() {
+      return '' + Date.now() + Math.floor(Math.random() * 100);
+   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Provide tooling access to LaxarJS services.
+ *
+ * Each laxar#bootstrap call creates a new set of services such as a logger, global event bus etc. For tools
+ * like the laxar-developer-tools-widget, it may be necessary to access these services for a given instance,
+ * or for all instances.
+ *
+ * @param {String} [optionalName]
+ *   the configuration name of a LaxarJS instance to inspect (may be omitted to access all application
+ *   instances by name)
+ *
+ * @return {Object}
+ *   the tooling services for a specified instance, or for all instances that have tooling enabled
+ *
+ * @memberof laxar
+ */
+function instances(optionalName) {
+   var globalInstances = global.laxarInstances || {};
+   return optionalName ? globalInstances[optionalName] : globalInstances;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Export a LaxarJS instance to be accessed via the laxar#instances function.
+ *
+ * @param {String} name
+ *    the name under which the instance should be accessible
+ * @param {Object} instance
+ *    the object representing the LaxarJS instance that should be exported
+ *
+ * @private
+ */
+function exportInstance(name, instance) {
+   var globalInstances = global.laxarInstances = instances();
+   var uniqueName = name;
+
+   if (name in globalInstances) {
+      var suffix = 1;
+      do {
+         uniqueName = '' + name + suffix++;
+      } while (uniqueName in globalInstances);
+   }
+
+   globalInstances[uniqueName] = instance;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Provide another instance's debug event bus. This instance is shared across all LaxarJS instances.
+ * If there is no other active LaxarJS instance, a new event bus is created.
+ *
+ * @return {EventBus}
+ *   the `debugEventBus` service of any other active LaxarJS instance or a new event bus instance
+ *
+ * @private
+ */
+function provideSharedDebugEventBus() {
+   var globalInstances = instances();
+
+   for (var name in globalInstances) {
+      if (globalInstances.hasOwnProperty(name) && globalInstances[name].debugEventBus) {
+         return globalInstances[name].debugEventBus;
+      }
+   }
+
+   return createDebugEventBus({ eventBusTimeoutMs: 1000 });
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Create a new debug event bus with the given configuration.
+ *
+ * @param {Object} configuration
+ *    a plain object with at least a `eventBusTimeoutMs` property
+ *
+ * @return {EventBus}
+ *    a new event bus instance
+ *
+ * @private
+ */
+function createDebugEventBus(configuration) {
+   var ensure = function ensure(key) {
+      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(key in configuration);
+      return configuration[key];
+   };
+   var nextTick = window.nextTick ? window.nextTick : function (f) {
+      return window.setTimeout(f, 0);
+   };
+   var setTimeout = window.setTimeout;
+   var errorHandler = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib_runtime_event_bus__["a" /* createLogErrorHandler */])({
+      error: function error(message, optionalErrorInformation) {
+         window.console.error('DebugEventBus: ' + message, optionalErrorInformation);
+      }
+   });
+
+   return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib_runtime_event_bus__["b" /* create */])({ ensure: ensure }, nextTick, setTimeout, errorHandler);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_string__ = __webpack_require__(2);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * The control loader helps to load control assets and implementations.
+ *
+ * @module control_loader
+ */
+
+
+function create(artifactProvider) {
+
+   var notDeclaredMessage = 'Tried to load control reference [0] without declaration in widget.json.\nDetails: [1]';
+   var errorInfoLink = 'https://github.com/LaxarJS/laxar/blob/master/docs/manuals/providing_controls.md#compatibility';
+
+   var aliases = {};
+   var modules = {};
+
+   /**
+    * @constructor
+    * @name ControlLoader
+    */
+   return {
+      load: load,
+      provide: provide
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Provides the implementation module of the given control, for manual instantiation by a widget.
+    *
+    * Because the method must return synchronously, it may only be called for controls that have been
+    * loaded before (using {@link #load()})!
+    * For controls that are correctly listed in the `controls` section of the `widget.json`, this is ensured
+    * by the widget loader.
+    *
+    * @param {String} controlRef
+    *   a valid control reference as used in the `widget.json`
+    *
+    * @return {*}
+    *   the module for the requested control reference
+    *
+    * @memberof ControlLoader
+    */
+   function provide(controlRef) {
+      var module = modules[aliases[controlRef]];
+      if (!module) {
+         var message = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_string__["format"])('axControls: ' + notDeclaredMessage, [controlRef, errorInfoLink]);
+         throw new Error(message);
+      }
+      return module;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Fetches the descriptor for a given control reference, and saves it as a side-effect.
+    * This is part of the internal API used by the widget loader.
+    *
+    * This process must be completed before the descriptor or the module for a control can be provided.
+    * For this reason, `load` is called by the widget-loader, using information from the `widget.json` file.
+    *
+    * @param {String} controlRef
+    *   a valid control reference as used in the `widget.json`
+    *
+    * @return {Promise}
+    *   a promise for the (fetched or synthesized) control descriptor
+    *
+    * @memberof ControlLoader
+    */
+   function load(controlRef) {
+      var _artifactProvider$for = artifactProvider.forControl(controlRef),
+          descriptor = _artifactProvider$for.descriptor,
+          module = _artifactProvider$for.module;
+
+      return Promise.all([descriptor(), module()]).then(function (_ref) {
+         var _ref2 = _slicedToArray(_ref, 2),
+             descriptor = _ref2[0],
+             module = _ref2[1];
+
+         //TODO: debugEventBus;
+         var name = descriptor.name;
+
+         aliases[controlRef] = name;
+         modules[name] = module;
+         return descriptor;
+      });
+   }
+}
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+
+function create(artifactProvider, debugEventBus) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(artifactProvider).hasType(Object).isNotNull();
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(debugEventBus).hasType(Object).isNotNull();
+
+   return {
+      load: function load(layoutRef) {
+         var _artifactProvider$for = artifactProvider.forLayout(layoutRef),
+             descriptor = _artifactProvider$for.descriptor,
+             assetForTheme = _artifactProvider$for.assetForTheme;
+         //TODO: debugEventBus;
+
+
+         return descriptor().then(function (_ref) {
+            var name = _ref.name,
+                templateSource = _ref.templateSource;
+            return Promise.all([Promise.resolve(name), assetForTheme(templateSource || name + '.html')]);
+         }).then(function (_ref2) {
+            var _ref3 = _slicedToArray(_ref2, 2),
+                name = _ref3[0],
+                html = _ref3[1];
+
+            return { name: name, html: html, className: name + '-layout' };
+         });
+      }
+   };
+}
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Creates and returns a new page loader instance.
+ *
+ * @param {ArtifactProvider} artifactProvider
+ *    an ArtifactProvider to load application assets
+ * @param {EventBus} debugEventBus
+ *    an event bus to publish debug information
+ *
+ * @return {PageLoader}
+ *    a page loader instance
+ *
+ * @private
+ */
+function create(artifactProvider, debugEventBus) {
+  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(artifactProvider).isNotNull();
+  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(debugEventBus).isNotNull();
+
+  return { load: load };
+
+  /**
+   * Loads a pre-assembled page definition. References to compositions, widgets and layouts have been
+   * resolved at build-time. Schema-validation for the page itself and for the contained feature
+   * configurations has also already been performed.
+   *
+   * @param {String} pageRef
+   *    the page to load. Usually a path relative to the page base path, with the `.json` suffix omitted
+   *
+   * @return {Promise}
+   *    the result promise
+   *
+   * @private
+   */
+  function load(pageRef) {
+    var _artifactProvider$for = artifactProvider.forPage(pageRef),
+        definition = _artifactProvider$for.definition;
+
+    return definition().then(function (pageDefinition) {
+      return pageDefinition;
+    });
+  }
+}
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_string__ = __webpack_require__(2);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+
+var TYPE_WIDGET = 'widget';
+var TYPE_ACTIVITY = 'activity';
+
+var ID_SEPARATOR = '-';
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var noOp = function noOp() {};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Create a generic widget loader that can load widgets and activities implemented in various technologies
+ * by using appropriate adapters.
+ *
+ * @param {Log} log
+ *    log instance to use for technology compatibility warnings
+ * @param {ArtifactProvider} artifactProvider
+ *    an artifact provider for looking up widget descriptors and assets
+ * @param {EventBus} debugEventBus
+ *    an event bus to publish debug information
+ * @param {ControlLoader} controlLoader
+ *    helps loading controls and their assets
+ * @param {Function} servicesForWidget
+ *    a factory method to create widget-specific services
+ *
+ * @return {WidgetLoader}
+ *    a new widget loader
+ */
+function create(log, artifactProvider, debugEventBus, controlLoader, servicesForWidget) {
+
+   var widgetAdapters = {};
+
+   /**
+    * @name WidgetLoader
+    * @constructor
+    */
+   return {
+      load: load,
+
+      /**
+       * Register support for integration technologies.
+       *
+       * @param {Object} adapters
+       *    a map of widget adapters by technology to be registered with this loader
+       *
+       * @memberof WidgetLoader
+       */
+      registerWidgetAdapters: function registerWidgetAdapters(adapters) {
+         Object.assign(widgetAdapters, adapters);
+      }
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Load a widget using an appropriate adapter
+    *
+    * First, get the given widget's descriptor to validate and instantiate the widget features.
+    * Then, instantiate a widget adapter matching the widget's technology. Using the adapter, create the
+    * widget controller. The adapter is returned and can be used to attach the widget to the DOM, or to
+    * destroy it.
+    *
+    * @param {Object} widgetConfiguration
+    *    a widget instance configuration (as used in page definitions) to instantiate the widget from
+    * @param {Object} [optionalOptions]
+    *    map of additonal options
+    * @param {Function} [optionalOptions.whenServicesAvailable]
+    *    a callback that will be invoked just before the controller is set up. It receives an object of named,
+    *    widget-specific injections as arguments allowing clients and tools such as laxar-mocks to tap into
+    *   the provided services
+    * @param {ItemMeta} [itemMeta]
+    *    an object identifying the bootstrapping item and LaxarJS instance the widget lives in
+    *
+    * @return {Promise} a promise for a widget adapter, with an already instantiated controller
+    *
+    * @memberof WidgetLoader
+    */
+   function load(widgetConfiguration) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref$whenServicesAvai = _ref.whenServicesAvailable,
+          whenServicesAvailable = _ref$whenServicesAvai === undefined ? noOp : _ref$whenServicesAvai;
+
+      var itemMeta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+
+      var widgetArtifactProvider = artifactProvider.forWidget(widgetConfiguration.widget);
+      var publishDebugInfo = function publishDebugInfo(event, data) {
+         debugEventBus.publish(event + '.' + itemMeta.instance + '.' + itemMeta.item, Object.assign({
+            itemMeta: itemMeta
+         }, data));
+      };
+
+      publishDebugInfo('willLoad.widget', { widget: widgetConfiguration.widget });
+
+      return widgetArtifactProvider.descriptor().then(function (descriptor) {
+         // The control-descriptors must be loaded prior to controller creation.
+         // This allows the widget controller to synchronously instantiate controls.
+         return Promise.all((descriptor.controls || []).map(controlLoader.load)).then(function (controlDescriptors) {
+            controlDescriptors.forEach(checkTechnologyCompatibility(descriptor));
+            return descriptor;
+         });
+      }).then(function (descriptor) {
+         var _descriptor$integrati = descriptor.integration,
+             type = _descriptor$integrati.type,
+             technology = _descriptor$integrati.technology;
+
+         var widgetName = descriptor.name;
+         if (type !== TYPE_WIDGET && type !== TYPE_ACTIVITY) {
+            throwError(widgetConfiguration, 'Unknown integration type "' + type + '"');
+         }
+
+         var features = widgetConfiguration.features || {};
+         var anchorElement = document.createElement('DIV');
+         anchorElement.className = widgetName;
+         anchorElement.id = 'ax' + ID_SEPARATOR + widgetConfiguration.id;
+
+         var adapterFactory = widgetAdapters[technology];
+         var _adapterFactory$servi = adapterFactory.serviceDecorators,
+             serviceDecorators = _adapterFactory$servi === undefined ? function () {
+            return {};
+         } : _adapterFactory$servi;
+
+         var _servicesForWidget = servicesForWidget(descriptor, widgetConfiguration, features, serviceDecorators(descriptor, widgetConfiguration), itemMeta),
+             services = _servicesForWidget.services,
+             releaseServices = _servicesForWidget.releaseServices;
+
+         var environment = {
+            anchorElement: anchorElement,
+            services: services,
+            widgetName: widgetName,
+            provideServices: whenServicesAvailable
+         };
+
+         return Promise.resolve(adapterFactory.create(environment)).then(function (adapter) {
+            publishDebugInfo('didLoad.widget', { widget: widgetConfiguration.widget });
+            return adapter;
+         }).then(function (adapter) {
+            return Object.assign({ destroy: noOp }, adapter);
+         }).then(function (adapter) {
+            return {
+               id: widgetConfiguration.id,
+               adapter: adapter,
+               destroy: function destroy() {
+                  releaseServices();
+                  adapter.destroy();
+                  publishDebugInfo('didUnload.widget', { widget: widgetConfiguration.widget });
+               },
+
+               templatePromise: loadAssets(descriptor, widgetArtifactProvider)
+            };
+         });
+      }, function (err) {
+         var message = 'Could not load widget "' + widgetConfiguration.widget + '": ' + err.message;
+         log.error(message);
+         throw err;
+      });
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Locates and loads the widget HTML template for this widget (if any) as well as any CSS stylesheets
+    * used by this widget or its controls.
+    *
+    * @param {Object} widgetDescriptor
+    *    a descriptor identifying the widget to load assets for
+    * @param {ArtifactProvider} artifactProviderForWidget
+    *    the provider with which to lookup or fetch artifact HTML and CSS
+    *
+    * @return {Promise}
+    *    A promise that will be resolved with the contents of any HTML template for this widget, or with
+    *    `null` if there is no template (for example, if this is an activity).
+    *
+    * @private
+    */
+   function loadAssets(widgetDescriptor, _ref2) {
+      var assetForTheme = _ref2.assetForTheme;
+      var type = widgetDescriptor.integration.type,
+          name = widgetDescriptor.name;
+
+      return type === TYPE_ACTIVITY ? Promise.resolve(null) : assetForTheme(widgetDescriptor.templateSource || name + '.html');
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function checkTechnologyCompatibility(widgetDescriptor) {
+      var name = widgetDescriptor.name,
+          technology = widgetDescriptor.integration.technology;
+
+      return function (controlDescriptor) {
+         var controlTechnology = (controlDescriptor.integration || {}).technology;
+         if (controlTechnology === 'plain') {
+            // plain is always compatible
+            return;
+         }
+
+         if (technology !== controlTechnology) {
+            log.warn('Incompatible integration technologies: widget [0] ([1]) cannot use control [2] ([3])', name, technology, controlDescriptor.name, controlTechnology);
+         }
+      };
+   }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function throwError(widgetConfiguration, message) {
+   throw new Error(__WEBPACK_IMPORTED_MODULE_0__utilities_string__["format"]('Error loading widget "[widget]" (id: "[id]"): [0]', [message], widgetConfiguration));
+}
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+/**
+ * Several factory methods for creating error objects that are useful for almost any adapter.
+ *
+ * @module adapter_utilities
+ */
+
+/**
+ * Creates an instance of the adapter utilities.
+ *
+ * @return {AdapterUtilities}
+ *   a collection of methods to create error messages commonly generated by widget adapters
+ *
+ * @private
+ */
+function create() {
+
+  /**
+   * Provides access to the configuration that was passed during application bootstrapping.
+   *
+   * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
+   * application bootstrapping configuration. The configuration values are passed to
+   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
+   * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
+   * file `init.js` under your project's root directory.
+   *
+   * @name AdapterUtilities
+   * @constructor
+   */
+  return {
+
+    /**
+     * Creates (but does not throw) an error indicating that an activity tried accessing the DOM.
+     *
+     * @param {Object} details
+     *    details for the error
+     * @param {String} details.technology
+     *    the complaining adapter's technology
+     * @param {String} details.widgetName
+     *    the canonical name of the activity causing the problem
+     *
+     * @return {Error}
+     *    the error, ready to throw
+     */
+    activityAccessingDom: function activityAccessingDom(_ref) {
+      var technology = _ref.technology,
+          widgetName = _ref.widgetName;
+
+      return new Error(technology + " adapter: Trying to access DOM in activity " + widgetName);
+    },
+
+
+    /**
+     * Creates (but does not throw) an error indicating that a widget requested an injection that cannot be
+     * provided by the adapter.
+     *
+     * @param {Object} details
+     *    details for the error
+     * @param {String} details.technology
+     *    the complaining adapter's technology
+     * @param {String} details.injection
+     *    the failing injection
+     * @param {String} details.widgetName
+     *    the canonical name of the widget causing the problem
+     *
+     * @return {Error}
+     *    the error, ready to throw
+     */
+    unknownInjection: function unknownInjection(_ref2) {
+      var technology = _ref2.technology,
+          injection = _ref2.injection,
+          widgetName = _ref2.widgetName;
+
+      return new Error(technology + " adapter: " + ("Trying to inject unknown service \"" + injection + " into widget \"" + widgetName + "\""));
+    },
+
+
+    /**
+     * Creates (but does not throw) an error indicating that a widget was not registered with the current
+     * adapter.
+     *
+     * @param {Object} details
+     *    details for the error
+     * @param {String} details.technology
+     *    the complaining adapter's technology
+     * @param {String} details.widgetName
+     *    the canonical name of the missing widget
+     *
+     * @return {Error}
+     *    the error, ready to throw
+     */
+    unknownWidget: function unknownWidget(_ref3) {
+      var technology = _ref3.technology,
+          widgetName = _ref3.widgetName;
+
+      return new Error(technology + " adapter: Unknown widget: " + widgetName);
+    }
+  };
+}
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+/**
+* Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+
+
+
+var NOT_FOUND = { content: null };
+
+function create(artifacts, browser, configuration, log) {
+
+   var baseHref = configuration.get('baseHref');
+
+   var resolve = baseHref ? function (_) {
+      return browser.resolve(_, baseHref);
+   } : function (_) {
+      return _;
+   };
+
+   var _ref = function (themeRef) {
+      var themeIndex = artifacts.aliases.themes[themeRef];
+      var theme = artifacts.themes[themeIndex];
+      if (!theme) {
+         log.error('The configured theme ' + themeRef + ' is not available.');
+         return ['default', 'default.theme'];
+      }
+      return [themeRef, theme.descriptor.name];
+   }(configuration.ensure('theme')),
+       _ref2 = _slicedToArray(_ref, 2),
+       themeRef = _ref2[0],
+       themeName = _ref2[1];
+
+   return {
+      forFlow: makeProvider('flows', ['descriptor'], ['definition']),
+      forTheme: makeProvider('themes', ['descriptor', 'assets']).bind(null, themeRef),
+      forPage: makeProvider('pages', ['descriptor'], ['definition']),
+      forLayout: makeProvider('layouts', ['descriptor', 'assets']),
+      forWidget: makeProvider('widgets', ['descriptor', 'assets', 'module']),
+      forControl: makeProvider('controls', ['descriptor', 'assets', 'module'])
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function makeProvider(bucket) {
+      var keys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+      var cloneKeys = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+      return function (ref) {
+         var api = {};
+         var index = artifacts.aliases[bucket][ref];
+         var artifactPromise = index === undefined ? Promise.reject(new Error('Artifact ' + ref + ' not found in ' + bucket)) : Promise.resolve(artifacts[bucket][index]);
+
+         ['definition', 'module', 'descriptor'].forEach(function (key) {
+            if (cloneKeys.includes(key)) {
+               api[key] = function () {
+                  return artifactPromise.then(function (_) {
+                     return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["deepClone"])(_[key]);
+                  });
+               };
+            } else if (keys.includes(key)) {
+               api[key] = function () {
+                  return artifactPromise.then(function (_) {
+                     return _[key];
+                  });
+               };
+            }
+         });
+
+         if (keys.includes('assets')) {
+            var lookup = function lookup(name) {
+               __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+               return function (_ref3) {
+                  var _ref3$assets = _ref3.assets,
+                      assets = _ref3$assets === undefined ? {} : _ref3$assets;
+
+                  return assets[name] || NOT_FOUND;
+               };
+            };
+
+            var lookupForTheme = function lookupForTheme(name) {
+               __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
+               return function (_ref4) {
+                  var _ref4$assets = _ref4.assets,
+                      assets = _ref4$assets === undefined ? {} : _ref4$assets;
+
+                  var themedAssets = assets[themeName];
+                  if (themedAssets && themedAssets[name]) {
+                     return themedAssets[name];
+                  }
+                  var defaultAssets = assets['default.theme'];
+                  if (defaultAssets && defaultAssets[name]) {
+                     return defaultAssets[name];
+                  }
+                  return NOT_FOUND;
+               };
+            };
+
+            var provide = function provide(_ref5) {
+               var url = _ref5.url,
+                   content = _ref5.content;
+
+               if (content == null && url) {
+                  return browser.fetch(resolve(url)).then(function (_) {
+                     return _.text();
+                  });
+               }
+               return content || null;
+            };
+
+            var provideUrl = function provideUrl(_ref6) {
+               var url = _ref6.url;
+               return url ? resolve(url) : null;
+            };
+
+            api.asset = function (name) {
+               return artifactPromise.then(lookup(name)).then(provide);
+            };
+
+            api.assetUrl = function (name) {
+               return artifactPromise.then(lookup(name)).then(provideUrl);
+            };
+
+            api.assetForTheme = function (name) {
+               return artifactPromise.then(lookupForTheme(name)).then(provide);
+            };
+
+            api.assetUrlForTheme = function (name) {
+               return artifactPromise.then(lookupForTheme(name)).then(provideUrl);
+            };
+         }
+
+         return api;
+      };
+   }
+}
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * Module providing the Browser factory.
+ *
+ * Provides abstractions for browser APIs used internally by LaxarJS, which might need a different
+ * implementation in a server-side environment, or for testing.
+ * This service is internal to LaxarJS and not available to widgets and activities.
+ *
+ * @module browser
+ */
+
+/**
+ * Create a browser abstraction environment.
+ *
+ * @return {Browser}
+ *    a fresh browser instance
+ *
+ * @private
+ */
+function create() {
+
+   // for the MSIE `resolve`-workaround, cache the temporary HTML document
+   var resolveDoc = void 0;
+   var resolveDocBase = void 0;
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * A brower mostly abstracts over the location-related DOM window APIs, and provides a console wrapper.
+    * Since it is internal to LaxarJS, only relevant APIs are included.
+    *
+    * @name Browser
+    * @constructor
+    */
+   return {
+      /**
+      * Calculates an absolute URL from a (relative) URL, and an optional base URL.
+      *
+      * If no base URL is given, the `document.baseURI` is used instead. The given base URL may also be
+      * relative, in which case it is resolved against the `document.baseURI` before resolving the first URL.
+      *
+      * For browser environments that do not support the `new URL( url, baseUrl )` constructor for resolving
+      * URLs or that do not support `document.baseURI`, fallback mechanisms are used.
+      *
+      * @param {String} url
+      *    the URL to resolve
+      * @param {String} baseUrl
+      *    the base to resolve from
+      *
+      * @return {String}
+      *    an absolute URL based on the given URL
+      *
+      * @type {Function}
+      * @memberof Browser
+      */
+      resolve: selectResolver(),
+
+      /**
+       * Provides easily mocked access to `window.location`
+       *
+       * @return {Location}
+       *    the current (window's) DOM location
+       *
+       * @type {Function}
+       * @memberof Browser
+       */
+      location: function location() {
+         return window.location;
+      },
+
+      /**
+       * Provides easily mocked access to `window.fetch` or a suitable polyfill:
+       *
+       * @param {String|Request} input
+       *    the URL to fetch or the request to perform
+       * @param {Object} [init]
+       *    additional options, described here in more detail:
+       *    https://developer.mozilla.org/en-US/docs/Web/API/Globalfetch/fetch#Parameters
+       *
+       * @return {Promise<Response>}
+       *    the resulting promise
+       *
+       * @type {Function}
+       * @memberof Browser
+       */
+      fetch: function fetch(input, init) {
+         return window.fetch(input, init);
+      },
+
+      /**
+       * Provides easily mocked access to `window.console`:
+       *
+       * @return {Console}
+       *    the browser console promise
+       *
+       * @type {Function}
+       * @memberof Browser
+       */
+      console: function console() {
+         return window.console;
+      }
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   // perform the exception-based feature-detect only once (for performance, and to be nice to debugger users)
+   function selectResolver() {
+      try {
+         var href = window.location.href;
+
+         return new URL('', href).href === href ? resolveUsingUrl : resolveUsingLink;
+      } catch (e) {
+         return resolveUsingLink;
+      }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   // Resolve using the DOM URL API (Chrome, Firefox, Safari, MS Edge)
+   function resolveUsingUrl(url, baseUrl) {
+      var absoluteBaseUrl = baseUrl ? abs(baseUrl) : document.baseURI || abs('.');
+      return new URL(url, absoluteBaseUrl).href;
+
+      function abs(url) {
+         return new URL(url, document.baseURI || resolveUsingLink('.'));
+      }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   // Resolve using the a-tag fallback (MSIE)
+   function resolveUsingLink(url, baseUrl) {
+      var absoluteBaseUrl = abs(baseUrl);
+      if (!resolveDoc) {
+         resolveDoc = document.implementation.createHTMLDocument('');
+         resolveDocBase = resolveDoc.createElement('base');
+         resolveDoc.head.appendChild(resolveDocBase);
+      }
+      resolveDocBase.href = absoluteBaseUrl;
+      return abs(url, resolveDoc);
+
+      function abs(url) {
+         var baseDocument = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
+
+         var a = baseDocument.createElement('a');
+         // MSIE does not process empty URLs correctly (http://stackoverflow.com/a/7966835)
+         a.href = url || '#';
+         return url ? a.href : a.href.slice(0, -1);
+      }
+   }
 }
 
 /***/ }),
 /* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+/**
+ * Copyright 2016 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+/**
+ * Module providing the Configuration factory.
+ *
+ * To use the Configuration in a widget, request the {@link widget_services#axConfiguration axConfiguration}
+ * injection. In compatibility mode with LaxarJS v1.x, it is also available under `laxar.configuration`.
+ *
+ * @module configuration
+ */
+
+
+
+function create(source, defaults) {
+
+  /**
+   * Provides access to the configuration that was passed during application bootstrapping.
+   *
+   * A *Configuration* instance provides convenient readonly access to the underlying LaxarJS
+   * application bootstrapping configuration. The configuration values are passed to
+   * {@link laxar#create()} on startup (before LaxarJS v2.x, these configuration values were read from
+   * `window.laxar`). When using the LaxarJS application template, the configuration values are set in the
+   * file `init.js` under your project's root directory.
+   *
+   * @name Configuration
+   * @constructor
+   */
+  return { get: get, ensure: ensure };
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Returns the configured value for the specified attribute path or `undefined` in case it wasn't
+   * configured. If a default value was passed as second argument this is returned instead of `undefined`.
+   *
+   * Services should use this to get configuration values for which there are universal fallback behaviors.
+   *
+   * Examples:
+   * ```js
+   * // ... inject `axConfiguration` as `config` ...
+   * config.get( 'logging.threshold' ); // -> 'INFO'
+   * config.get( 'iDontExist' ); // -> undefined
+   * config.get( 'iDontExist', 42 ); // -> 42
+   * ```
+   *
+   * @param {String} key
+   *    a path (using `.` as separator) to the property in the configuration object
+   * @param {*} [optionalDefault]
+   *    the value to return if no value was set for `key`
+   *
+   * @return {*}
+   *    either the configured value, `undefined` or `optionalDefault`
+   *
+   * @memberof Configuration
+   */
+  function get(key, optionalDefault) {
+    var value = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(source, key);
+    return value !== undefined ? value : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(defaults, key, optionalDefault);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Retrieves a configuration value by key, failing if it is `undefined` or `null`.
+   *
+   * Services should use this to get configuration values for which no universal default or fallback exists.
+   *
+   * Examples:
+   * ```js
+   * // ... inject `axConfiguration` as `config` ...
+   * config.ensure( 'logging.threshold' ); // -> 'INFO'
+   * config.ensure( 'iDontExist' ); // -> throws
+   * ```
+   *
+   * @param {String} key
+   *    a path (using `.` as separator) to the property in the configuration object
+   *
+   * @return {*}
+   *    the configured value (if `undefined` or `null`, an exception is thrown instead)
+   *
+   * @memberof Configuration
+   */
+  function ensure(key) {
+    var value = get(key);
+    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(value).isNotNull('Configuration is missing mandatory entry: ' + key);
+    return value;
+  }
+}
+
+/***/ }),
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5136,7 +5319,7 @@ function equals(a, b) {
 }
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5204,7 +5387,7 @@ function create(flowController) {
 }
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5385,11 +5568,11 @@ function create(customNextTick, customTimeout) {
 }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__area_helper__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__area_helper__ = __webpack_require__(4);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 /**
  * Copyright 2016 aixigo AG
@@ -5462,7 +5645,7 @@ function create(areaHelper, className, widget) {
 }
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5541,11 +5724,11 @@ function create(eventBus, configuration) {
 }
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_navigo__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_navigo__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_navigo___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_navigo__);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -5664,10 +5847,7 @@ function create(browser, configuration) {
 
       router.on(preparedRoutes).on('*', function (querystring) {
          if (emptyHashRouteHandler) {
-            var _browser$location = browser.location(),
-                _hash = _browser$location.hash;
-
-            if (['', _hash, _hash + '/'].indexOf(_hash) !== -1) {
+            if (['', hash, hash + '/'].indexOf(browser.location().hash) !== -1) {
                emptyHashRouteHandler(collectParameters({}, querystring));
                return;
             }
@@ -5884,13 +6064,13 @@ function create(browser, configuration) {
 }
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__area_helper__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__layout_widget_adapter__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__area_helper__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__layout_widget_adapter__ = __webpack_require__(21);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -5903,7 +6083,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 
 
-function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, pagesCollector, log) {
+function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager, visibilityManager, log, debugEventBus) {
 
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(eventBus).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(pageLoader).isNotNull();
@@ -5911,16 +6091,17 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(widgetLoader).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(localeManager).isNotNull();
    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(visibilityManager).isNotNull();
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(pagesCollector).isNotNull();
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(debugEventBus).isNotNull();
 
    var pageController = void 0;
 
    var pageServiceApi = {
-      createControllerFor: function createControllerFor(pageElement) {
+      createControllerFor: function createControllerFor(pageElement, instanceContext) {
          __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].state(!pageController, 'Cannot create a page controller more than once.');
          __WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */].state(pageElement instanceof HTMLElement, 'A page controller can only be created for a valid DOM element.');
+         __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(instanceContext).hasType(Object).isNotNull();
 
-         pageController = createPageController(pageElement);
+         pageController = createPageController(pageElement, instanceContext);
          return pageController;
       },
       controller: function controller() {
@@ -5930,7 +6111,7 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function createPageController(pageElement) {
+   function createPageController(pageElement, /* bootstrappingItemMeta */instanceContext) {
 
       var _areaHelper = null;
       var api = {
@@ -5939,6 +6120,11 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
          areaHelper: function areaHelper() {
             return _areaHelper;
          }
+      };
+      var publishDebugInfo = function publishDebugInfo(event, data) {
+         debugEventBus.publish(event + '.' + instanceContext.instance + '.' + instanceContext.item, Object.assign({
+            itemMeta: instanceContext
+         }, data));
       };
 
       /** Delay between sending didLifeCycle and attaching widget templates. */
@@ -5950,6 +6136,7 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
 
       var activeWidgetAdapterWrappers = [];
       var cleanUpLayout = function cleanUpLayout() {};
+      var activePage = null;
 
       pageElement.innerHTML = '';
 
@@ -5957,6 +6144,8 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
 
       function setupPage(pageName) {
          __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(pageName).hasType(String).isNotNull();
+
+         publishDebugInfo('willLoad.page', { page: pageName });
 
          return pageLoader.load(pageName).then(function (page) {
             _areaHelper = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__area_helper__["a" /* create */])(page, log);
@@ -5973,14 +6162,16 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
 
             // instantiate controllers wrapped by widget adapters
             var widgetPromises = widgetsForPage(page).map(function (widget) {
-               return 'layout' in widget ? layoutWidget(widget) : widgetLoader.load(widget);
+               return 'layout' in widget ? layoutWidget(widget) : widgetLoader.load(widget, {}, instanceContext);
             });
 
             return Promise.all([].concat(_toConsumableArray(widgetPromises), [layoutPromise])).then(function (results) {
                return results.slice(0, -1);
             });
          }).then(function (widgetAdapterWrappers) {
-            pagesCollector.collectCurrentPage(pageName);
+            publishDebugInfo('didLoad.page', { page: pageName });
+
+            activePage = pageName;
             activeWidgetAdapterWrappers = widgetAdapterWrappers;
          }).then(localeManager.initialize).then(function () {
             return eventBus.publishAndGatherReplies('beginLifecycleRequest.default', LIFECYCLE_EVENT, EVENT_OPTIONS);
@@ -5999,11 +6190,17 @@ function create(eventBus, pageLoader, layoutLoader, widgetLoader, localeManager,
          visibilityManager.unsubscribe();
          localeManager.unsubscribe();
 
+         publishDebugInfo('willUnload.page', { page: activePage });
+
          return eventBus.publishAndGatherReplies('endLifecycleRequest.default', LIFECYCLE_EVENT, EVENT_OPTIONS).then(function () {
+            var pageName = activePage;
             activeWidgetAdapterWrappers.forEach(function (wrapper) {
                return wrapper.destroy();
             });
             activeWidgetAdapterWrappers = [];
+            activePage = null;
+
+            publishDebugInfo('didUnload.page', { page: pageName });
             cleanUpLayout();
             cleanUpLayout = function cleanUpLayout() {};
          });
@@ -6118,7 +6315,7 @@ function delay(ms) {
 }
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6393,7 +6590,7 @@ function create(configuration, browser, localStorageBackend, sessionStorageBacke
 }
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6495,7 +6692,7 @@ function create(log) {
 }
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6650,14 +6847,14 @@ function create(eventBus) {
 }
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__runtime_log__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__widget_services_i18n__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widget_services_visibility__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__runtime_log__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__widget_services_i18n__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__widget_services_visibility__ = __webpack_require__(30);
 /* harmony export (immutable) */ __webpack_exports__["a"] = create;
 /**
  * Copyright 2016 aixigo AG
@@ -6680,13 +6877,14 @@ function create(eventBus) {
 var INVALID_ID_MATCHER = /[^A-Za-z0-9_.-]/g;
 var ID_SEPARATOR = '-';
 
-function create(artifactProvider, configuration, controlLoader, globalEventBus, flowService, log, heartbeat, pageService, storage, toolingProviders) {
+function create(artifactProvider, configuration, controlLoader, debugEventBus, globalEventBus, flowService, log, heartbeat, pageService, storage, tooling) {
 
    var i18nOptions = configuration.ensure('i18n');
 
    return {
       forWidget: function forWidget(specification, widgetConfiguration, features) {
          var decorators = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+         var itemMeta = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
          var widgetId = widgetConfiguration.id;
          var widgetName = specification.name;
 
@@ -6726,6 +6924,13 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
              * @type {ControlLoader}
              */
             axControls: null,
+
+            /**
+             * Provides access to a super-global EventBus shared by Laxar instances.
+             *
+             * @type {AxEventBus}
+             */
+            axDebugEventBus: null,
 
             /**
              * Event bus instance specifically enriched for the widget instance.
@@ -6803,6 +7008,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
              * Example:
              *
              * ```js
+             * // ... inject `axId`, get reference to `widgetDom` (depends on integration technology) ...
              * widgetDom.querySelector( 'label' ).setAttribute( 'for', axId( 'myField' ) );
              * widgetDom.querySelector( 'input' ).setAttribute( 'id', axId( 'myField' ) );
              * ```
@@ -6836,9 +7042,8 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 
             /**
              * Access to the tooling provider API.
-             * TODO (#404) Fix the type (and document toolingProviders)
              *
-             * @type {*}
+             * @type {AxTooling}
              */
             axTooling: null,
 
@@ -6865,6 +7070,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
             return createContextForWidget(widgetConfiguration, widgetId, services);
          });
          registerService('axControls', controlLoader);
+         registerService('axDebugEventBus', debugEventBus);
          registerServiceFactory('axEventBus', function () {
             return createEventBusForWidget(services.axGlobalEventBus, widgetName, widgetId);
          }, function () {
@@ -6889,10 +7095,14 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
          registerServiceFactory('axStorage', function () {
             return createStorageForWidget(storage, widgetId);
          });
+         registerServiceFactory('axTooling', function () {
+            return createToolingForWidget(tooling, widgetId, itemMeta);
+         }, function () {
+            instances.axTooling.release();
+         });
          registerServiceFactory('axVisibility', function () {
             return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__widget_services_visibility__["a" /* create */])(services.axContext, services.axAreaHelper);
          });
-         registerService('axTooling', toolingProviders);
 
          return {
             services: services,
@@ -7022,6 +7232,8 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
           *
           * @return {Boolean}
           *    the current visibility state of the given area
+          *
+          * @memberof AxAreaHelper
           */
          isVisible: function isVisible(fullAreaName) {
             return pageService.controller().areaHelper().isVisible(fullAreaName);
@@ -7110,10 +7322,9 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
        * For binary files there exists the {@link #AxAssets.url} function.
        *
        * Example:
-       * ```
-       * function Controller( axAssets ) {
-       *    axAssets( 'data.json' ).then( fileContent => { ... } );
-       * }
+       * ```js
+       * // ... inject `axAssets` ...
+       * axAssets( 'data.json' ).then( fileContent => { ... } );
        * ```
        *
        * @param {String} name
@@ -7134,10 +7345,9 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
        * This can then be safely used in e.g. `video` or `img` tags.
        *
        * Example:
-       * ```
-       * function Controller( axAssets ) {
-       *    axAssets.url( 'tux.jpg' ).then( url => { img.src = url; } );
-       * }
+       * ```js
+       * // ... inject `axAssets`, find `img` in DOM ...
+       * axAssets.url( 'tux.jpg' ).then( url => { img.src = url; } );
        * ```
        *
        * @param  {String} name
@@ -7162,10 +7372,9 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
        * For binary files there exists the {@link #AxAssets.urlForTheme} function.
        *
        * Example:
-       * ```
-       * function Controller( axAssets ) {
-       *    axAssets.forTheme( 'some-template.html' ).then( template => { ... } );
-       * }
+       * ```js
+       * // ... inject `axAssets` ...
+       * axAssets.forTheme( 'some-template.html' ).then( template => { ... } );
        * ```
        *
        * @param {String} name
@@ -7189,10 +7398,9 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
        * further information on theme asset lookup).
        *
        * Example:
-       * ```
-       * function Controller( axAssets ) {
-       *    axAssets.urlForTheme( 'icon.jpg' ).then( url => { img.src = url; } );
-       * }
+       * ```js
+       * // ... inject `axAssets`, find `img` in DOM ...
+       * axAssets.urlForTheme( 'icon.jpg' ).then( url => { img.src = url; } );
        * ```
        *
        * @param  {String} name
@@ -7267,6 +7475,12 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
           */
          session: storage.getSessionStorage(namespace)
       };
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function createToolingForWidget(tooling, widgetId, itemMeta) {
+      return tooling.forItem(itemMeta);
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -7367,7 +7581,7 @@ function create(artifactProvider, configuration, controlLoader, globalEventBus, 
 }
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7441,7 +7655,8 @@ var normalize = memoize(function (languageTag) {
 function create(context, configuration) {
    var optionalOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
    var features = context.features,
-       eventBus = context.eventBus;
+       eventBus = context.eventBus,
+       widget = context.widget;
    var _optionalOptions$fall = optionalOptions.fallback,
        fallback = _optionalOptions$fall === undefined ? 'en' : _optionalOptions$fall,
        _optionalOptions$stri = optionalOptions.strict,
@@ -7499,7 +7714,7 @@ function create(context, configuration) {
       }
 
       var locale = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["path"])(features, featurePath + '.locale');
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(locale).hasType(String).isNotNull('axI18n: missing feature-configuration \'' + featurePath + '.locale\' (widget: ' + context.widget.id + ')');
+      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(locale).hasType(String).isNotNull('axI18n: missing feature-configuration \'' + featurePath + '.locale\' (widget: ' + widget.id + ')');
 
       var api = forLocale(locale, featurePath);
       handlers[featurePath] = api;
@@ -7695,7 +7910,7 @@ function create(context, configuration) {
          var languageTag = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : tags[locale];
 
          if (!i18nValue || primitives[typeof i18nValue === 'undefined' ? 'undefined' : _typeof(i18nValue)]) {
-            // Value is not i18n
+            // value is not internationalized
             return i18nValue;
          }
          if (!languageTag) {
@@ -7756,7 +7971,7 @@ function memoize(f) {
 }
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8089,348 +8304,808 @@ function create(context, areaHelper) {
 }
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__pages__ = __webpack_require__(5);
-/* harmony export (immutable) */ __webpack_exports__["a"] = createCollectors;
-/* harmony export (immutable) */ __webpack_exports__["b"] = createProviders;
+/* unused harmony export FLAT */
+/* unused harmony export COMPACT */
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /**
  * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
 /**
- * Accepts and keeps laxarjs application data from various laxarjs services, and makes it available to
- * development tools.
+ * A module for compatibility with old LaxarJS tooling.
  *
- * This module has an internal API (the `collectors`-service), and an external API (the `providers` service).
- * The collectors service is fed data by the other laxarjs services, while the provider allows external
- * listeners to subscribe to that data's changes, or to retrieve snapshots of it.
+ * @module pages
  */
 
+var FLAT = 'FLAT';
+var COMPACT = 'COMPACT';
 
+function create(tooling) {
+   var listeners = [];
+   var pageInfo = void 0;
 
-// eslint-disable-next-line valid-jsdoc
-/** Collects inspection data from laxarjs services */
-function createCollectors(configuration, log) {
+   function onChange(event) {
+      pageInfo = getPageInfo(event);
+      listeners.forEach(function (callback) {
+         callback(pageInfo);
+      });
+   }
+
+   /**
+    * @constructor
+    * @name PagesTooling
+    */
    return {
-      pages: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__pages__["a" /* createCollector */])(configuration, log)
+      /**
+       * Start collecting page/composition data.
+       * @memberof PagesTooling
+       */
+      enable: function enable() {
+         tooling.unsubscribe(onChange);
+         tooling.onChange(onChange);
+      },
+
+
+      /**
+       * Stop collecting page/composition data.
+       * @memberof PagesTooling
+       */
+      disable: function disable() {
+         tooling.unsubscribe(onChange);
+      },
+
+
+      /**
+       * Access the current page information.
+       * Everything is returned as a copy, sothis object cannot be used to modify the host application.
+       *
+       * @return {Object}
+       *   the current page information, with the following properties:
+       *    - `pageDefinitions` {Object}
+       *       both the original as well as the expanded/flattened page model for each available page
+       *    - `compositionDefinitions` {Object}
+       *       both the original as well as the expanded/flattened composition model for each composition of
+       *       any available page
+       *    - `widgetDescriptors` {Object}
+       *       the widget descriptor for each widget that was referenced
+       *    - `pageReference` {String}
+       *       the reference for the current page, to lookup page/composition definitions
+       * @memberof PagesTooling
+       */
+      current: function current() {
+         return pageInfo;
+      },
+
+
+      /**
+       * Add a listener function to be notified whenever the page information changes.
+       * As a side-effect, this also automatically enables collecting page/composition data.
+       * Each listener will be delivered its own copy of the page information.
+       *
+       * @param {Function} callback
+       *    The listener to add. Will be called with the current page information whenever that changes.
+       * @memberof PagesTooling
+       */
+      addListener: function addListener(callback) {
+         listeners.push(callback);
+      },
+
+
+      /**
+       * Remove a page information listener function.
+       *
+       * @param {Function} callback
+       *    The listener to remove
+       * @memberof PagesTooling
+       */
+      removeListener: function removeListener(callback) {
+         var index = void 0;
+         while ((index = listeners.indexOf(callback)) >= 0) {
+            listeners.splice(index, 1);
+         }
+      }
    };
 }
 
-// eslint-disable-next-line valid-jsdoc
-/** Exposes inspection data from laxarjs services to development tools */
-function createProviders(collectors) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Generate the "old" page info object from the debug info in the onChange event.
+ *
+ * @param {String} event
+ *   the data received from the toolings onChange handler
+ *
+ * @return {Object} the page information
+ * @private
+ */
+function getPageInfo(event) {
+   var pageDefinitions = {};
+   var compositionDefinitions = {};
+   var widgetDescriptors = {};
+
+   var pageReference = void 0;
+
+   Object.keys(event.pages).forEach(function (ref) {
+      var page = event.pages[ref];
+
+      pageReference = ref;
+      pageDefinitions[ref] = definitions(page);
+      compositionDefinitions[ref] = {};
+
+      page.compositions.forEach(function (composition) {
+         compositionDefinitions[ref][composition.id] = definitions(composition);
+      });
+   });
+
+   Object.keys(event.widgets).forEach(function (ref) {
+      var widget = event.widgets[ref];
+
+      widgetDescriptors[ref] = widget.DESC;
+   });
+
    return {
-      pages: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__pages__["b" /* createProvider */])(collectors.pages)
+      pageDefinitions: pageDefinitions,
+      pageReference: pageReference,
+      compositionDefinitions: compositionDefinitions,
+      widgetDescriptors: widgetDescriptors
    };
+
+   function definitions(info) {
+      var _ref;
+
+      return _ref = {}, _defineProperty(_ref, FLAT, info.FLAT), _defineProperty(_ref, COMPACT, info.COMPACT), _ref;
+   }
 }
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_31__;
 
 /***/ }),
 /* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_utilities_object__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__lib_utilities_string__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__lib_runtime_services__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__ = __webpack_require__(6);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "assert", function() { return __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a"]; });
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "object", function() { return __WEBPACK_IMPORTED_MODULE_1__lib_utilities_object__; });
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "string", function() { return __WEBPACK_IMPORTED_MODULE_2__lib_utilities_string__; });
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "plainAdapter", function() { return __WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__; });
-/* harmony export (immutable) */ __webpack_exports__["create"] = create;
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "instances", function() { return instances; });
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utilities_assert__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utilities_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pages__ = __webpack_require__(31);
+/* harmony export (immutable) */ __webpack_exports__["a"] = create;
 /**
  * Copyright 2016 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
-
 /**
- * The API entry point for boostrapping LaxarJS applications.
- * Also, provides a couple of utilities to deal with assertions, objects and strings.
+ * Accepts static debug information from `laxar-loader/debug-info` and listens on the debug event bus to
+ * supply development tools with the current state of the LaxarJS instance and bootstrapping items:
  *
- * @module laxar
+ * @module tooling
  */
 
 
 
 
 
+// eslint-disable-next-line valid-jsdoc
+/** Exposes inspection data from laxarjs services to development tools */
+function create(debugEventBus, log) {
 
+   var debugInfoQueue = []; // a list of callbacks waiting for whenDebugInfoAvailable()
+   var loadDebugInfo = void 0; // the debug info loader registered with registerDebugInfo()
+   var debugInfo = void 0; // the actual debug info object loaded by loadDebugInfo( debugInfo => {} )
 
-
-// Get a reference to the global object of the JS environment.
-// See http://stackoverflow.com/a/6930376 for details
-var global = void 0;
-try {
-   // eslint-disable-next-line no-new-func, no-eval
-   global = Function('return this')() || (1, eval)('this');
-} catch (_) {
-   // if it forbids eval, it's probably a browser
-   global = window;
-}
-
-var MESSAGE_ADAPTERS = 'laxar.create: `adapters` must be an array';
-var MESSAGE_ARTIFACTS = 'laxar.create: `artifacts` object must have at least: aliases, themes, widgets';
-var MESSAGE_CONFIGURATION = 'laxar.create: `configuration` must be an object';
-
-/**
- * Prepares a LaxarJS application instance from a list of adapters, a bundle of artifacts, and application
- * configuration. The instance then allows to configure which DOM node should receive an application flow.
- * Running this has no effect until `.bootstrap()` is called on the returned instance API.
- *
- * @param {Array} adapters
- *    widget adapters to use in this bootstrapping instance
- * @param {Object} artifacts
- *    an artifact listing for the application, generated by the utilized built tool (e.g. webpack)
- * @param {Object} configuration
- *    application-wide LaxarJS configuration. See http://laxarjs.org/docs/laxar-latest/manuals/configuration/
- *    for further information on available properties
- *
- * @return {BootstrappingInstance}
- *    a handle on the bootstrapping instance, to load and bootstrap a flow
- *
- * @memberof laxar
- */
-function create(adapters, artifacts, configuration) {
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(adapters).hasType(Array).isNotNull(MESSAGE_ADAPTERS);
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.aliases).hasType(Object).isNotNull(MESSAGE_ARTIFACTS);
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.themes).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(artifacts.widgets).hasType(Array).isNotNull(MESSAGE_ARTIFACTS);
-   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(configuration).hasType(Object).isNotNull(MESSAGE_CONFIGURATION);
-
-   var services = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__lib_runtime_services__["a" /* create */])(configuration, artifacts);
-   var bootstrappingSchedule = {
-      items: [],
-      testing: false
-   };
+   var instanceListeners = [];
+   var itemListeners = {};
 
    /**
-    * Handle on a LaxarJS bootstrapping instance.
-    *
-    * @name BootstrappingInstance
     * @constructor
+    * @name AxTooling
     */
-   var api = { flow: flow, testing: testing, bootstrap: bootstrap };
+   var api = Object.assign({
+      forItem: forItem
+   }, createToolingApi(instanceListeners), {
+
+      registerDebugInfo: registerDebugInfo,
+      registerItem: registerItem
+   });
+
+   addPagesTooling(api);
+
    return api;
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    /**
-    * Registers a flow to control routing for this application.
+    * Get an {@link #AxTooling} interface for the given bootstrapping item.
     *
-    * @param {String} name
-    *    widget adapters to use in this bootstrapping instance
-    * @param {HTMLElement} anchorElement
-    *    container element to determine where to put the flow
-    *
-    * @return {BootstrappingInstance}
-    *    the current bootstrapping instance (self), for chaining
-    *
-    * @memberof BootstrappingInstance
+    * @param {ItemMeta} itemMeta
+    *    an object identifying the bootstrapping item
+    * @return {AxTooling}
+    *    a tooling API for the given bootstrapping item
+    * @memberof AxTooling
     */
-   function flow(name, anchorElement) {
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(name).hasType(String).isNotNull();
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */])(anchorElement).isNotNull();
-      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(anchorElement.nodeType === Node.ELEMENT_NODE);
-      bootstrappingSchedule.items.push({ type: 'flow', name: name, anchorElement: anchorElement });
+   function forItem(_ref) {
+      var instance = _ref.instance,
+          item = _ref.item;
+
+      var key = instance + '.' + item;
+      if (!(key in itemListeners)) {
+         log.warn('LaxarJS tooling: Not enabled for bootstrap item \'' + item + '\' in instance \'' + instance + '\'');
+         return createToolingApi([]);
+      }
+
+      var api = createToolingApi(itemListeners[key]);
+      addPagesTooling(api);
       return api;
    }
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    /**
-    * Declare that this instance is used for testing.
-    * This will cause .bootstrap not to fail if no flow was configured.
+    * Register a debug info object or callback with the tooling instance. Debug information can be generated
+    * with `laxar-loader/debug-info` and may be in the form a function accepting a callback.
+    * If debug information is needed, the function will be called to load it asynchronously.
     *
-    * @return {BootstrappingInstance}
-    *    the current bootstrapping instance (self), for chaining
-    *
-    * @memberof BootstrappingInstance
+    * @param {Object|Function} debugInfo
+    *    a debug information callback or object
+    * @memberof AxTooling
     */
-   function testing() {
-      bootstrappingSchedule.testing = true;
-      return api;
+   function registerDebugInfo(debugInfo) {
+      if (typeof debugInfo === 'function') {
+         loadDebugInfo = debugInfo;
+      } else {
+         loadDebugInfo = function loadDebugInfo(callback) {
+            callback(debugInfo);
+         };
+      }
+
+      whenDebugInfoAvailable();
    }
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    /**
-    * Performs the actual application bootstrapping.
-    * This includes bootstrapping the application adapters and starting the router.
+    * Register a bootstrapping item with the tooling instance.
     *
-    * @memberof BootstrappingInstance
+    * @param {ItemMeta} itemMeta
+    *    an object identifying the bootstrapping item
+    * @memberof AxTooling
     */
-   function bootstrap() {
-      var testing = bootstrappingSchedule.testing,
-          items = bootstrappingSchedule.items;
+   function registerItem(_ref2) {
+      var instance = _ref2.instance,
+          item = _ref2.item;
 
-      __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(testing || items.length > 0, 'Nothing configured for bootstrap()');
+      var key = instance + '.' + item;
+      var pending = [];
 
-      var adapterInstances = bootstrapAdapters(services, [__WEBPACK_IMPORTED_MODULE_4__lib_runtime_plain_adapter__].concat(_toConsumableArray(adapters)), artifacts);
-      services.widgetLoader.registerWidgetAdapters(adapterInstances);
-      announceInstance(services);
+      var state = {
+         pages: addLoadingStateHandler('page', instance, item, pending, onChange),
+         widgets: addLoadingStateHandler('widget', instance, item, pending, onChange)
+      };
 
-      var log = services.log;
+      itemListeners[key] = [];
 
-      items.forEach(function (item) {
-         // other item types will be added in future commits, but for now:
-         __WEBPACK_IMPORTED_MODULE_0__lib_utilities_assert__["a" /* default */].state(item.type === 'flow');
-         var name = item.name,
-             anchorElement = item.anchorElement;
+      function onChange() {
+         if (instanceListeners.length > 0 || itemListeners[key].length > 0) {
+            whenDebugInfoAvailable(function (debugInfo) {
+               var event = {
+                  instance: instance,
+                  item: item,
+                  pages: getActiveItems('pages', state.pages),
+                  widgets: getActiveItems('widgets', state.widgets)
+               };
 
+               instanceListeners.forEach(callListener);
+               itemListeners[key].forEach(callListener);
 
-         whenDocumentReady(function () {
-            log.trace('laxar.bootstrap: loading fow: ' + name);
-            services.pageService.createControllerFor(anchorElement);
-            services.flowController.loadFlow(name).then(function () {
-               log.trace('laxar.bootstrap: flow loaded');
-            }, function (err) {
-               log.fatal('laxar.bootstrap: failed to load flow.');
-               log.fatal('Error [0].\nStack: [1]', err, err && err.stack);
+               function getActiveItems(category, refs) {
+                  if (!debugInfo.aliases) {
+                     return {};
+                  }
+
+                  return __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utilities_object__["tabulate"])(function (ref) {
+                     var index = debugInfo.aliases[category][ref];
+                     if (index === undefined) {
+                        var message = ref + ' not present in ' + category + ' debug information';
+                        log.info(message);
+                        return { info: message };
+                     }
+                     return debugInfo[category][index];
+                  }, refs);
+               }
+
+               function callListener(listener) {
+                  listener(event);
+               }
             });
-         });
-      });
-   }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function whenDocumentReady(callback) {
-   if (document.readyState === 'complete') {
-      callback();
-   } else {
-      document.addEventListener('DOMContentLoaded', callback);
-   }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function bootstrapAdapters(services, adapterModules, artifacts) {
-
-   var adapterServices = {
-      adapterUtilities: services.adapterUtilities,
-      artifactProvider: services.artifactProvider,
-      configuration: services.configuration,
-      flowService: services.flowService,
-      globalEventBus: services.globalEventBus,
-      heartbeat: services.heartbeat,
-      log: services.log,
-      storage: services.storage,
-      tooling: services.toolingProviders,
-      // TODO (https://github.com/LaxarJS/laxar/issues/363 and https://github.com/LaxarJS/laxar/issues/397)
-      // Fixing the latter issue broke laxar-mocks, since it could no longer access the widget loader.
-      // To temporarily fix this, we re-add the widget loader to the exposed services.
-      // Nevertheless on the medium /short term we want to be able to load single widgets into the page
-      // (the first issue above) and use the api that will be created for this in laxar-mocks.
-      widgetLoader: services.widgetLoader
-   };
-
-   var log = services.log;
-
-   var adapterModulesByTechnology = {};
-   var artifactsByTechnology = {};
-
-   adapterModules.forEach(function (module) {
-      adapterModulesByTechnology[module.technology] = module;
-      artifactsByTechnology[module.technology] = { widgets: [], controls: [] };
-   });
-
-   ['widgets', 'controls'].forEach(function (type) {
-      artifacts[type].forEach(function (artifact) {
-         var technology = artifact.descriptor.integration.technology;
-
-         if (!adapterModulesByTechnology[technology]) {
-            var name = artifact.descriptor.name;
-
-            log.fatal('Unknown widget technology: [0], required by [1] "[2]"', technology, type, name);
-            return;
          }
-         artifactsByTechnology[technology][type].push(artifact);
-      });
-   });
+      }
+   }
 
-   var adaptersByTechnology = {};
-   Object.keys(adapterModulesByTechnology).forEach(function (technology) {
-      var adapterModule = adapterModulesByTechnology[technology];
-      var artifacts = artifactsByTechnology[technology];
-      adaptersByTechnology[technology] = adapterModule.bootstrap(artifacts, adapterServices);
-   });
-   return adaptersByTechnology;
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Create debugEventBus subscriptions for the load events related to the given type of artifact and scoped
+    * to the given instance and item.
+    *
+    * @param {String} type
+    *    the type of load event (page, widget, etc.) to subscribe to
+    * @param {String} instance
+    *    the instance name
+    * @param {String} item
+    *    the bootstrapping item id
+    * @param {Array} pending
+    *    an array to use for managing pending events
+    * @param {Function} onChange
+    *    a function to call when a change occurred and there are no more pending events
+    * @return {Array}
+    *    an array that will be updated with the currently active items of the given type in the given
+    *    bootstrapping item.
+    * @private
+    */
+   function addLoadingStateHandler(type, instance, item, pending, onChange) {
+      var subtopic = type + '.' + instance + '.' + item;
+      var active = [];
+
+      var willLoad = 'willLoad.' + subtopic;
+      var didLoad = 'didLoad.' + subtopic;
+      var willUnload = 'willUnload.' + subtopic;
+      var didUnload = 'didUnload.' + subtopic;
+
+      debugEventBus.subscribe(willLoad, function (_ref3) {
+         var ref = _ref3[type];
+
+         pending.push(didLoad + ':' + ref);
+      });
+      debugEventBus.subscribe(didLoad, function (_ref4) {
+         var ref = _ref4[type];
+
+         remove(pending, didLoad + ':' + ref);
+         active.push(ref);
+         if (pending.length === 0) {
+            onChange();
+         }
+      });
+      debugEventBus.subscribe(willUnload, function (_ref5) {
+         var ref = _ref5[type];
+
+         pending.push(didUnload + ':' + ref);
+      });
+      debugEventBus.subscribe(didUnload, function (_ref6) {
+         var ref = _ref6[type];
+
+         remove(pending, didUnload + ':' + ref);
+         remove(active, ref);
+         if (pending.length === 0) {
+            onChange();
+         }
+      });
+
+      return active;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Register a function to be called when debug info is available and trigger loading the debug information
+    * if not present. If no callback was given, just re-check if the debug info was registered and possibly
+    * handle queued callbacks.
+    *
+    * @param {Function} [callback]
+    *    a function to be called with the debug information object
+    * @private
+    */
+   function whenDebugInfoAvailable(callback) {
+      if (callback) {
+         if (debugInfo) {
+            callback(debugInfo);
+         } else {
+            debugInfoQueue.push(callback);
+         }
+      }
+
+      if (loadDebugInfo && debugInfoQueue.length > 0) {
+         loadDebugInfo(function (info) {
+            debugInfo = info;
+            if (debugInfo.info && !debugInfo.aliases) {
+               // debug info not available, but an informative message in .info
+               log.info(debugInfo.info);
+            } else {
+               debugInfoQueue.splice(0).forEach(function (callback) {
+                  callback(debugInfo);
+               });
+            }
+         });
+         loadDebugInfo = null;
+      }
+   }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function announceInstance(services) {
-   var configuration = services.configuration,
-       log = services.log,
-       storage = services.storage;
+function createToolingApi(listeners) {
+   __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utilities_assert__["a" /* default */])(listeners).hasType(Array);
+
+   return {
+      /**
+       * Register a function to be called when the composition of active observed items changes.
+       *
+       * @param {Function} callback
+       *    a function to call with updated debug information
+       * @return {AxTooling}
+       *    the tooling instance
+       * @memberof AxTooling
+       */
+      onChange: function onChange(callback) {
+         listeners.push(callback);
+         return this;
+      },
 
 
-   if (configuration.get('tooling.enabled')) {
-      instances()[configuration.get('name', 'unnamed')] = services;
-   }
+      /**
+       * Unsubscribe a registered {@link #AxTooling.onChange} callback
+       *
+       * @param {Function} callback
+       *    a function that was previously passed to {@link #AxTooling.onChange}
+       * @return {AxTooling}
+       *    the tooling instance
+       * @memberof AxTooling
+       */
+      unsubscribe: function unsubscribe(callback) {
+         remove(listeners, callback);
+         return this;
+      },
 
-   var idGenerator = configuration.get('logging.instanceId', simpleId);
-   if (idGenerator === false) {
-      return;
-   }
 
-   var instanceIdStorageKey = 'axLogTags.INST';
-   var store = storage.getApplicationSessionStorage();
-   var instanceId = store.getItem(instanceIdStorageKey);
-   if (!instanceId) {
-      instanceId = idGenerator();
-      store.setItem(instanceIdStorageKey, instanceId);
-   }
-   log.addTag('INST', instanceId);
+      /**
+       * A {@link PagesTooling} interface to the {@link AxTooling} instance.
+       *
+       * @type {PagesTooling}
+       * @memberof AxTooling
+       * @deprecated
+       */
+      pages: null,
 
-   function simpleId() {
-      return '' + Date.now() + Math.floor(Math.random() * 100);
-   }
+      release: function release() {}
+   };
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Provide tooling access to LaxarJS services.
+ * Add a getter to create the old interface on demand.
  *
- * Each laxar#bootstrap call creates a new set of services such as a logger, global event bus etc. For tools
- * like the laxar-developer-tools-widget, it may be necessary to access these services for a given instance,
- * or for all instances.
- *
- * @param {String} [optionalName]
- *   The configuration name of a LaxarJS instance to inspect.
- *   May be omitted to access all application instances by name.
- *
- * @return {Object}
- *   The tooling services for a specified instance, or for all instances that have tooling enabled.
- *
- * @memberof laxar
+ * @param {AxTooling} api
+ *    the tooling instance to enrich with the pages tooling
+ * @private
  */
-function instances(optionalName) {
-   var instances = global.laxarInstances = global.laxarInstances || {};
-   return optionalName ? instances[optionalName] : instances;
+function addPagesTooling(api) {
+   var pagesTooling = void 0;
+   Object.defineProperty(api, 'pages', {
+      get: function get() {
+         if (!pagesTooling) {
+            pagesTooling = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__pages__["a" /* create */])(api);
+            pagesTooling.enable();
+            api.destroy = function () {
+               pagesTooling.disable();
+            };
+         }
+         return pagesTooling;
+      }
+   });
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function remove(array, item) {
+   var index = array.indexOf(item);
+   if (index >= 0) {
+      array.splice(index, 1);
+   }
+}
 
+/***/ }),
+/* 33 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
 
 /***/ })
 /******/ ]);
 });
 //# sourceMappingURL=laxar.js.map
-//# sourceMappingURL=laxar.js.map
+
+/***/ }),
+
+/***/ 238:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * 
+ */
+
+
+
+// The Symbol used to tag the ReactElement type. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+
+var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 0xeac7;
+
+module.exports = REACT_ELEMENT_TYPE;
+
+/***/ }),
+
+/***/ 239:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2014-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
+
+/**
+ * ReactElementValidator provides a wrapper around a element factory
+ * which validates the props passed to the element. This is intended to be
+ * used only in DEV and could be replaced by a static type checker for languages
+ * that support it.
+ */
+
+
+
+var ReactCurrentOwner = __webpack_require__(17);
+var ReactComponentTreeHook = __webpack_require__(11);
+var ReactElement = __webpack_require__(28);
+
+var checkReactTypeSpec = __webpack_require__(439);
+
+var canDefineProperty = __webpack_require__(80);
+var getIteratorFn = __webpack_require__(81);
+var warning = __webpack_require__(2);
+
+function getDeclarationErrorAddendum() {
+  if (ReactCurrentOwner.current) {
+    var name = ReactCurrentOwner.current.getName();
+    if (name) {
+      return ' Check the render method of `' + name + '`.';
+    }
+  }
+  return '';
+}
+
+/**
+ * Warn if there's no key explicitly set on dynamic arrays of children or
+ * object keys are not valid. This allows us to keep track of children between
+ * updates.
+ */
+var ownerHasKeyUseWarning = {};
+
+function getCurrentComponentErrorInfo(parentType) {
+  var info = getDeclarationErrorAddendum();
+
+  if (!info) {
+    var parentName = typeof parentType === 'string' ? parentType : parentType.displayName || parentType.name;
+    if (parentName) {
+      info = ' Check the top-level render call using <' + parentName + '>.';
+    }
+  }
+  return info;
+}
+
+/**
+ * Warn if the element doesn't have an explicit key assigned to it.
+ * This element is in an array. The array could grow and shrink or be
+ * reordered. All children that haven't already been validated are required to
+ * have a "key" property assigned to it. Error statuses are cached so a warning
+ * will only be shown once.
+ *
+ * @internal
+ * @param {ReactElement} element Element that requires a key.
+ * @param {*} parentType element's parent's type.
+ */
+function validateExplicitKey(element, parentType) {
+  if (!element._store || element._store.validated || element.key != null) {
+    return;
+  }
+  element._store.validated = true;
+
+  var memoizer = ownerHasKeyUseWarning.uniqueKey || (ownerHasKeyUseWarning.uniqueKey = {});
+
+  var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
+  if (memoizer[currentComponentErrorInfo]) {
+    return;
+  }
+  memoizer[currentComponentErrorInfo] = true;
+
+  // Usually the current owner is the offender, but if it accepts children as a
+  // property, it may be the creator of the child that's responsible for
+  // assigning it a key.
+  var childOwner = '';
+  if (element && element._owner && element._owner !== ReactCurrentOwner.current) {
+    // Give the component that originally created this child.
+    childOwner = ' It was passed a child from ' + element._owner.getName() + '.';
+  }
+
+  undefined !== 'production' ? warning(false, 'Each child in an array or iterator should have a unique "key" prop.' + '%s%s See https://fb.me/react-warning-keys for more information.%s', currentComponentErrorInfo, childOwner, ReactComponentTreeHook.getCurrentStackAddendum(element)) : void 0;
+}
+
+/**
+ * Ensure that every element either is passed in a static location, in an
+ * array with an explicit keys property defined, or in an object literal
+ * with valid key property.
+ *
+ * @internal
+ * @param {ReactNode} node Statically passed child of any type.
+ * @param {*} parentType node's parent's type.
+ */
+function validateChildKeys(node, parentType) {
+  if (typeof node !== 'object') {
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (var i = 0; i < node.length; i++) {
+      var child = node[i];
+      if (ReactElement.isValidElement(child)) {
+        validateExplicitKey(child, parentType);
+      }
+    }
+  } else if (ReactElement.isValidElement(node)) {
+    // This element was passed in a valid location.
+    if (node._store) {
+      node._store.validated = true;
+    }
+  } else if (node) {
+    var iteratorFn = getIteratorFn(node);
+    // Entry iterators provide implicit keys.
+    if (iteratorFn) {
+      if (iteratorFn !== node.entries) {
+        var iterator = iteratorFn.call(node);
+        var step;
+        while (!(step = iterator.next()).done) {
+          if (ReactElement.isValidElement(step.value)) {
+            validateExplicitKey(step.value, parentType);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Given an element, validate that its props follow the propTypes definition,
+ * provided by the type.
+ *
+ * @param {ReactElement} element
+ */
+function validatePropTypes(element) {
+  var componentClass = element.type;
+  if (typeof componentClass !== 'function') {
+    return;
+  }
+  var name = componentClass.displayName || componentClass.name;
+  if (componentClass.propTypes) {
+    checkReactTypeSpec(componentClass.propTypes, element.props, 'prop', name, element, null);
+  }
+  if (typeof componentClass.getDefaultProps === 'function') {
+    undefined !== 'production' ? warning(componentClass.getDefaultProps.isReactClassApproved, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;
+  }
+}
+
+var ReactElementValidator = {
+
+  createElement: function (type, props, children) {
+    var validType = typeof type === 'string' || typeof type === 'function';
+    // We warn in this case but don't throw. We expect the element creation to
+    // succeed and there will likely be errors in render.
+    if (!validType) {
+      if (typeof type !== 'function' && typeof type !== 'string') {
+        var info = '';
+        if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
+          info += ' You likely forgot to export your component from the file ' + 'it\'s defined in.';
+        }
+        info += getDeclarationErrorAddendum();
+        undefined !== 'production' ? warning(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', type == null ? type : typeof type, info) : void 0;
+      }
+    }
+
+    var element = ReactElement.createElement.apply(this, arguments);
+
+    // The result can be nullish if a mock or a custom function is used.
+    // TODO: Drop this when these are no longer allowed as the type argument.
+    if (element == null) {
+      return element;
+    }
+
+    // Skip key warning if the type isn't valid since our key validation logic
+    // doesn't expect a non-string/function type and can throw confusing errors.
+    // We don't want exception behavior to differ between dev and prod.
+    // (Rendering will throw with a helpful message and as soon as the type is
+    // fixed, the key warnings will appear.)
+    if (validType) {
+      for (var i = 2; i < arguments.length; i++) {
+        validateChildKeys(arguments[i], type);
+      }
+    }
+
+    validatePropTypes(element);
+
+    return element;
+  },
+
+  createFactory: function (type) {
+    var validatedFactory = ReactElementValidator.createElement.bind(null, type);
+    // Legacy hook TODO: Warn if this is accessed
+    validatedFactory.type = type;
+
+    if (undefined !== 'production') {
+      if (canDefineProperty) {
+        Object.defineProperty(validatedFactory, 'type', {
+          enumerable: false,
+          get: function () {
+            undefined !== 'production' ? warning(false, 'Factory.type is deprecated. Access the class directly ' + 'before passing it to createFactory.') : void 0;
+            Object.defineProperty(this, 'type', {
+              value: type
+            });
+            return type;
+          }
+        });
+      }
+    }
+
+    return validatedFactory;
+  },
+
+  cloneElement: function (element, props, children) {
+    var newElement = ReactElement.cloneElement.apply(this, arguments);
+    for (var i = 2; i < arguments.length; i++) {
+      validateChildKeys(arguments[i], newElement.type);
+    }
+    validatePropTypes(newElement);
+    return newElement;
+  }
+
+};
+
+module.exports = ReactElementValidator;
+
+/***/ }),
+
+/***/ 240:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * 
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
 
 /***/ }),
 
@@ -11519,7 +12194,7 @@ module.exports = traverseAllChildren;
 
 __webpack_require__(57);
 __webpack_require__(7);
-module.exports = __webpack_require__(25);
+module.exports = __webpack_require__(22);
 
 
 /***/ }),
@@ -11810,9 +12485,19 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /***/ }),
 
 /***/ 57:
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(true)
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["polyfills"] = factory();
+	else
+		root["polyfills"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -11820,9 +12505,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -11874,10 +12559,10 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/dist";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -11889,86 +12574,84 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 if (!Array.from) {
-   (function () {
-      var toStr = Object.prototype.toString;
-      var isCallable = function isCallable(fn) {
-         return typeof fn === 'function' || toStr.call(fn) === '[ object Function ]';
-      };
-      var toInteger = function toInteger(value) {
-         var number = Number(value);
-         if (isNaN(number)) {
-            return 0;
-         }
-         if (number === 0 || !isFinite(number)) {
-            return number;
-         }
-         return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
-      };
-      var maxSafeInteger = Math.pow(2, 53) - 1;
-      var toLength = function toLength(value) {
-         var len = toInteger(value);
-         return Math.min(Math.max(len, 0), maxSafeInteger);
-      };
+   var toStr = Object.prototype.toString;
+   var isCallable = function isCallable(fn) {
+      return typeof fn === 'function' || toStr.call(fn) === '[ object Function ]';
+   };
+   var toInteger = function toInteger(value) {
+      var number = Number(value);
+      if (isNaN(number)) {
+         return 0;
+      }
+      if (number === 0 || !isFinite(number)) {
+         return number;
+      }
+      return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number));
+   };
+   var maxSafeInteger = Math.pow(2, 53) - 1;
+   var toLength = function toLength(value) {
+      var len = toInteger(value);
+      return Math.min(Math.max(len, 0), maxSafeInteger);
+   };
 
-      // The length property of the from method is 1.
-      Array.from = function from(arrayLike /*, mapFn, thisArg */) {
-         // 1. Let C be the this value.
-         var C = this;
+   // The length property of the from method is 1.
+   Array.from = function from(arrayLike /*, mapFn, thisArg */) {
+      // 1. Let C be the this value.
+      var C = this;
 
-         // 2. Let items be ToObject(arrayLike).
-         var items = Object(arrayLike);
+      // 2. Let items be ToObject(arrayLike).
+      var items = Object(arrayLike);
 
-         // 3. ReturnIfAbrupt(items).
-         if (arrayLike == null) {
-            throw new TypeError('Array.from requires an array-like object - not null or undefined');
-         }
+      // 3. ReturnIfAbrupt(items).
+      if (arrayLike == null) {
+         throw new TypeError('Array.from requires an array-like object - not null or undefined');
+      }
 
-         // 4. If mapfn is undefined, then let mapping be false.
-         // eslint-disable-next-line no-void
-         var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
-         var T = void 0;
-         if (typeof mapFn !== 'undefined') {
-            // 5. else
-            // 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
-            if (!isCallable(mapFn)) {
-               throw new TypeError('Array.from: when provided, the second argument must be a function');
-            }
-
-            // 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
-            if (arguments.length > 2) {
-               T = arguments[2];
-            }
+      // 4. If mapfn is undefined, then let mapping be false.
+      // eslint-disable-next-line no-void
+      var mapFn = arguments.length > 1 ? arguments[1] : void undefined;
+      var T = void 0;
+      if (typeof mapFn !== 'undefined') {
+         // 5. else
+         // 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
+         if (!isCallable(mapFn)) {
+            throw new TypeError('Array.from: when provided, the second argument must be a function');
          }
 
-         // 10. Let lenValue be Get(items, "length").
-         // 11. Let len be ToLength(lenValue).
-         var len = toLength(items.length);
-
-         // 13. If IsConstructor(C) is true, then
-         // 13. a. Let A be the result of calling the [ [Construct] ] internal method
-         // of C with an argument list containing the single item len.
-         // 14. a. Else, Let A be ArrayCreate(len).
-         var A = isCallable(C) ? Object(new C(len)) : new Array(len);
-
-         // 16. Let k be 0.
-         var k = 0;
-         // 17. Repeat, while k < len… (also steps a - h)
-         var kValue = void 0;
-         while (k < len) {
-            kValue = items[k];
-            if (mapFn) {
-               A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
-            } else {
-               A[k] = kValue;
-            }
-            k += 1;
+         // 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
+         if (arguments.length > 2) {
+            T = arguments[2];
          }
-         // 18. Let putStatus be Put(A, "length", len, true).
-         A.length = len;
-         // 20. Return A.
-         return A;
-      };
-   })();
+      }
+
+      // 10. Let lenValue be Get(items, "length").
+      // 11. Let len be ToLength(lenValue).
+      var len = toLength(items.length);
+
+      // 13. If IsConstructor(C) is true, then
+      // 13. a. Let A be the result of calling the [ [Construct] ] internal method
+      // of C with an argument list containing the single item len.
+      // 14. a. Else, Let A be ArrayCreate(len).
+      var A = isCallable(C) ? Object(new C(len)) : new Array(len);
+
+      // 16. Let k be 0.
+      var k = 0;
+      // 17. Repeat, while k < len… (also steps a - h)
+      var kValue = void 0;
+      while (k < len) {
+         kValue = items[k];
+         if (mapFn) {
+            A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+         } else {
+            A[k] = kValue;
+         }
+         k += 1;
+      }
+      // 18. Let putStatus be Put(A, "length", len, true).
+      A.length = len;
+      // 20. Return A.
+      return A;
+   };
 }
 
 /***/ }),
@@ -12053,7 +12736,7 @@ if (!Object.assign) {
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(6)(__webpack_require__(5))
+__webpack_require__(7)(__webpack_require__(6))
 
 /***/ }),
 /* 4 */
@@ -12529,28 +13212,6 @@ __webpack_require__(6)(__webpack_require__(5))
 
 /***/ }),
 /* 5 */
-/***/ (function(module, exports) {
-
-module.exports = "(function (root) {\n\n  // Store setTimeout reference so promise-polyfill will be unaffected by\n  // other code modifying setTimeout (like sinon.useFakeTimers())\n  var setTimeoutFunc = setTimeout;\n\n  function noop() {}\n  \n  // Polyfill for Function.prototype.bind\n  function bind(fn, thisArg) {\n    return function () {\n      fn.apply(thisArg, arguments);\n    };\n  }\n\n  function Promise(fn) {\n    if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new');\n    if (typeof fn !== 'function') throw new TypeError('not a function');\n    this._state = 0;\n    this._handled = false;\n    this._value = undefined;\n    this._deferreds = [];\n\n    doResolve(fn, this);\n  }\n\n  function handle(self, deferred) {\n    while (self._state === 3) {\n      self = self._value;\n    }\n    if (self._state === 0) {\n      self._deferreds.push(deferred);\n      return;\n    }\n    self._handled = true;\n    Promise._immediateFn(function () {\n      var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;\n      if (cb === null) {\n        (self._state === 1 ? resolve : reject)(deferred.promise, self._value);\n        return;\n      }\n      var ret;\n      try {\n        ret = cb(self._value);\n      } catch (e) {\n        reject(deferred.promise, e);\n        return;\n      }\n      resolve(deferred.promise, ret);\n    });\n  }\n\n  function resolve(self, newValue) {\n    try {\n      // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure\n      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');\n      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {\n        var then = newValue.then;\n        if (newValue instanceof Promise) {\n          self._state = 3;\n          self._value = newValue;\n          finale(self);\n          return;\n        } else if (typeof then === 'function') {\n          doResolve(bind(then, newValue), self);\n          return;\n        }\n      }\n      self._state = 1;\n      self._value = newValue;\n      finale(self);\n    } catch (e) {\n      reject(self, e);\n    }\n  }\n\n  function reject(self, newValue) {\n    self._state = 2;\n    self._value = newValue;\n    finale(self);\n  }\n\n  function finale(self) {\n    if (self._state === 2 && self._deferreds.length === 0) {\n      Promise._immediateFn(function() {\n        if (!self._handled) {\n          Promise._unhandledRejectionFn(self._value);\n        }\n      });\n    }\n\n    for (var i = 0, len = self._deferreds.length; i < len; i++) {\n      handle(self, self._deferreds[i]);\n    }\n    self._deferreds = null;\n  }\n\n  function Handler(onFulfilled, onRejected, promise) {\n    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;\n    this.onRejected = typeof onRejected === 'function' ? onRejected : null;\n    this.promise = promise;\n  }\n\n  /**\n   * Take a potentially misbehaving resolver function and make sure\n   * onFulfilled and onRejected are only called once.\n   *\n   * Makes no guarantees about asynchrony.\n   */\n  function doResolve(fn, self) {\n    var done = false;\n    try {\n      fn(function (value) {\n        if (done) return;\n        done = true;\n        resolve(self, value);\n      }, function (reason) {\n        if (done) return;\n        done = true;\n        reject(self, reason);\n      });\n    } catch (ex) {\n      if (done) return;\n      done = true;\n      reject(self, ex);\n    }\n  }\n\n  Promise.prototype['catch'] = function (onRejected) {\n    return this.then(null, onRejected);\n  };\n\n  Promise.prototype.then = function (onFulfilled, onRejected) {\n    var prom = new (this.constructor)(noop);\n\n    handle(this, new Handler(onFulfilled, onRejected, prom));\n    return prom;\n  };\n\n  Promise.all = function (arr) {\n    var args = Array.prototype.slice.call(arr);\n\n    return new Promise(function (resolve, reject) {\n      if (args.length === 0) return resolve([]);\n      var remaining = args.length;\n\n      function res(i, val) {\n        try {\n          if (val && (typeof val === 'object' || typeof val === 'function')) {\n            var then = val.then;\n            if (typeof then === 'function') {\n              then.call(val, function (val) {\n                res(i, val);\n              }, reject);\n              return;\n            }\n          }\n          args[i] = val;\n          if (--remaining === 0) {\n            resolve(args);\n          }\n        } catch (ex) {\n          reject(ex);\n        }\n      }\n\n      for (var i = 0; i < args.length; i++) {\n        res(i, args[i]);\n      }\n    });\n  };\n\n  Promise.resolve = function (value) {\n    if (value && typeof value === 'object' && value.constructor === Promise) {\n      return value;\n    }\n\n    return new Promise(function (resolve) {\n      resolve(value);\n    });\n  };\n\n  Promise.reject = function (value) {\n    return new Promise(function (resolve, reject) {\n      reject(value);\n    });\n  };\n\n  Promise.race = function (values) {\n    return new Promise(function (resolve, reject) {\n      for (var i = 0, len = values.length; i < len; i++) {\n        values[i].then(resolve, reject);\n      }\n    });\n  };\n\n  // Use polyfill for setImmediate for performance gains\n  Promise._immediateFn = (typeof setImmediate === 'function' && function (fn) { setImmediate(fn); }) ||\n    function (fn) {\n      setTimeoutFunc(fn, 0);\n    };\n\n  Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {\n    if (typeof console !== 'undefined' && console) {\n      console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console\n    }\n  };\n\n  /**\n   * Set the immediate function to execute callbacks\n   * @param fn {function} Function to execute\n   * @deprecated\n   */\n  Promise._setImmediateFn = function _setImmediateFn(fn) {\n    Promise._immediateFn = fn;\n  };\n\n  /**\n   * Change the function to execute on unhandled rejection\n   * @param {function} fn Function to execute on unhandled rejection\n   * @deprecated\n   */\n  Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {\n    Promise._unhandledRejectionFn = fn;\n  };\n  \n  if (typeof module !== 'undefined' && module.exports) {\n    module.exports = Promise;\n  } else if (!root.Promise) {\n    root.Promise = Promise;\n  }\n\n})(this);\n"
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-module.exports = function(src) {
-	if (typeof execScript !== "undefined")
-		execScript(src);
-	else
-		eval.call(null, src);
-}
-
-
-/***/ }),
-/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12572,9 +13233,31 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = "(function (root) {\n\n  // Store setTimeout reference so promise-polyfill will be unaffected by\n  // other code modifying setTimeout (like sinon.useFakeTimers())\n  var setTimeoutFunc = setTimeout;\n\n  function noop() {}\n  \n  // Polyfill for Function.prototype.bind\n  function bind(fn, thisArg) {\n    return function () {\n      fn.apply(thisArg, arguments);\n    };\n  }\n\n  function Promise(fn) {\n    if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new');\n    if (typeof fn !== 'function') throw new TypeError('not a function');\n    this._state = 0;\n    this._handled = false;\n    this._value = undefined;\n    this._deferreds = [];\n\n    doResolve(fn, this);\n  }\n\n  function handle(self, deferred) {\n    while (self._state === 3) {\n      self = self._value;\n    }\n    if (self._state === 0) {\n      self._deferreds.push(deferred);\n      return;\n    }\n    self._handled = true;\n    Promise._immediateFn(function () {\n      var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;\n      if (cb === null) {\n        (self._state === 1 ? resolve : reject)(deferred.promise, self._value);\n        return;\n      }\n      var ret;\n      try {\n        ret = cb(self._value);\n      } catch (e) {\n        reject(deferred.promise, e);\n        return;\n      }\n      resolve(deferred.promise, ret);\n    });\n  }\n\n  function resolve(self, newValue) {\n    try {\n      // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure\n      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');\n      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {\n        var then = newValue.then;\n        if (newValue instanceof Promise) {\n          self._state = 3;\n          self._value = newValue;\n          finale(self);\n          return;\n        } else if (typeof then === 'function') {\n          doResolve(bind(then, newValue), self);\n          return;\n        }\n      }\n      self._state = 1;\n      self._value = newValue;\n      finale(self);\n    } catch (e) {\n      reject(self, e);\n    }\n  }\n\n  function reject(self, newValue) {\n    self._state = 2;\n    self._value = newValue;\n    finale(self);\n  }\n\n  function finale(self) {\n    if (self._state === 2 && self._deferreds.length === 0) {\n      Promise._immediateFn(function() {\n        if (!self._handled) {\n          Promise._unhandledRejectionFn(self._value);\n        }\n      });\n    }\n\n    for (var i = 0, len = self._deferreds.length; i < len; i++) {\n      handle(self, self._deferreds[i]);\n    }\n    self._deferreds = null;\n  }\n\n  function Handler(onFulfilled, onRejected, promise) {\n    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;\n    this.onRejected = typeof onRejected === 'function' ? onRejected : null;\n    this.promise = promise;\n  }\n\n  /**\n   * Take a potentially misbehaving resolver function and make sure\n   * onFulfilled and onRejected are only called once.\n   *\n   * Makes no guarantees about asynchrony.\n   */\n  function doResolve(fn, self) {\n    var done = false;\n    try {\n      fn(function (value) {\n        if (done) return;\n        done = true;\n        resolve(self, value);\n      }, function (reason) {\n        if (done) return;\n        done = true;\n        reject(self, reason);\n      });\n    } catch (ex) {\n      if (done) return;\n      done = true;\n      reject(self, ex);\n    }\n  }\n\n  Promise.prototype['catch'] = function (onRejected) {\n    return this.then(null, onRejected);\n  };\n\n  Promise.prototype.then = function (onFulfilled, onRejected) {\n    var prom = new (this.constructor)(noop);\n\n    handle(this, new Handler(onFulfilled, onRejected, prom));\n    return prom;\n  };\n\n  Promise.all = function (arr) {\n    var args = Array.prototype.slice.call(arr);\n\n    return new Promise(function (resolve, reject) {\n      if (args.length === 0) return resolve([]);\n      var remaining = args.length;\n\n      function res(i, val) {\n        try {\n          if (val && (typeof val === 'object' || typeof val === 'function')) {\n            var then = val.then;\n            if (typeof then === 'function') {\n              then.call(val, function (val) {\n                res(i, val);\n              }, reject);\n              return;\n            }\n          }\n          args[i] = val;\n          if (--remaining === 0) {\n            resolve(args);\n          }\n        } catch (ex) {\n          reject(ex);\n        }\n      }\n\n      for (var i = 0; i < args.length; i++) {\n        res(i, args[i]);\n      }\n    });\n  };\n\n  Promise.resolve = function (value) {\n    if (value && typeof value === 'object' && value.constructor === Promise) {\n      return value;\n    }\n\n    return new Promise(function (resolve) {\n      resolve(value);\n    });\n  };\n\n  Promise.reject = function (value) {\n    return new Promise(function (resolve, reject) {\n      reject(value);\n    });\n  };\n\n  Promise.race = function (values) {\n    return new Promise(function (resolve, reject) {\n      for (var i = 0, len = values.length; i < len; i++) {\n        values[i].then(resolve, reject);\n      }\n    });\n  };\n\n  // Use polyfill for setImmediate for performance gains\n  Promise._immediateFn = (typeof setImmediate === 'function' && function (fn) { setImmediate(fn); }) ||\n    function (fn) {\n      setTimeoutFunc(fn, 0);\n    };\n\n  Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {\n    if (typeof console !== 'undefined' && console) {\n      console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console\n    }\n  };\n\n  /**\n   * Set the immediate function to execute callbacks\n   * @param fn {function} Function to execute\n   * @deprecated\n   */\n  Promise._setImmediateFn = function _setImmediateFn(fn) {\n    Promise._immediateFn = fn;\n  };\n\n  /**\n   * Change the function to execute on unhandled rejection\n   * @param {function} fn Function to execute on unhandled rejection\n   * @deprecated\n   */\n  Promise._setUnhandledRejectionFn = function _setUnhandledRejectionFn(fn) {\n    Promise._unhandledRejectionFn = fn;\n  };\n  \n  if (typeof module !== 'undefined' && module.exports) {\n    module.exports = Promise;\n  } else if (!root.Promise) {\n    root.Promise = Promise;\n  }\n\n})(this);\n"
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+module.exports = function(src) {
+	if (typeof execScript !== "undefined")
+		execScript(src);
+	else
+		eval.call(null, src);
+}
+
+
 /***/ })
 /******/ ]);
-//# sourceMappingURL=polyfills.js.map
+});
 //# sourceMappingURL=polyfills.js.map
 
 /***/ }),

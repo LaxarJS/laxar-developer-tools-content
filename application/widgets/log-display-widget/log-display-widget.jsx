@@ -25,7 +25,7 @@ function create( context, eventBus, reactRender ) {
          else {
             displayLogMessage( event.data );
          }
-         render();
+         reactRender();
       } );
    }
 
@@ -48,7 +48,7 @@ function create( context, eventBus, reactRender ) {
 
    function discard() {
       model.messages.length = 0;
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ function create( context, eventBus, reactRender ) {
          </tr>
       );
 
-      reactRender(
+      return (
          <div>
             <AutoAffix>
                <div className="ax-affix-area">
@@ -110,9 +110,7 @@ function create( context, eventBus, reactRender ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render
-   };
+   return render;
 }
 
 export default {

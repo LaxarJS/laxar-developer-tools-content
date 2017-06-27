@@ -95,7 +95,7 @@ function create( context, reactRender ) {
    resources.handlerFor( context ).registerResourceFromFeature( 'filter', {
       onUpdateReplace: () => {
          runFilters();
-         render();
+         reactRender();
       },
       isOptional: true
    } );
@@ -109,7 +109,7 @@ function create( context, reactRender ) {
             addEvent( event.data );
          }
          runFilters();
-         render();
+         reactRender();
       } );
    }
 
@@ -228,7 +228,7 @@ function create( context, reactRender ) {
    function filterBySearch( event ) {
       settings.namePattern = event.target.value;
       runFilters();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ function create( context, reactRender ) {
          settings.visibleEventsLimit = event.target.value;
       }
       runFilters();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +331,7 @@ function create( context, reactRender ) {
 
       runFilters();
 
-      render();
+      reactRender();
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -359,7 +359,7 @@ function create( context, reactRender ) {
       model.selectionEventInfo = null;
       runFilters();
       refreshProblemSummary();
-      render();
+      reactRender();
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ function create( context, reactRender ) {
          model.visibleEventInfos.forEach( event => {
             event.selected = false;
          } );
-         render();
+         reactRender();
          return;
       }
 
@@ -383,7 +383,7 @@ function create( context, reactRender ) {
          event.selected = inSelection( event, selectedEvent );
       } );
 
-      render();
+      reactRender();
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -977,7 +977,7 @@ function create( context, reactRender ) {
 
    function render() {
 
-      reactRender(
+      return (
          <div>
             <AutoAffix
                affixClassName="ax-affix-area"
@@ -1018,9 +1018,7 @@ function create( context, reactRender ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return {
-      onDomAvailable: render
-   };
+   return render;
 }
 
 export default {
