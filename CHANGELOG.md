@@ -2,6 +2,7 @@
 
 ## Last Changes
 
+## v2.0.0
 
 ## v0.1.0-rc.0
 
